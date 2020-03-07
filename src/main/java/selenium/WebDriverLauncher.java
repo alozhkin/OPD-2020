@@ -40,6 +40,10 @@ public class WebDriverLauncher {
         return driver;
     }
 
+    public boolean clickSomeElement(){
+        return false;
+    }
+
     public static void main(String[] args) {
         WebDriverLauncher webDriverLauncher = new WebDriverLauncher("https://habr.com");
     }
