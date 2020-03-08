@@ -12,7 +12,7 @@ public class WebCrawler {
         for (Element page : linksOnPage) {
             String actualURL = page.attr("abs:href");
             if (CrawlersFilter.filter(actualURL, rootURL)) {
-                System.out.println(actualURL);//Сбда встроить вывод ссылки в лист
+                System.out.println(actualURL);//Сюда встроить вывод ссылки в лист
             }
         }
     }
