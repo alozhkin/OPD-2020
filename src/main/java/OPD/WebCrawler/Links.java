@@ -1,4 +1,7 @@
 package OPD.WebCrawler;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashSet;
 
 public class Links {
@@ -13,11 +16,23 @@ public class Links {
         return links.contains(URL);
     }
 
-    public void addLinks(String link) {
-        links.add(link);
+    public void add(@NotNull String i) {
+        links.add(i);
     }
 
-    public HashSet<String> getLinks() {
+    public void addAll(@NotNull HashSet<String> i) {
+        links.addAll(i);
+    }
+
+    public int size() {
+        return links.size();
+    }
+
+    public void printALL() {
+        for (String link : links) System.out.println(link);
+    }
+
+    public HashSet<String> get() {
         return links;
     }
 }
