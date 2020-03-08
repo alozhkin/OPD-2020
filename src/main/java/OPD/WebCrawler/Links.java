@@ -1,12 +1,11 @@
 package OPD.WebCrawler;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.HashSet;
 
-public class Links {
+public class Links {//Временная версия HashSet преназначеая для хранения, дополнения и сверения всех URL сайта
 
-    public HashSet<String> links;//вынести во внешний класс
+    public HashSet<String> links;//Этот класс жедательно перенести на уровень повыше что бы Scraper имел к нему доступ
 
     public Links() {
         links = new HashSet<>();

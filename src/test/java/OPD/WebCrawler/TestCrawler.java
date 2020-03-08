@@ -6,7 +6,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
-public class TestCrawler {
+public class TestCrawler {//Класс исключительно для тестировки WebCrawler
     public static String rootURL = "https://jsoup.org/";
     public static String rootURL2 = "https://jsoup.org/download";
 
