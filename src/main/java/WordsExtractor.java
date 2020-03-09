@@ -1,4 +1,4 @@
-import database.DatabaseImpl;
+import database.Database;
 import scraper.DefaultScraper;
 import util.HTML;
 import util.Link;
@@ -29,7 +29,7 @@ public class WordsExtractor {
             linkQueue.add(link);
             var parser = new SiteParser.Builder(linkQueue,
                     HTMLQueue,
-                    new DatabaseImpl(domainsIds),
+                    Database.newInstance(),
                     link.getDomain()).build();
             var scraper = new DefaultScraper(linkQueue, HTMLQueue);
             EXECUTOR_SERVICE.execute(parser::start);
