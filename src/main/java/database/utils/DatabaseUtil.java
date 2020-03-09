@@ -1,0 +1,73 @@
+package database.utils;
+
+import database.models.Website;
+import database.models.Word;
+
+import java.io.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
+public class DatabaseUtil {
+
+    private DatabaseUtil() {
+    }
+
+    /**
+     * The function calls the script, which first deletes the previous table and creates a new one with new parameters.
+     *
+     * @param connection - database connection
+     * @param table - sql table path
+     * @throws IOException  - if file doesn't exist
+     * @throws SQLException - some error with sql database
+     */
+    public static void initDatabaseTable(Connection connection, String table) throws IOException, SQLException {
+        ScriptRunner sr = new ScriptRunner(connection, false, false);
+        Reader reader = new BufferedReader(new FileReader(table));
+        sr.runScript(reader);
+    }
+
+    public static PreparedStatement getWebsitesPreparedStatement(List<Website> websites, Connection connection) throws SQLException {
+        StringBuilder statement = new StringBuilder();
+        statement.append("INSERT INTO websites (company_id, website) VALUES (?, ?)");
+
+        for (int i = 1; i < websites.size(); i++) {
+            statement.append(", (?, ?)");
+        }
+
+        PreparedStatement preparedStatement = connection.prepareStatement(statement.toString());
+
+        int position = 1;
+        for (Website element : websites) {
+            preparedStatement.setInt(position, element.getCompanyId());
+            preparedStatement.setString(position + 1, element.getLink());
+
+            position += 2;
+        }
+
+        return preparedStatement;
+    }
+
+    public static PreparedStatement getWordsPreparedStatement(List<Word> words, Connection connection) throws SQLException {
+        StringBuilder statement = new StringBuilder();
+        statement.append("INSERT INTO words (website_id, word) VALUES (?, ?)");
+
+        for (int i = 1; i < words.size(); i++) {
+            statement.append(", (?, ?)");
+        }
+
+        statement.append(" ON DUPLICATE KEY UPDATE word=VALUES(word)");
+
+        PreparedStatement preparedStatement = connection.prepareStatement(statement.toString());
+
+        int position = 1;
+        for (Word element : words) {
+            preparedStatement.setInt(position, element.getWebsiteId());
+            preparedStatement.setString(position + 1, element.getWord());
+
+            position += 2;
+        }
+        return preparedStatement;
+    }
+}
