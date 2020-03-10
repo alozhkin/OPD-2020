@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -41,7 +42,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean putWebsite(int companyId, String website) {
-        String statement = "INSERT INTO websites (company_id, website) VALUES (?, ?) ON DUPLICATE KEY UPDATE website=VALUES(website)";
+        String statement = "INSERT INTO websites (company_id, website) VALUES (?, ?)";
         return executeStatementWithParams(companyId, website, statement);
     }
 
@@ -65,7 +66,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean putWord(int websiteId, String word) {
-        String statement = "INSERT INTO words (website_id, word) VALUES (?, ?) ON DUPLICATE KEY UPDATE word=VALUES(word)";
+        String statement = "INSERT INTO words (website_id, word) VALUES (?, ?)";
         return executeStatementWithParams(websiteId, word, statement);
     }
 
@@ -112,6 +113,29 @@ class DatabaseImpl implements Database {
         return getSizeFromQuery(query);
     }
 
+    public List<Website> getWebsites() {
+        String query = "SELECT * FROM websites";
+        List<Website> list = new ArrayList<>();
+
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet set = statement.executeQuery(query);
+                while (set.next()) {
+                    int id = set.getInt(1);
+                    int companyId = set.getInt(2);
+                    String website = set.getString(3);
+
+                    list.add(new Website(companyId, website));
+                }
+                ;
+                return list;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list;
+        }
+    }
+
     private void parseProperties() {
         Properties properties = new Properties();
 
@@ -127,11 +151,13 @@ class DatabaseImpl implements Database {
     }
 
     private void initDatabase() throws ClassNotFoundException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
+        Class.forName("org.sqlite.JDBC");
 
         try (Connection connection = getConnection()) {
-            DatabaseUtil.initDatabaseTable(connection, "src/main/java/database/properties/websites_structure.sql");
-            DatabaseUtil.initDatabaseTable(connection, "src/main/java/database/properties/words_structure.sql");
+
+            Statement statement = connection.createStatement();
+            statement.execute("CREATE TABLE IF NOT EXISTS websites ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'company_id' int(11) NOT NULL , 'website' TEXT NOT NULL)");
+            statement.execute("CREATE TABLE IF NOT EXISTS words ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'website_id' int(11) NOT NULL , 'word' TEXT NOT NULL)");
         } catch (Exception e) {
             e.printStackTrace();
         }

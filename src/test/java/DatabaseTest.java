@@ -1,4 +1,3 @@
-
 import database.Database;
 import database.models.Website;
 import database.models.Word;
@@ -128,7 +127,7 @@ public class DatabaseTest {
         database.putWord(4, "4test_word");
         database.putWord(4, "4test_word");
 
-        assertEquals(4, database.getWordsSize());
+        assertEquals(5, database.getWordsSize());
     }
 
     @Test
@@ -144,6 +143,6 @@ public class DatabaseTest {
         database.putWebsite(5, "sdsdasdasd");
         database.putWebsite(5, "sdsdasdasd");
 
-        assertEquals(4, database.getWebsitesSize());
+        assertEquals(5, database.getWebsitesSize());
     }
 }

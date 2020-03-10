@@ -32,9 +32,7 @@ public class DatabaseUtil {
         StringBuilder statement = new StringBuilder();
         statement.append("INSERT INTO websites (company_id, website) VALUES (?, ?)");
 
-        for (int i = 1; i < websites.size(); i++) {
-            statement.append(", (?, ?)");
-        }
+        statement.append(", (?, ?)".repeat(Math.max(0, websites.size() - 1)));
 
         PreparedStatement preparedStatement = connection.prepareStatement(statement.toString());
 
@@ -56,8 +54,6 @@ public class DatabaseUtil {
         for (int i = 1; i < words.size(); i++) {
             statement.append(", (?, ?)");
         }
-
-        statement.append(" ON DUPLICATE KEY UPDATE word=VALUES(word)");
 
         PreparedStatement preparedStatement = connection.prepareStatement(statement.toString());
 

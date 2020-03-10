@@ -20,4 +20,5 @@ dependencies {
 
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.19'
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.30.1'
 }
