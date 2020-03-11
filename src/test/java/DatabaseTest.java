@@ -145,4 +145,9 @@ public class DatabaseTest {
 
         assertEquals(5, database.getWebsitesSize());
     }
+
+    @Test
+    public void testGetWebsites() {
+
+    }
 }

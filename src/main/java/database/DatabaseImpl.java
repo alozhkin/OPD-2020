@@ -113,26 +113,71 @@ class DatabaseImpl implements Database {
         return getSizeFromQuery(query);
     }
 
+    @Override
     public List<Website> getWebsites() {
         String query = "SELECT * FROM websites";
-        List<Website> list = new ArrayList<>();
+        return getWebsitesByQuery(query);
+    }
 
+    @Override
+    public List<Website> getWebsites(String word) {
+        String query = "SELECT * FROM websites WHERE company_id=(SELECT 2 FROM words_websites WHERE word_id=" +
+                "(SELECT 2 FROM words WHERE word='"+word+"'))";
+        return getWebsitesByQuery(query);
+    }
+
+    @Override
+    public List<Website> getWebsites(int companyId) {
+        String query = "SELECT * FROM websites WHERE company_id='" + companyId + "'";
+        return getWebsitesByQuery(query);
+    }
+
+    @Override
+    public List<String> getWebsiteLink(int companyId) {
+        String query = "SELECT * FROM websites WHERE company_id='" + companyId + "'";
+        List<String> list = new ArrayList<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 ResultSet set = statement.executeQuery(query);
-                while (set.next()) {
-                    int id = set.getInt(1);
-                    int companyId = set.getInt(2);
-                    String website = set.getString(3);
-
-                    list.add(new Website(companyId, website));
+                while(set.next()){
+                    String link = set.getString(3);
+                    list.add(link);
                 }
-                ;
                 return list;
             }
         } catch (Exception e) {
             e.printStackTrace();
             return list;
+        }
+    }
+
+    @Override
+    public List<Word> getWords() {
+        String query = "SELECT * FROM words";
+        return getWords(query);
+    }
+
+    @Override
+    public List<Word> getWords(int websiteId) {
+        String query = "SELECT * FROM words WHERE id = (SELECT 1 FROM words_websites WHERE website_id='"+websiteId+"')";
+        return getWords(query);
+    }
+
+    @Override
+    public Word getWord(int wordId) {
+        Word word = null;
+        String query = "SELECT * FROM words WHERE id = '" + wordId + "'";
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet set = statement.executeQuery(query);
+                set.next();
+                String wordStr = set.getString(2);
+                word = new Word(wordId, wordStr);
+                return word;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return word;
         }
     }
 
@@ -205,6 +250,43 @@ class DatabaseImpl implements Database {
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    private List<Word> getWords(String query) {
+        List<Word> list = new ArrayList<>();
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet set = statement.executeQuery(query);
+                while (set.next()) {
+                    int wordId = set.getInt(1);
+                    String word = set.getString(2);
+                    list.add(new Word(wordId, word));
+                }
+                return list;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list;
+        }
+    }
+
+    private List<Website> getWebsitesByQuery(String query) {
+        List<Website> list = new ArrayList<>();
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet set = statement.executeQuery(query);
+                while (set.next()) {
+                    int companyId = set.getInt(2);
+                    String website = set.getString(3);
+                    list.add(new Website(companyId, website));
+                }
+                return list;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list;
         }
     }
 }

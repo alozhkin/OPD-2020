@@ -117,18 +117,57 @@ public interface Database {
      */
     int getWordsSize();
 
-    /* TODO
-
+    /**
+     * Returns a list containing all the websites from the "websites" table
+     *
+     * @return List of websites from websites table
+     */
     List<Website> getWebsites();
+
+    /**
+     * Returns a list containing the website in which such word last occurred from the "words" table
+     *
+     * @param word      word by which to find a website
+     * @return List of Website objects
+     */
     List<Website> getWebsites(String word);
 
-    String getWebsiteLink(int companyId);
-    Website getWebsite(int companyId);
+    /**
+     * Returns a list of site objects containing the link of website and company ID
+     *
+     * @param companyId     websites' company ID in "websites" table
+     * @return list of website objects with website link and company id
+     */
+    List<Website> getWebsites(int companyId);
 
+    /**
+     * Returns a list of string containing the links of websites by its company ID
+     *
+     * @param companyId      websites' company ID in "websites" table
+     * @return list of Strings with websites link
+     */
+    List<String> getWebsiteLink(int companyId);
+
+    /**
+     * Returns a list containing all found words from "words" table
+     *
+     * @return list of Word objects
+     */
     List<Word> getWords();
+
+    /**
+     * Returns a list containing all found words from the specified website
+     *
+     * @param websiteId     id of website
+     * @return list of Word objects
+     */
     List<Word> getWords(int websiteId);
 
+    /**
+     * Returns a word object by its id in "words" table
+     *
+     * @param wordId     id of required word
+     * @return list of Word objects
+     */
     Word getWord(int wordId);
-
-    */
 }
