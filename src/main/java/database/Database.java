@@ -164,10 +164,17 @@ public interface Database {
     List<Word> getWords(int websiteId);
 
     /**
+     * Returns a word ID from the "words" table
+     *
+     * @param word    word which id is required
+     * @return word ID
+     */
+    int getWordId(String word);
+    /**
      * Returns a word object by its id in "words" table
      *
      * @param wordId     id of required word
-     * @return list of Word objects
+     * @return Word object
      */
     Word getWord(int wordId);
 }

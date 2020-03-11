@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -148,6 +149,35 @@ public class DatabaseTest {
 
     @Test
     public void testGetWebsites() {
+        assertTrue(database.clearWebsites());
+        assertTrue(database.clearWords());
+
+        database.putWebsite(1, "hhtlsdsd");
+        database.putWebsite(2, "sdasd");
+        database.putWebsite(3, "sdsdsd");
+        database.putWebsite(5, "sdsdasdasd");
+
+        database.putWord(1, "asdasdasd");
+        database.putWord(2, "2test_word");
+        database.putWord(3, "3test_word");
+        database.putWord(5, "4test_word");
+
+        List<Website> testList1 = new ArrayList<>();
+        List<Website> testList2 = new ArrayList<>();
+        List<Website> testList3 = new ArrayList<>();
+
+        testList1.add(new Website(1, "hhtlsdsd"));
+        testList2.add(new Website(1, "hhtlsdsd"));
+        testList2.add(new Website(2, "sdasd"));
+        testList2.add(new Website(3, "sdsdsd"));
+        testList2.add(new Website(5, "sdsdasdasd"));
+        testList3.add(new Website(3, "sdsdsd"));
+
+        assertEquals(testList1, database.getWebsites("asdasdasd"));
+        assertEquals(testList1, database.getWebsites(1));
+        assertEquals(testList3, database.getWebsites("3test_word"));
+        assertEquals(testList3, database.getWebsites(3));
+        assertEquals(testList2, database.getWebsites());
 
     }
 }

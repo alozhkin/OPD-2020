@@ -121,8 +121,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public List<Website> getWebsites(String word) {
-        String query = "SELECT * FROM websites WHERE company_id=(SELECT 2 FROM words_websites WHERE word_id=" +
-                "(SELECT 2 FROM words WHERE word='"+word+"'))";
+        String query = "SELECT * FROM websites WHERE company_id=(SELECT website_id FROM words WHERE word='"+word+"')";
         return getWebsitesByQuery(query);
     }
 
@@ -159,7 +158,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public List<Word> getWords(int websiteId) {
-        String query = "SELECT * FROM words WHERE id = (SELECT 1 FROM words_websites WHERE website_id='"+websiteId+"')";
+        String query = "SELECT * FROM words WHERE website_id = '"+websiteId+"'";
         return getWords(query);
     }
 
@@ -171,13 +170,29 @@ class DatabaseImpl implements Database {
             try (Statement statement = connection.createStatement()) {
                 ResultSet set = statement.executeQuery(query);
                 set.next();
-                String wordStr = set.getString(2);
-                word = new Word(wordId, wordStr);
+                String wordStr = set.getString(3);
+                int websiteId = set.getInt(2);
+                word = new Word(websiteId, wordStr);
                 return word;
             }
         } catch (Exception e) {
             e.printStackTrace();
             return word;
+        }
+    }
+
+    @Override
+    public int getWordId(String word) {
+        String query = "SELECT * FROM words WHERE word = '" + word + "'";
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet set = statement.executeQuery(query);
+                set.next();
+                return set.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
         }
     }
 
@@ -259,9 +274,9 @@ class DatabaseImpl implements Database {
             try (Statement statement = connection.createStatement()) {
                 ResultSet set = statement.executeQuery(query);
                 while (set.next()) {
-                    int wordId = set.getInt(1);
-                    String word = set.getString(2);
-                    list.add(new Word(wordId, word));
+                    int websiteId = set.getInt(2);
+                    String word = set.getString(3);
+                    list.add(new Word(websiteId, word));
                 }
                 return list;
             }
