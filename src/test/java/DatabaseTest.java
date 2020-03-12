@@ -152,32 +152,94 @@ public class DatabaseTest {
         assertTrue(database.clearWebsites());
         assertTrue(database.clearWords());
 
-        database.putWebsite(1, "hhtlsdsd");
-        database.putWebsite(2, "sdasd");
-        database.putWebsite(3, "sdsdsd");
-        database.putWebsite(5, "sdsdasdasd");
+        Website site1 = new Website(1, "website1");
+        Website site2 = new Website(2, "website2");
+        Website site3 = new Website(3, "website3");
+        Website site5 = new Website(5, "website5");
 
-        database.putWord(1, "asdasdasd");
-        database.putWord(2, "2test_word");
-        database.putWord(3, "3test_word");
-        database.putWord(5, "4test_word");
+        database.putWebsite(site1);
+        database.putWebsite(site2);
+        database.putWebsite(site3);
+        database.putWebsite(site5);
+
+        Word word1 = new Word(1, "word1");
+        Word word2 = new Word(2, "word2");
+        Word word3 = new Word(3, "word3");
+        Word word5 = new Word(5, "word5");
+
+        database.putWord(word1);
+        database.putWord(word2);
+        database.putWord(word3);
+        database.putWord(word5);
 
         List<Website> testList1 = new ArrayList<>();
         List<Website> testList2 = new ArrayList<>();
         List<Website> testList3 = new ArrayList<>();
 
-        testList1.add(new Website(1, "hhtlsdsd"));
-        testList2.add(new Website(1, "hhtlsdsd"));
-        testList2.add(new Website(2, "sdasd"));
-        testList2.add(new Website(3, "sdsdsd"));
-        testList2.add(new Website(5, "sdsdasdasd"));
-        testList3.add(new Website(3, "sdsdsd"));
+        testList1.add(site1);
+        testList2.add(site1);
+        testList2.add(site2);
+        testList2.add(site3);
+        testList2.add(site5);
+        testList3.add(site3);
 
-        assertEquals(testList1, database.getWebsites("asdasdasd"));
+        assertEquals(testList1, database.getWebsites("word1"));
         assertEquals(testList1, database.getWebsites(1));
-        assertEquals(testList3, database.getWebsites("3test_word"));
+        assertEquals(testList3, database.getWebsites("word3"));
         assertEquals(testList3, database.getWebsites(3));
         assertEquals(testList2, database.getWebsites());
 
+        List<String> testLink1 = new ArrayList<>();
+        testLink1.add("website3");
+
+        List<String> testLink2 = new ArrayList<>();
+        testLink2.add("website5");
+
+        assertEquals(testLink1, database.getWebsiteLink(3));
+        assertEquals(testLink2, database.getWebsiteLink(5));
+    }
+
+    @Test
+    public void testGetWords() {
+        assertTrue(database.clearWebsites());
+        assertTrue(database.clearWords());
+
+        Website site1 = new Website(1, "website1");
+        Website site2 = new Website(2, "website2");
+        Website site3 = new Website(3, "website3");
+        Website site5 = new Website(5, "website5");
+
+        database.putWebsite(site1);
+        database.putWebsite(site2);
+        database.putWebsite(site3);
+        database.putWebsite(site5);
+
+        Word word1 = new Word(1, "word1");
+        Word word2 = new Word(2, "word2");
+        Word word31 = new Word(3, "word31");
+        Word word32 = new Word(3, "word32");
+        Word word5 = new Word(5, "word5");
+
+        database.putWord(word1);
+        database.putWord(word2);
+        database.putWord(word31);
+        database.putWord(word32);
+        database.putWord(word5);
+
+        List<Word> testList1 = new ArrayList<>();
+        testList1.add(word1);
+        testList1.add(word2);
+        testList1.add(word31);
+        testList1.add(word32);
+        testList1.add(word5);
+        List<Word> testList2 = new ArrayList<>();
+        testList2.add(word31);
+        testList2.add(word32);
+
+        int word2Id = database.getWordId("word2");
+
+        assertEquals(testList1, database.getWords());
+        assertEquals(testList2, database.getWords(3));
+        assertEquals(word2, database.getWord(word2Id));
     }
 }
