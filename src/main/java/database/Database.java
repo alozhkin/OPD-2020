@@ -3,8 +3,8 @@ package database;
 import database.models.Website;
 import database.models.Word;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 
 public interface Database {
 
@@ -131,7 +131,7 @@ public interface Database {
      *
      * @return List of websites from websites table
      */
-    ArrayList<Website> getWebsites();
+    HashSet<Website> getWebsites();
 
     /**
      * Returns a list containing the website in which such word last occurred from the "words" table
@@ -139,7 +139,7 @@ public interface Database {
      * @param word      word by which to find a website
      * @return List of Website objects
      */
-    ArrayList<Website> getWebsites(String word);
+    HashSet<Website> getWebsites(String word);
 
     /**
      * Returns a list of site objects containing the link of website and company ID
@@ -147,7 +147,7 @@ public interface Database {
      * @param companyId     websites' company ID in "websites" table
      * @return list of website objects with website link and company id
      */
-    ArrayList<Website> getWebsites(int companyId);
+    HashSet<Website> getWebsites(int companyId);
 
     /**
      * Returns a list of string containing the links of websites by its company ID
@@ -155,14 +155,14 @@ public interface Database {
      * @param companyId      websites' company ID in "websites" table
      * @return list of Strings with websites link
      */
-    ArrayList<String> getWebsiteLink(int companyId);
+    HashSet<String> getWebsiteLink(int companyId);
 
     /**
      * Returns a list containing all found words from "words" table
      *
      * @return list of Word objects
      */
-    ArrayList<Word> getWords();
+    HashSet<Word> getWords();
 
     /**
      * Returns a list containing all found words from the specified website
@@ -170,7 +170,7 @@ public interface Database {
      * @param websiteId     id of website
      * @return list of Word objects
      */
-    ArrayList<Word> getWords(int websiteId);
+    HashSet<Word> getWords(int websiteId);
 
     /**
      * Returns a word ID from the "words" table

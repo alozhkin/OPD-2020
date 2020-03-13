@@ -8,6 +8,7 @@ import org.junit.runners.JUnit4;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -38,7 +39,7 @@ public class DatabaseTest {
 
     @Test
     public void testInsertWebsites() {
-        ArrayList<Website> list = new ArrayList<>();
+        List<Website> list = new ArrayList<>();
 
         list.add(new Website(12345, "https://alb-dach.de"));
         list.add(new Website(123456, "https://wolfsperger-landmaschinen.de"));
@@ -181,10 +182,12 @@ public class DatabaseTest {
                 int parsedLineId = Integer.parseInt(parsedLine[0]);
                 String parsedWord = parsedLine[2].replace("\"", "");
                 int parsedWebId = Integer.parseInt(parsedLine[1]);
-                ArrayList<Word> list = database.getWords(parsedWebId);
+                Word testWord = new Word(parsedWebId, parsedWord);
+                HashSet<Word> testSet = new HashSet<>();
+                testSet.add(testWord);
 
                 assertEquals(database.getWord(parsedLineId).getWord(), parsedWord);
-                assertEquals(list.get(0).getWord(), parsedWord);
+                assertEquals(testSet, database.getWords(parsedWebId));
             }
             fr.close();
 
@@ -220,27 +223,27 @@ public class DatabaseTest {
         database.putWord(word3);
         database.putWord(word5);
 
-        List<Website> testList1 = new ArrayList<>();
-        List<Website> testList2 = new ArrayList<>();
-        List<Website> testList3 = new ArrayList<>();
+        HashSet<Website> testSet1 = new HashSet<>();
+        HashSet<Website> testSet2 = new HashSet<>();
+        HashSet<Website> testSet3 = new HashSet<>();
 
-        testList1.add(site1);
-        testList2.add(site1);
-        testList2.add(site2);
-        testList2.add(site3);
-        testList2.add(site5);
-        testList3.add(site3);
+        testSet1.add(site1);
+        testSet2.add(site1);
+        testSet2.add(site2);
+        testSet2.add(site3);
+        testSet2.add(site5);
+        testSet3.add(site3);
 
-        assertEquals(testList1, database.getWebsites("word1"));
-        assertEquals(testList1, database.getWebsites(1));
-        assertEquals(testList3, database.getWebsites("word3"));
-        assertEquals(testList3, database.getWebsites(3));
-        assertEquals(testList2, database.getWebsites());
+        assertEquals(testSet1, database.getWebsites("word1"));
+        assertEquals(testSet1, database.getWebsites(1));
+        assertEquals(testSet3, database.getWebsites("word3"));
+        assertEquals(testSet3, database.getWebsites(3));
+        assertEquals(testSet2, database.getWebsites());
 
-        List<String> testLink1 = new ArrayList<>();
+        HashSet<String> testLink1 = new HashSet<>();
         testLink1.add("website3");
 
-        List<String> testLink2 = new ArrayList<>();
+        HashSet<String> testLink2 = new HashSet<>();
         testLink2.add("website5");
 
         assertEquals(testLink1, database.getWebsiteLink(3));
@@ -263,21 +266,21 @@ public class DatabaseTest {
         database.putWord(word32);
         database.putWord(word5);
 
-        List<Word> testList1 = new ArrayList<>();
-        testList1.add(word1);
-        testList1.add(word2);
-        testList1.add(word31);
-        testList1.add(word32);
-        testList1.add(word5);
+        HashSet<Word> testSet1 = new HashSet<>();
+        testSet1.add(word1);
+        testSet1.add(word2);
+        testSet1.add(word31);
+        testSet1.add(word32);
+        testSet1.add(word5);
 
-        List<Word> testList2 = new ArrayList<>();
-        testList2.add(word31);
-        testList2.add(word32);
+        HashSet<Word> testSet2 = new HashSet<>();
+        testSet2.add(word31);
+        testSet2.add(word32);
 
         int word2Id = database.getWordId("word2");
 
-        assertEquals(testList1, database.getWords());
-        assertEquals(testList2, database.getWords(3));
+        assertEquals(testSet1, database.getWords());
+        assertEquals(testSet2, database.getWords(3));
         assertEquals(word2, database.getWord(word2Id));
     }
 }
