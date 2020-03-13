@@ -13,6 +13,7 @@ import util.Link;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -94,7 +95,7 @@ public class SiteParser {
                         () -> crawler.crawl(html),
                         EXECUTOR_SERVICE);
                 crawlerFuture.thenAccept(result -> linkQueue.addAll(linkFilter.filter(result, domain)));
-                CompletableFuture<List<String>> extractorFuture = CompletableFuture.supplyAsync(
+                CompletableFuture<Set<String>> extractorFuture = CompletableFuture.supplyAsync(
                         () -> extractor.extract(html),
                         EXECUTOR_SERVICE);
                 extractorFuture.thenAccept(result -> db.insertAll(wordFilter.filter(result), domain));
