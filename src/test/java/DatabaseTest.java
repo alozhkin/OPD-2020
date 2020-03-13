@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,6 +149,53 @@ public class DatabaseTest {
     }
 
     @Test
+    public void testExportData() {
+        assertTrue(database.clearWords());
+
+        Word word1 = new Word(1, "word1");
+        Word word2 = new Word(2, "word2");
+        Word word3 = new Word(3, "word3");
+        Word word5 = new Word(5, "word5");
+
+        database.putWord(word1);
+        database.putWord(word2);
+        database.putWord(word3);
+        database.putWord(word5);
+
+        String csvpath = "src\\test\\resources\\actualExportData.csv";
+
+        assertTrue(database.exportDataToCSV(csvpath));
+        try {
+            File file = new File(csvpath);
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            String actualHeaderLine = br.readLine();
+            String expectedHeaderLine = "\"id\";\"website_id\";\"word\"";
+            assertEquals(expectedHeaderLine, actualHeaderLine);
+
+            String tempLine;
+            while ((tempLine = br.readLine()) != null) {         //reading every line and checking
+                String[] parsedLine = tempLine.split(";");// if current line in csv equal to the same line in database
+
+                int parsedLineId = Integer.parseInt(parsedLine[0]);
+                String parsedWord = parsedLine[2].replace("\"", "");
+                int parsedWebId = Integer.parseInt(parsedLine[1]);
+                ArrayList<Word> list = database.getWords(parsedWebId);
+
+                assertEquals(database.getWord(parsedLineId).getWord(), parsedWord);
+                assertEquals(list.get(0).getWord(), parsedWord);
+            }
+            fr.close();
+
+            //uncomment line below if you don't want to check output csv
+            //file.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void testGetWebsites() {
         assertTrue(database.clearWebsites());
         assertTrue(database.clearWords());
@@ -201,18 +249,7 @@ public class DatabaseTest {
 
     @Test
     public void testGetWords() {
-        assertTrue(database.clearWebsites());
         assertTrue(database.clearWords());
-
-        Website site1 = new Website(1, "website1");
-        Website site2 = new Website(2, "website2");
-        Website site3 = new Website(3, "website3");
-        Website site5 = new Website(5, "website5");
-
-        database.putWebsite(site1);
-        database.putWebsite(site2);
-        database.putWebsite(site3);
-        database.putWebsite(site5);
 
         Word word1 = new Word(1, "word1");
         Word word2 = new Word(2, "word2");
@@ -232,6 +269,7 @@ public class DatabaseTest {
         testList1.add(word31);
         testList1.add(word32);
         testList1.add(word5);
+
         List<Word> testList2 = new ArrayList<>();
         testList2.add(word31);
         testList2.add(word32);

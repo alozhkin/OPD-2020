@@ -3,6 +3,7 @@ package database;
 import database.models.Website;
 import database.models.Word;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface Database {
@@ -111,6 +112,14 @@ public interface Database {
     int getWebsitesSize();
 
     /**
+     * Exports data from database and inserts it in the new CSV file
+     *
+     * @return true, if the export was successful,
+     * false, if it was not possible to insert
+     */
+    boolean exportDataToCSV(String filepath);
+
+    /**
      * Returns the number of entries in the "words" table
      *
      * @return Words table size
@@ -122,7 +131,7 @@ public interface Database {
      *
      * @return List of websites from websites table
      */
-    List<Website> getWebsites();
+    ArrayList<Website> getWebsites();
 
     /**
      * Returns a list containing the website in which such word last occurred from the "words" table
@@ -130,7 +139,7 @@ public interface Database {
      * @param word      word by which to find a website
      * @return List of Website objects
      */
-    List<Website> getWebsites(String word);
+    ArrayList<Website> getWebsites(String word);
 
     /**
      * Returns a list of site objects containing the link of website and company ID
@@ -138,7 +147,7 @@ public interface Database {
      * @param companyId     websites' company ID in "websites" table
      * @return list of website objects with website link and company id
      */
-    List<Website> getWebsites(int companyId);
+    ArrayList<Website> getWebsites(int companyId);
 
     /**
      * Returns a list of string containing the links of websites by its company ID
@@ -146,14 +155,14 @@ public interface Database {
      * @param companyId      websites' company ID in "websites" table
      * @return list of Strings with websites link
      */
-    List<String> getWebsiteLink(int companyId);
+    ArrayList<String> getWebsiteLink(int companyId);
 
     /**
      * Returns a list containing all found words from "words" table
      *
      * @return list of Word objects
      */
-    List<Word> getWords();
+    ArrayList<Word> getWords();
 
     /**
      * Returns a list containing all found words from the specified website
@@ -161,7 +170,7 @@ public interface Database {
      * @param websiteId     id of website
      * @return list of Word objects
      */
-    List<Word> getWords(int websiteId);
+    ArrayList<Word> getWords(int websiteId);
 
     /**
      * Returns a word ID from the "words" table

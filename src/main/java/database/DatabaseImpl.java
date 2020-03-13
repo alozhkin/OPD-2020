@@ -5,8 +5,7 @@ import database.models.Word;
 import database.utils.CSVUtils;
 import database.utils.DatabaseUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
@@ -114,27 +113,55 @@ class DatabaseImpl implements Database {
     }
 
     @Override
-    public List<Website> getWebsites() {
+    public boolean exportDataToCSV(String filepath) {
+        String query = "SELECT * FROM words";
+        File file = new File(filepath);
+        file.delete();
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+                String header = "\"id\";\"website_id\";\"word\"";
+                writer.append(header);
+                ResultSet set = statement.executeQuery(query);
+                while (set.next()) {
+                    int id = set.getInt(1);
+                    int websiteId = set.getInt(2);
+                    String word = set.getString(3);
+                    writer.append(String.format("\n%d;%d;\"%s\"", id, websiteId, word));
+                }
+
+                writer.close();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    @Override
+    public ArrayList<Website> getWebsites() {
         String query = "SELECT * FROM websites";
         return getWebsitesByQuery(query);
     }
 
     @Override
-    public List<Website> getWebsites(String word) {
+    public ArrayList<Website> getWebsites(String word) {
         String query = "SELECT * FROM websites WHERE company_id=(SELECT website_id FROM words WHERE word='"+word+"')";
         return getWebsitesByQuery(query);
     }
 
     @Override
-    public List<Website> getWebsites(int companyId) {
+    public ArrayList<Website> getWebsites(int companyId) {
         String query = "SELECT * FROM websites WHERE company_id='" + companyId + "'";
         return getWebsitesByQuery(query);
     }
 
     @Override
-    public List<String> getWebsiteLink(int companyId) {
+    public ArrayList<String> getWebsiteLink(int companyId) {
         String query = "SELECT * FROM websites WHERE company_id='" + companyId + "'";
-        List<String> list = new ArrayList<>();
+        ArrayList<String> list = new ArrayList<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 ResultSet set = statement.executeQuery(query);
@@ -151,13 +178,13 @@ class DatabaseImpl implements Database {
     }
 
     @Override
-    public List<Word> getWords() {
+    public ArrayList<Word> getWords() {
         String query = "SELECT * FROM words";
         return getWords(query);
     }
 
     @Override
-    public List<Word> getWords(int websiteId) {
+    public ArrayList<Word> getWords(int websiteId) {
         String query = "SELECT * FROM words WHERE website_id = '"+websiteId+"'";
         return getWords(query);
     }
@@ -268,8 +295,8 @@ class DatabaseImpl implements Database {
         }
     }
 
-    private List<Word> getWords(String query) {
-        List<Word> list = new ArrayList<>();
+    private ArrayList<Word> getWords(String query) {
+        ArrayList<Word> list = new ArrayList<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 ResultSet set = statement.executeQuery(query);
@@ -287,8 +314,8 @@ class DatabaseImpl implements Database {
         }
     }
 
-    private List<Website> getWebsitesByQuery(String query) {
-        List<Website> list = new ArrayList<>();
+    private ArrayList<Website> getWebsitesByQuery(String query) {
+        ArrayList<Website> list = new ArrayList<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 ResultSet set = statement.executeQuery(query);
