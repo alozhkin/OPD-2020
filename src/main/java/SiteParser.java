@@ -17,8 +17,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SiteParser {
 
@@ -102,13 +100,12 @@ public class SiteParser {
                 extractorFuture.thenAccept(result -> {
                     ArrayList<Word> words = new ArrayList<>();
                     for (String word : result) {
-                        words.add(new Word(domain.hashCode(), word));
+                        words.add(new Word(0, domain.hashCode(), word));
                     }
                     db.putWords(words);
                 });
             } catch (InterruptedException e) {
-                Logger log = Logger.getLogger(SiteParser.class.getName());
-                log.log(Level.SEVERE, e.getMessage(), e);
+                e.printStackTrace();
             }
         }
     }

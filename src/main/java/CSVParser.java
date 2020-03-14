@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class CSVParser {
     private static final String SEPARATOR = ";";
@@ -28,8 +26,7 @@ public class CSVParser {
                 domainsIds.put(link.getDomain(), id);
             }
         } catch (IOException e) {
-            Logger log = Logger.getLogger(CSVParser.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
         }
     }
 

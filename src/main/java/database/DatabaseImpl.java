@@ -1,6 +1,5 @@
 package database;
 
-import database.models.Triple;
 import database.models.Website;
 import database.models.Word;
 import database.utils.CSVUtils;
@@ -31,8 +30,7 @@ class DatabaseImpl implements Database {
             parseProperties();
             initDatabase();
         } catch (ClassNotFoundException e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
         }
     }
 
@@ -60,8 +58,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return false;
         }
     }
@@ -86,8 +83,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return false;
         }
     }
@@ -124,10 +120,10 @@ class DatabaseImpl implements Database {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             String header = "\"id\";\"website_id\";\"word\"";
             writer.append(header);
-            List<Triple<Integer, Integer, String>> list = getWordsData();
+            List<Word> list = getWordsData();
             assert list != null;
-            for (Triple<Integer, Integer, String> tr: list) {
-                writer.append(String.format("\n%d;%d;\"%s\"", tr.getFirst(), tr.getSecond(), tr.getThird()));
+            for (Word w: list) {
+                writer.append(String.format("\n%d;%d;\"%s\"", w.getId(), w.getWebsiteId(), w.getWord()));
             }
             return true;
         } catch (Exception e) {
@@ -171,8 +167,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return set;
         }
     }
@@ -199,12 +194,12 @@ class DatabaseImpl implements Database {
                     rset.next();
                     String wordStr = rset.getString(3);
                     int websiteId = rset.getInt(2);
-                    return new Word(websiteId, wordStr);
+                    int id = rset.getInt(1);
+                    return new Word(id, websiteId, wordStr);
                 }
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return null;
         }
     }
@@ -221,8 +216,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return -1;
         }
     }
@@ -237,8 +231,7 @@ class DatabaseImpl implements Database {
             username = properties.getProperty("username");
             password = properties.getProperty("password");
         } catch (IOException e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
         }
     }
 
@@ -251,8 +244,7 @@ class DatabaseImpl implements Database {
             statement.execute("CREATE TABLE IF NOT EXISTS websites ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'company_id' int(11) NOT NULL , 'website' TEXT NOT NULL)");
             statement.execute("CREATE TABLE IF NOT EXISTS words ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'website_id' int(11) NOT NULL , 'word' TEXT NOT NULL)");
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
         }
     }
 
@@ -267,8 +259,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return false;
         }
     }
@@ -284,8 +275,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return false;
         }
     }
@@ -310,17 +300,17 @@ class DatabaseImpl implements Database {
             try (Statement statement = connection.createStatement()) {
                 try (ResultSet rset = statement.executeQuery(query)) {
                     while (rset.next()) {
+                        int id = rset.getInt(1);
                         int websiteId = rset.getInt(2);
                         String word = rset.getString(3);
-                        set.add(new Word(websiteId, word));
+                        set.add(new Word(id, websiteId, word));
                     }
                     return set;
                 }
             }
 
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return set;
         }
     }
@@ -339,31 +329,29 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return set;
         }
     }
 
-    private List<Triple<Integer, Integer, String>> getWordsData() {
+    private List<Word> getWordsData() {
         String query = "SELECT * FROM words";
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 try (ResultSet rset = statement.executeQuery(query)) {
-                    List<Triple<Integer, Integer, String>> tripleList = new ArrayList<>();
+                    List<Word> wordList = new ArrayList<>();
                     while (rset.next()) {
                         int id = rset.getInt(1);
                         int websiteId = rset.getInt(2);
                         String word = rset.getString(3);
-                        Triple<Integer, Integer, String> tempTriple = new Triple<>(id, websiteId, word);
-                        tripleList.add(tempTriple);
+                        Word tempWord = new Word(id, websiteId, word);
+                        wordList.add(tempWord);
                     }
-                    return tripleList;
+                    return wordList;
                 }
             }
         } catch (Exception e) {
-            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
-            log.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
             return null;
         }
     }
