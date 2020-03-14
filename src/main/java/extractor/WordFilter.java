@@ -1,8 +1,10 @@
 package extractor;
 
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+
 
 public interface WordFilter {
-    List<String> filter(Set<String> words);
+    Collection<String> filter(HashSet<String> words) throws IOException;
 }

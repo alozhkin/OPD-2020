@@ -11,6 +11,8 @@ import extractor.WordFilter;
 import util.HTML;
 import util.Link;
 
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,10 +97,16 @@ public class SiteParser {
                         () -> crawler.crawl(html),
                         EXECUTOR_SERVICE);
                 crawlerFuture.thenAccept(result -> linkQueue.addAll(linkFilter.filter(result, domain)));
-                CompletableFuture<Set<String>> extractorFuture = CompletableFuture.supplyAsync(
+                CompletableFuture<HashSet<String>> extractorFuture = CompletableFuture.supplyAsync(
                         () -> extractor.extract(html),
                         EXECUTOR_SERVICE);
-                extractorFuture.thenAccept(result -> db.insertAll(wordFilter.filter(result), domain));
+                extractorFuture.thenAccept(result -> {
+                    try {
+                        db.insertAll(wordFilter.filter(result), domain);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
