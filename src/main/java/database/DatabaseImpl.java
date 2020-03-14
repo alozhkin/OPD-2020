@@ -91,13 +91,23 @@ class DatabaseImpl implements Database {
     @Override
     public boolean clearWebsites() {
         String statement = "DELETE FROM websites";
-        return executeStatement(statement);
+        if (executeStatement(statement)) {
+            String resetIncrement = "DELETE FROM SQLITE_SEQUENCE WHERE NAME='websites'";
+            return executeStatement(resetIncrement);
+        } else {
+            return false;
+        }
     }
 
     @Override
     public boolean clearWords() {
         String statement = "DELETE FROM words";
-        return executeStatement(statement);
+        if (executeStatement(statement)) {
+            String resetIncrement = "DELETE FROM SQLITE_SEQUENCE WHERE NAME='words'";
+            return executeStatement(resetIncrement);
+        } else {
+            return false;
+        }
     }
 
     @Override
