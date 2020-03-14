@@ -8,6 +8,12 @@ public class Word {
     private final int websiteId;
     private final String word;
 
+    public Word(int websiteId, String word) {
+        this.id = -1;
+        this.websiteId = websiteId;
+        this.word = word;
+    }
+
     public Word(int id, int websiteId, String word) {
         this.id = id;
         this.websiteId = websiteId;
@@ -36,5 +42,14 @@ public class Word {
     @Override
     public int hashCode() {
         return Objects.hash(id, websiteId, word);
+    }
+
+    @Override
+    public String toString() {
+        return "Word{" +
+                "id=" + id +
+                ", websiteId=" + websiteId +
+                ", word='" + word + '\'' +
+                '}';
     }
 }
