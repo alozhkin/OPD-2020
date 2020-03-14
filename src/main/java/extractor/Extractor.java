@@ -2,8 +2,8 @@ package extractor;
 
 import util.HTML;
 
-import java.util.List;
+import java.util.Set;
 
 public interface Extractor {
-    List<String> extract(HTML html);
+    Set<String> extract(HTML html);
 }
