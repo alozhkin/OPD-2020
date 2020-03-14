@@ -3,7 +3,7 @@ import crawler.DefaultCrawler;
 import crawler.DefaultLinkFilter;
 import crawler.LinkFilter;
 import database.Database;
-import database.models.Word;
+import database.DatabaseImpl;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
@@ -11,8 +11,9 @@ import extractor.WordFilter;
 import util.HTML;
 import util.Link;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -94,16 +95,10 @@ public class SiteParser {
                         () -> crawler.crawl(html),
                         EXECUTOR_SERVICE);
                 crawlerFuture.thenAccept(result -> linkQueue.addAll(linkFilter.filter(result, domain)));
-                CompletableFuture<List<String>> extractorFuture = CompletableFuture.supplyAsync(
+                CompletableFuture<Set<String>> extractorFuture = CompletableFuture.supplyAsync(
                         () -> extractor.extract(html),
                         EXECUTOR_SERVICE);
-                extractorFuture.thenAccept(result -> {
-                    ArrayList<Word> words = new ArrayList<>();
-                    for (String word : result) {
-                        words.add(new Word(0, domain.hashCode(), word));
-                    }
-                    db.putWords(words);
-                });
+                extractorFuture.thenAccept(result -> db.insertAll(wordFilter.filter(result), domain));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
