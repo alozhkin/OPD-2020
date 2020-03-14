@@ -1,9 +1,9 @@
 package extractor;
 
 import util.HTML;
+import java.util.HashSet;
 
-import java.util.Set;
 
 public interface Extractor {
-    Set<String> extract(HTML html);
+    HashSet<String> extract(HTML html);
 }
