@@ -16,13 +16,30 @@ public class WebDriverLauncher {
     private HTML currentSource;
     public WebDriverLauncher(String url) {
        getWebsite(url);
-       currentSource = getHTMLSource();
+    }
+
+    public WebDriverLauncher(Link link) {
+        getWebsite(link.toString());
     }
 
     public WebDriverLauncher getNextWebsite(String url) {
         this.url = url;
         driver.get(url);
         return this;
+    }
+
+    public WebDriverLauncher getNextWebsite(Link link) {
+        this.url = link.toString();
+        driver.get(url);
+        currentSource = getHTMLSource();
+        return this;
+    }
+
+    public WebDriverLauncher () {
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     private void getWebsite(String url) {
