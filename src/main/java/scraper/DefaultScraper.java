@@ -1,6 +1,8 @@
 package scraper;
 
 import org.jsoup.Jsoup;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import util.HTML;
 import util.Link;
 
@@ -36,5 +38,10 @@ public class DefaultScraper implements Scraper {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        WebDriver a = new ChromeDriver();
+        System.out.println(System.getProperty("webdriver.chrome.driver"));
     }
 }

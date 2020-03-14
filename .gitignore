@@ -21,6 +21,7 @@ gradlew.bat
 # User-specific configurations
 .idea/
 *.iml
+src/main/config/local.properties
 
 # OS-specific files
 .DS_Store
