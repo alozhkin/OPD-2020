@@ -12,7 +12,7 @@ import java.util.HashSet;
 
 public class DefaultExtractor implements Extractor {
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         Link l = new Link("https://ru.wikipedia.org/wiki/%D0%AF%D0%B4%D0%BE%D0%B2%D0%B8%D1%82%D1%8B%D0%B9_%D0%BF%D0%BB%D1%8E%D1%89_(%D1%84%D0%B8%D0%BB%D1%8C%D0%BC,_1992)");
         HTML h = new HTML("<!DOCTYPE html>\n" +
                 "<!DOCTYPE html>\n" +
@@ -156,7 +156,7 @@ public class DefaultExtractor implements Extractor {
                 "</html>",l);
        HashSet setOfWords = (HashSet) new DefaultExtractor().extract(h);
        System.out.println(setOfWords);
-    }
+    }*/
 
 
     public HashSet<String> extract(HTML html) {
