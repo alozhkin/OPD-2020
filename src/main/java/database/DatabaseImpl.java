@@ -5,13 +5,13 @@ import database.models.Word;
 import database.utils.CSVUtils;
 import database.utils.DatabaseUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class DatabaseImpl implements Database {
 
@@ -41,7 +41,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean putWebsite(int companyId, String website) {
-        String statement = "INSERT INTO websites (company_id, website) VALUES (?, ?) ON DUPLICATE KEY UPDATE website=VALUES(website)";
+        String statement = "INSERT INTO websites (company_id, website) VALUES (?, ?)";
         return executeStatementWithParams(companyId, website, statement);
     }
 
@@ -65,7 +65,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean putWord(int websiteId, String word) {
-        String statement = "INSERT INTO words (website_id, word) VALUES (?, ?) ON DUPLICATE KEY UPDATE word=VALUES(word)";
+        String statement = "INSERT INTO words (website_id, word) VALUES (?, ?)";
         return executeStatementWithParams(websiteId, word, statement);
     }
 
@@ -91,13 +91,23 @@ class DatabaseImpl implements Database {
     @Override
     public boolean clearWebsites() {
         String statement = "DELETE FROM websites";
-        return executeStatement(statement);
+        if (executeStatement(statement)) {
+            String resetIncrement = "DELETE FROM SQLITE_SEQUENCE WHERE NAME='websites'";
+            return executeStatement(resetIncrement);
+        } else {
+            return false;
+        }
     }
 
     @Override
     public boolean clearWords() {
         String statement = "DELETE FROM words";
-        return executeStatement(statement);
+        if (executeStatement(statement)) {
+            String resetIncrement = "DELETE FROM SQLITE_SEQUENCE WHERE NAME='words'";
+            return executeStatement(resetIncrement);
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -110,6 +120,115 @@ class DatabaseImpl implements Database {
     public int getWordsSize() {
         String query = "SELECT COUNT(*) FROM words";
         return getSizeFromQuery(query);
+    }
+
+    @Override
+    public boolean exportDataToCSV(String filepath) {
+        File file = new File(filepath);
+        file.delete();
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            String header = "\"id\";\"website_id\";\"word\"";
+            writer.append(header);
+            List<Word> list = getWordsData();
+            assert list != null;
+            for (Word w: list) {
+                writer.append(String.format("\n%d;%d;\"%s\"", w.getId(), w.getWebsiteId(), w.getWord()));
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    @Override
+    public HashSet<Website> getWebsites() {
+        String query = "SELECT * FROM websites";
+        return getWebsitesByQuery(query);
+    }
+
+    @Override
+    public HashSet<Website> getWebsites(String word) {
+        String query = "SELECT * FROM websites WHERE company_id=(SELECT website_id FROM words WHERE word='"+word+"')";
+        return getWebsitesByQuery(query);
+    }
+
+    @Override
+    public HashSet<Website> getWebsites(int companyId) {
+        String query = "SELECT * FROM websites WHERE company_id='" + companyId + "'";
+        return getWebsitesByQuery(query);
+    }
+
+    @Override
+    public HashSet<String> getWebsiteLink(int companyId) {
+        String query = "SELECT * FROM websites WHERE company_id='" + companyId + "'";
+        HashSet<String> set = new HashSet<>();
+
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try(ResultSet rset = statement.executeQuery(query)) {
+                    while (rset.next()) {
+                        String link = rset.getString(3);
+                        set.add(link);
+                    }
+                    return set;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return set;
+        }
+    }
+
+    @Override
+    public HashSet<Word> getWords() {
+        String query = "SELECT * FROM words";
+        return getWords(query);
+    }
+
+    @Override
+    public HashSet<Word> getWords(int websiteId) {
+        String query = "SELECT * FROM words WHERE website_id = '"+websiteId+"'";
+        return getWords(query);
+    }
+
+    @Override
+    public Word getWord(int wordId) {
+        String query = "SELECT * FROM words WHERE id = '" + wordId + "'";
+
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    rset.next();
+                    String wordStr = rset.getString(3);
+                    int websiteId = rset.getInt(2);
+                    int id = rset.getInt(1);
+                    return new Word(id, websiteId, wordStr);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public int getWordId(String word) {
+        String query = "SELECT * FROM words WHERE word = '" + word + "'";
+
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    rset.next();
+                    return rset.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     private void parseProperties() {
@@ -127,11 +246,13 @@ class DatabaseImpl implements Database {
     }
 
     private void initDatabase() throws ClassNotFoundException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
+        Class.forName("org.sqlite.JDBC");
 
         try (Connection connection = getConnection()) {
-            DatabaseUtil.initDatabaseTable(connection, "src/main/java/database/properties/websites_structure.sql");
-            DatabaseUtil.initDatabaseTable(connection, "src/main/java/database/properties/words_structure.sql");
+
+            Statement statement = connection.createStatement();
+            statement.execute("CREATE TABLE IF NOT EXISTS websites ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'company_id' int(11) NOT NULL , 'website' TEXT NOT NULL)");
+            statement.execute("CREATE TABLE IF NOT EXISTS words ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'website_id' int(11) NOT NULL , 'word' TEXT NOT NULL)");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -172,13 +293,76 @@ class DatabaseImpl implements Database {
     private int getSizeFromQuery(String query) {
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet set = statement.executeQuery(query);
-                set.next();
-                return set.getInt(1);
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    rset.next();
+                    return rset.getInt(1);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    private HashSet<Word> getWords(String query) {
+        HashSet<Word> set = new HashSet<>();
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    while (rset.next()) {
+                        int id = rset.getInt(1);
+                        int websiteId = rset.getInt(2);
+                        String word = rset.getString(3);
+                        set.add(new Word(id, websiteId, word));
+                    }
+                    return set;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return set;
+        }
+    }
+
+    private HashSet<Website> getWebsitesByQuery(String query) {
+        HashSet<Website> set = new HashSet<>();
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    while (rset.next()) {
+                        int companyId = rset.getInt(2);
+                        String website = rset.getString(3);
+                        set.add(new Website(companyId, website));
+                    }
+                    return set;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return set;
+        }
+    }
+
+    private List<Word> getWordsData() {
+        String query = "SELECT * FROM words";
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    List<Word> wordList = new ArrayList<>();
+                    while (rset.next()) {
+                        int id = rset.getInt(1);
+                        int websiteId = rset.getInt(2);
+                        String word = rset.getString(3);
+                        Word tempWord = new Word(id, websiteId, word);
+                        wordList.add(tempWord);
+                    }
+                    return wordList;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

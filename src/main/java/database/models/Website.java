@@ -32,4 +32,12 @@ public class Website {
     public int hashCode() {
         return Objects.hash(companyId, link);
     }
+
+    @Override
+    public String toString() {
+        return "Website{" +
+                "companyId=" + companyId +
+                ", link='" + link + '\'' +
+                '}';
+    }
 }
