@@ -3,6 +3,9 @@ import scraper.DefaultScraper;
 import util.HTML;
 import util.Link;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +22,7 @@ public class WordsExtractor {
     private static Executor EXECUTOR_SERVICE = Executors.newFixedThreadPool(2);
 
     public static void main(String[] args) {
+        setConsoleEncoding();
         List<Link> links = new ArrayList<>();
         var csvParser = new CSVParser();
         Map<String, Integer> domainsIds = csvParser.getDomainsIds();
@@ -34,6 +38,18 @@ public class WordsExtractor {
             var scraper = new DefaultScraper(linkQueue, HTMLQueue);
             EXECUTOR_SERVICE.execute(parser::start);
             EXECUTOR_SERVICE.execute(scraper::start);
+        }
+    }
+
+    static void setConsoleEncoding() {
+        String consoleEncoding = System.getProperty("consoleEncoding");
+        if (consoleEncoding != null) {
+            try {
+                System.setOut(new PrintStream(System.out, true, consoleEncoding));
+            } catch (UnsupportedEncodingException ex) {
+                Exception e = new IOException("Unsupported encoding set for console: "+consoleEncoding, ex);
+                e.printStackTrace();
+            }
         }
     }
 }

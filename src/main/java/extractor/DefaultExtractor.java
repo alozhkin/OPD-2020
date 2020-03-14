@@ -34,7 +34,7 @@ public class DefaultExtractor implements Extractor {
         Document doc = null;
         try {
             //doc = Jsoup.parse(new ByteArrayInputStream(html.toString().getBytes()), "windows-1251", html.getUrl().toString());
-            doc = Jsoup.parse( new File("D:\\Users\\Kazuru\\Downloads\\Suka.html"), "windows-1251", html.getUrl().toString());
+            doc = Jsoup.parse(new File("src/main/resources/wikipedia.html"), null, html.getUrl().toString());
             //doc = Jsoup.connect("https://ru.wikipedia.org/wiki/%D0%AF%D0%B4%D0%BE%D0%B2%D0%B8%D1%82%D1%8B%D0%B9_%D0%BF%D0%BB%D1%8E%D1%89_(%D1%84%D0%B8%D0%BB%D1%8C%D0%BC,_1992)").get();
         } catch (IOException e) {
             e.printStackTrace();
