@@ -166,33 +166,32 @@ public class DatabaseTest {
         String csvpath = "src\\test\\resources\\actualExportData.csv";
 
         assertTrue(database.exportDataToCSV(csvpath));
-        try {
-            File file = new File(csvpath);
-            FileReader fr = new FileReader(file);
-            BufferedReader br = new BufferedReader(fr);
 
-            String actualHeaderLine = br.readLine();
-            String expectedHeaderLine = "\"id\";\"website_id\";\"word\"";
-            assertEquals(expectedHeaderLine, actualHeaderLine);
+        File file = new File(csvpath);
+        try (FileReader fr = new FileReader(file)) {
+            try (BufferedReader br = new BufferedReader(fr)) {
+                String actualHeaderLine = br.readLine();
+                String expectedHeaderLine = "\"id\";\"website_id\";\"word\"";
+                assertEquals(expectedHeaderLine, actualHeaderLine);
 
-            String tempLine;
-            while ((tempLine = br.readLine()) != null) {         //reading every line and checking
-                String[] parsedLine = tempLine.split(";");// if current line in csv equal to the same line in database
+                String tempLine;
+                while ((tempLine = br.readLine()) != null) {         //reading every line and checking
+                    String[] parsedLine = tempLine.split(";");// if current line in csv equal to the same line in database
 
-                int parsedLineId = Integer.parseInt(parsedLine[0]);
-                String parsedWord = parsedLine[2].replace("\"", "");
-                int parsedWebId = Integer.parseInt(parsedLine[1]);
-                Word testWord = new Word(parsedWebId, parsedWord);
-                HashSet<Word> testSet = new HashSet<>();
-                testSet.add(testWord);
+                    int parsedLineId = Integer.parseInt(parsedLine[0]);
+                    String parsedWord = parsedLine[2].replace("\"", "");
+                    int parsedWebId = Integer.parseInt(parsedLine[1]);
+                    Word testWord = new Word(parsedWebId, parsedWord);
+                    HashSet<Word> testSet = new HashSet<>();
+                    testSet.add(testWord);
 
-                assertEquals(database.getWord(parsedLineId).getWord(), parsedWord);
-                assertEquals(testSet, database.getWords(parsedWebId));
+                    assertEquals(database.getWord(parsedLineId).getWord(), parsedWord);
+                    assertEquals(testSet, database.getWords(parsedWebId));
+                }
+
+                //uncomment line below if you don't want to check output csv
+                //file.delete();
             }
-            fr.close();
-
-            //uncomment line below if you don't want to check output csv
-            //file.delete();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -13,11 +13,12 @@ import util.Link;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SiteParser {
 
@@ -106,7 +107,8 @@ public class SiteParser {
                     db.putWords(words);
                 });
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logger log = Logger.getLogger(SiteParser.class.getName());
+                log.log(Level.SEVERE, e.getMessage(), e);
             }
         }
     }

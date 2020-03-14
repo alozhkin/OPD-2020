@@ -1,5 +1,6 @@
 package database;
 
+import database.models.Triple;
 import database.models.Website;
 import database.models.Word;
 import database.utils.CSVUtils;
@@ -117,25 +118,18 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean exportDataToCSV(String filepath) {
-        String query = "SELECT * FROM words";
         File file = new File(filepath);
         file.delete();
-        try (Connection connection = getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-                String header = "\"id\";\"website_id\";\"word\"";
-                writer.append(header);
-                ResultSet rset = statement.executeQuery(query);
-                while (rset.next()) {
-                    int id = rset.getInt(1);
-                    int websiteId = rset.getInt(2);
-                    String word = rset.getString(3);
-                    writer.append(String.format("\n%d;%d;\"%s\"", id, websiteId, word));
-                }
 
-                writer.close();
-                return true;
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            String header = "\"id\";\"website_id\";\"word\"";
+            writer.append(header);
+            List<Triple<Integer, Integer, String>> list = getWordsData();
+            assert list != null;
+            for (Triple<Integer, Integer, String> tr: list) {
+                writer.append(String.format("\n%d;%d;\"%s\"", tr.getFirst(), tr.getSecond(), tr.getThird()));
             }
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -165,14 +159,16 @@ class DatabaseImpl implements Database {
     public HashSet<String> getWebsiteLink(int companyId) {
         String query = "SELECT * FROM websites WHERE company_id='" + companyId + "'";
         HashSet<String> set = new HashSet<>();
+
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rset = statement.executeQuery(query);
-                while(rset.next()){
-                    String link = rset.getString(3);
-                    set.add(link);
+                try(ResultSet rset = statement.executeQuery(query)) {
+                    while (rset.next()) {
+                        String link = rset.getString(3);
+                        set.add(link);
+                    }
+                    return set;
                 }
-                return set;
             }
         } catch (Exception e) {
             Logger log = Logger.getLogger(DatabaseImpl.class.getName());
@@ -195,32 +191,34 @@ class DatabaseImpl implements Database {
 
     @Override
     public Word getWord(int wordId) {
-        Word word = null;
         String query = "SELECT * FROM words WHERE id = '" + wordId + "'";
+
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rset = statement.executeQuery(query);
-                rset.next();
-                String wordStr = rset.getString(3);
-                int websiteId = rset.getInt(2);
-                word = new Word(websiteId, wordStr);
-                return word;
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    rset.next();
+                    String wordStr = rset.getString(3);
+                    int websiteId = rset.getInt(2);
+                    return new Word(websiteId, wordStr);
+                }
             }
         } catch (Exception e) {
             Logger log = Logger.getLogger(DatabaseImpl.class.getName());
             log.log(Level.SEVERE, e.getMessage(), e);
-            return word;
+            return null;
         }
     }
 
     @Override
     public int getWordId(String word) {
         String query = "SELECT * FROM words WHERE word = '" + word + "'";
+
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rset = statement.executeQuery(query);
-                rset.next();
-                return rset.getInt(1);
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    rset.next();
+                    return rset.getInt(1);
+                }
             }
         } catch (Exception e) {
             Logger log = Logger.getLogger(DatabaseImpl.class.getName());
@@ -295,9 +293,10 @@ class DatabaseImpl implements Database {
     private int getSizeFromQuery(String query) {
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rset = statement.executeQuery(query);
-                rset.next();
-                return rset.getInt(1);
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    rset.next();
+                    return rset.getInt(1);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -309,13 +308,14 @@ class DatabaseImpl implements Database {
         HashSet<Word> set = new HashSet<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rset = statement.executeQuery(query);
-                while (rset.next()) {
-                    int websiteId = rset.getInt(2);
-                    String word = rset.getString(3);
-                    set.add(new Word(websiteId, word));
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    while (rset.next()) {
+                        int websiteId = rset.getInt(2);
+                        String word = rset.getString(3);
+                        set.add(new Word(websiteId, word));
+                    }
+                    return set;
                 }
-                return set;
             }
 
         } catch (Exception e) {
@@ -329,18 +329,42 @@ class DatabaseImpl implements Database {
         HashSet<Website> set = new HashSet<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rset = statement.executeQuery(query);
-                while (rset.next()) {
-                    int companyId = rset.getInt(2);
-                    String website = rset.getString(3);
-                    set.add(new Website(companyId, website));
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    while (rset.next()) {
+                        int companyId = rset.getInt(2);
+                        String website = rset.getString(3);
+                        set.add(new Website(companyId, website));
+                    }
+                    return set;
                 }
-                return set;
             }
         } catch (Exception e) {
             Logger log = Logger.getLogger(DatabaseImpl.class.getName());
             log.log(Level.SEVERE, e.getMessage(), e);
             return set;
+        }
+    }
+
+    private List<Triple<Integer, Integer, String>> getWordsData() {
+        String query = "SELECT * FROM words";
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet rset = statement.executeQuery(query)) {
+                    List<Triple<Integer, Integer, String>> tripleList = new ArrayList<>();
+                    while (rset.next()) {
+                        int id = rset.getInt(1);
+                        int websiteId = rset.getInt(2);
+                        String word = rset.getString(3);
+                        Triple<Integer, Integer, String> tempTriple = new Triple<>(id, websiteId, word);
+                        tripleList.add(tempTriple);
+                    }
+                    return tripleList;
+                }
+            }
+        } catch (Exception e) {
+            Logger log = Logger.getLogger(DatabaseImpl.class.getName());
+            log.log(Level.SEVERE, e.getMessage(), e);
+            return null;
         }
     }
 }

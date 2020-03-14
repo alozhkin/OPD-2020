@@ -127,48 +127,48 @@ public interface Database {
     int getWordsSize();
 
     /**
-     * Returns a list containing all the websites from the "websites" table
+     * Returns a set containing all the websites from the "websites" table
      *
-     * @return List of websites from websites table
+     * @return Set of websites from websites table
      */
     HashSet<Website> getWebsites();
 
     /**
-     * Returns a list containing the website in which such word last occurred from the "words" table
+     * Returns a set containing the websites in which such word occurred from the "words" table
      *
-     * @param word      word by which to find a website
-     * @return List of Website objects
+     * @param word      word by which to find websites
+     * @return Set of Website objects
      */
     HashSet<Website> getWebsites(String word);
 
     /**
-     * Returns a list of site objects containing the link of website and company ID
+     * Returns a set of site objects containing the link of website and company ID
      *
      * @param companyId     websites' company ID in "websites" table
-     * @return list of website objects with website link and company id
+     * @return set of website objects with website link and company id
      */
     HashSet<Website> getWebsites(int companyId);
 
     /**
-     * Returns a list of string containing the links of websites by its company ID
+     * Returns a set of string containing the links of websites by its company ID
      *
      * @param companyId      websites' company ID in "websites" table
-     * @return list of Strings with websites link
+     * @return set of Strings with websites link
      */
     HashSet<String> getWebsiteLink(int companyId);
 
     /**
-     * Returns a list containing all found words from "words" table
+     * Returns a set containing all found words from "words" table
      *
-     * @return list of Word objects
+     * @return set of Word objects
      */
     HashSet<Word> getWords();
 
     /**
-     * Returns a list containing all found words from the specified website
+     * Returns a set containing all found words from the specified website
      *
      * @param websiteId     id of website
-     * @return list of Word objects
+     * @return set of Word objects
      */
     HashSet<Word> getWords(int websiteId);
 
