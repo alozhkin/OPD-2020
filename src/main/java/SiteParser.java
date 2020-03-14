@@ -13,7 +13,6 @@ import util.Link;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -101,7 +100,7 @@ public class SiteParser {
                 extractorFuture.thenAccept(result -> {
                     ArrayList<Word> words = new ArrayList<>();
                     for (String word : result) {
-                        words.add(new Word(domain.hashCode(), word));
+                        words.add(new Word(0, domain.hashCode(), word));
                     }
                     db.putWords(words);
                 });

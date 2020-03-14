@@ -26,7 +26,6 @@ public class CSVParser {
                 domainsIds.put(link.getDomain(), id);
             }
         } catch (IOException e) {
-            // TODO нужен logger
             e.printStackTrace();
         }
     }

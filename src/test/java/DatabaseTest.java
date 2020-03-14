@@ -6,7 +6,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -36,7 +39,7 @@ public class DatabaseTest {
 
     @Test
     public void testInsertWebsites() {
-        ArrayList<Website> list = new ArrayList<>();
+        List<Website> list = new ArrayList<>();
 
         list.add(new Website(12345, "https://alb-dach.de"));
         list.add(new Website(123456, "https://wolfsperger-landmaschinen.de"));
@@ -144,5 +147,139 @@ public class DatabaseTest {
         database.putWebsite(5, "sdsdasdasd");
 
         assertEquals(5, database.getWebsitesSize());
+    }
+
+    @Test
+    public void testExportData() {
+        assertTrue(database.clearWords());
+
+        Word word1 = new Word(1, "word1");
+        Word word2 = new Word(2, "word2");
+        Word word3 = new Word(3, "word3");
+        Word word5 = new Word(5, "word5");
+
+        database.putWord(word1);
+        database.putWord(word2);
+        database.putWord(word3);
+        database.putWord(word5);
+
+        String csvpath = "src\\test\\resources\\actualExportData.csv";
+
+        assertTrue(database.exportDataToCSV(csvpath));
+
+        File file = new File(csvpath);
+        try (FileReader fr = new FileReader(file)) {
+            try (BufferedReader br = new BufferedReader(fr)) {
+                String actualHeaderLine = br.readLine();
+                String expectedHeaderLine = "\"id\";\"website_id\";\"word\"";
+                assertEquals(expectedHeaderLine, actualHeaderLine);
+
+                String tempLine;
+                while ((tempLine = br.readLine()) != null) {         //reading every line and checking
+                    String[] parsedLine = tempLine.split(";");// if current line in csv equal to the same line in database
+
+                    int parsedLineId = Integer.parseInt(parsedLine[0]);
+                    String parsedWord = parsedLine[2].replace("\"", "");
+                    int parsedWebId = Integer.parseInt(parsedLine[1]);
+                    Word testWord = new Word(parsedWebId, parsedWord);
+                    HashSet<Word> testSet = new HashSet<>();
+                    testSet.add(testWord);
+
+                    assertEquals(database.getWord(parsedLineId).getWord(), parsedWord);
+                    assertEquals(testSet, database.getWords(parsedWebId));
+                }
+
+                //uncomment line below if you don't want to check output csv
+                //file.delete();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGetWebsites() {
+        assertTrue(database.clearWebsites());
+        assertTrue(database.clearWords());
+
+        Website site1 = new Website(1, "website1");
+        Website site2 = new Website(2, "website2");
+        Website site3 = new Website(3, "website3");
+        Website site5 = new Website(5, "website5");
+
+        database.putWebsite(site1);
+        database.putWebsite(site2);
+        database.putWebsite(site3);
+        database.putWebsite(site5);
+
+        Word word1 = new Word(1, "word1");
+        Word word2 = new Word(2, "word2");
+        Word word3 = new Word(3, "word3");
+        Word word5 = new Word(5, "word5");
+
+        database.putWord(word1);
+        database.putWord(word2);
+        database.putWord(word3);
+        database.putWord(word5);
+
+        HashSet<Website> testSet1 = new HashSet<>();
+        HashSet<Website> testSet2 = new HashSet<>();
+        HashSet<Website> testSet3 = new HashSet<>();
+
+        testSet1.add(site1);
+        testSet2.add(site1);
+        testSet2.add(site2);
+        testSet2.add(site3);
+        testSet2.add(site5);
+        testSet3.add(site3);
+
+        assertEquals(testSet1, database.getWebsites("word1"));
+        assertEquals(testSet1, database.getWebsites(1));
+        assertEquals(testSet3, database.getWebsites("word3"));
+        assertEquals(testSet3, database.getWebsites(3));
+        assertEquals(testSet2, database.getWebsites());
+
+        HashSet<String> testLink1 = new HashSet<>();
+        testLink1.add("website3");
+
+        HashSet<String> testLink2 = new HashSet<>();
+        testLink2.add("website5");
+
+        assertEquals(testLink1, database.getWebsiteLink(3));
+        assertEquals(testLink2, database.getWebsiteLink(5));
+    }
+
+    @Test
+    public void testGetWords() {
+        assertTrue(database.clearWords());
+
+        Word word1 = new Word(1, "word1");
+        Word word2 = new Word(2, "word2");
+        Word word31 = new Word(3, "word31");
+        Word word32 = new Word(3, "word32");
+        Word word5 = new Word(5, "word5");
+
+        database.putWord(word1);
+        database.putWord(word2);
+        database.putWord(word31);
+        database.putWord(word32);
+        database.putWord(word5);
+
+        HashSet<Word> testSet1 = new HashSet<>();
+        testSet1.add(word1);
+        testSet1.add(word2);
+        testSet1.add(word31);
+        testSet1.add(word32);
+        testSet1.add(word5);
+
+        HashSet<Word> testSet2 = new HashSet<>();
+        testSet2.add(word31);
+        testSet2.add(word32);
+
+        int word2Id = database.getWordId("word2");
+
+        assertEquals(testSet1, database.getWords());
+        assertEquals(testSet2, database.getWords(3));
+        assertEquals(word2, database.getWord(word2Id));
     }
 }
