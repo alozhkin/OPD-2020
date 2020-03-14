@@ -181,7 +181,7 @@ public class DatabaseTest {
                     int parsedLineId = Integer.parseInt(parsedLine[0]);
                     String parsedWord = parsedLine[2].replace("\"", "");
                     int parsedWebId = Integer.parseInt(parsedLine[1]);
-                    Word testWord = new Word(parsedWebId, parsedWord);
+                    Word testWord = new Word(parsedLineId, parsedWebId, parsedWord);
                     HashSet<Word> testSet = new HashSet<>();
                     testSet.add(testWord);
 
@@ -252,12 +252,13 @@ public class DatabaseTest {
     @Test
     public void testGetWords() {
         assertTrue(database.clearWords());
+        int size = database.getWebsitesSize();
 
-        Word word1 = new Word(1, "word1");
-        Word word2 = new Word(2, "word2");
-        Word word31 = new Word(3, "word31");
-        Word word32 = new Word(3, "word32");
-        Word word5 = new Word(5, "word5");
+        Word word1 = new Word(1, 1, "word1");
+        Word word2 = new Word(2, 2, "word2");
+        Word word31 = new Word(3, 3, "word31");
+        Word word32 = new Word(4, 3, "word32");
+        Word word5 = new Word(5, 5, "word5");
 
         database.putWord(word1);
         database.putWord(word2);
