@@ -1,4 +1,5 @@
 import config.ConfigurationFailException;
+import config.ConfigurationUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -23,7 +24,7 @@ public class ConfigurationTest {
             localWriter.write("one=1");
         }
         
-        Properties properties = WordsExtractor.loadProperties(globalProperties.getAbsolutePath(),
+        Properties properties = ConfigurationUtils.loadProperties(globalProperties.getAbsolutePath(),
                 localProperties.getAbsolutePath());
 
         localProperties.delete();
@@ -34,6 +35,6 @@ public class ConfigurationTest {
 
     @Test
     public void nonExistingPropertyFilesShouldThrowException() {
-        assertThrows(ConfigurationFailException.class, () -> WordsExtractor.loadProperties("dummy_name"));
+        assertThrows(ConfigurationFailException.class, () -> ConfigurationUtils.loadProperties("dummy_name"));
     }
 }

@@ -9,8 +9,8 @@ import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
 import extractor.WordFilter;
-import util.HTML;
-import util.Link;
+import utils.HTML;
+import utils.Link;
 
 import java.util.List;
 import java.util.Set;

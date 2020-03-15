@@ -1,16 +1,13 @@
 package main;
 
-import config.ConfigurationFailException;
+import config.ConfigurationUtils;
 import database.DatabaseImpl;
 import org.openqa.selenium.chrome.ChromeOptions;
 import scraper.DefaultScraper;
-import util.CSVParser;
-import util.HTML;
-import util.Link;
+import utils.CSVParser;
+import utils.HTML;
+import utils.Link;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -44,7 +41,8 @@ public class WordsExtractor {
     }
 
     private static void configure() {
-        Properties properties = loadProperties("src/main/config/global.properties", "src/main/config/local.properties");
+        Properties properties = ConfigurationUtils.loadProperties("src/main/config/global.properties",
+                "src/main/config/local.properties");
 
         String chromePath = properties.getProperty("chrome.path");
         ChromeOptions options = new ChromeOptions();
@@ -52,21 +50,5 @@ public class WordsExtractor {
 
         String chromeDriverPath = properties.getProperty("webdriver.chrome.driver");
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
-    }
-
-    // last properties files override first
-    // TODO решить проблему с тестированием private методов
-    public static Properties loadProperties(String... propertiesPaths) {
-        var res = new Properties();
-        try {
-            for (String path : propertiesPaths) {
-                res.load(new FileInputStream(path));
-            }
-        } catch (FileNotFoundException e) {
-            throw new ConfigurationFailException("Configuration files are not found", e);
-        } catch (IOException e) {
-            throw new ConfigurationFailException("Configuration files are not loaded", e);
-        }
-        return res;
     }
 }

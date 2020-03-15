@@ -1,6 +1,6 @@
 package extractor;
 
-import util.HTML;
+import utils.HTML;
 
 import java.util.Set;
 
