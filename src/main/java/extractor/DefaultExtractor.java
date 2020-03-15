@@ -3,8 +3,8 @@ package extractor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import util.HTML;
-import util.Link;
+import utils.HTML;
+import utils.Link;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

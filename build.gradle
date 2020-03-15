@@ -15,8 +15,14 @@ compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 javadoc.options.encoding = 'UTF-8'
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testRuntime "org.junit.platform:junit-platform-launcher:1.4.0"
+    testCompile "org.junit.jupiter:junit-jupiter-api:5.4.0"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.4.0"
     compile 'org.jsoup:jsoup:1.13.1'
     compile 'org.jetbrains:annotations:13.0'
     implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
