@@ -1,6 +1,6 @@
 package crawler;
 
-import util.Link;
+import utils.Link;
 
 import java.util.List;
 

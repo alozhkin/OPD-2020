@@ -4,11 +4,10 @@ import org.jsoup.Jsoup;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import util.HTML;
-import util.Link;
+import utils.HTML;
+import utils.Link;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 public class DefaultScraper implements Scraper {

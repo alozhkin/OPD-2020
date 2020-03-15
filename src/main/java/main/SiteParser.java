@@ -1,20 +1,20 @@
+package main;
+
 import crawler.Crawler;
 import crawler.DefaultCrawler;
 import crawler.DefaultLinkFilter;
 import crawler.LinkFilter;
 import database.Database;
-import database.DatabaseImpl;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
 import extractor.WordFilter;
-import util.HTML;
-import util.Link;
+import utils.HTML;
+import utils.Link;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;

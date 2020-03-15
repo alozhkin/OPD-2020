@@ -1,7 +1,12 @@
+package main;
+
+import config.ConfigurationUtils;
 import database.DatabaseImpl;
+import org.openqa.selenium.chrome.ChromeOptions;
 import scraper.DefaultScraper;
-import util.HTML;
-import util.Link;
+import utils.CSVParser;
+import utils.HTML;
+import utils.Link;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -10,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -23,6 +29,7 @@ public class WordsExtractor {
 
     public static void main(String[] args) {
         setConsoleEncoding();
+        configure();
         List<Link> links = new ArrayList<>();
         var csvParser = new CSVParser();
         Map<String, Integer> domainsIds = csvParser.getDomainsIds();
@@ -41,15 +48,28 @@ public class WordsExtractor {
         }
     }
 
+
     static void setConsoleEncoding() {
         String consoleEncoding = System.getProperty("consoleEncoding");
         if (consoleEncoding != null) {
             try {
                 System.setOut(new PrintStream(System.out, true, consoleEncoding));
             } catch (UnsupportedEncodingException ex) {
-                Exception e = new IOException("Unsupported encoding set for console: "+consoleEncoding, ex);
+                Exception e = new IOException("Unsupported encoding set for console: " + consoleEncoding, ex);
                 e.printStackTrace();
             }
         }
+    }
+
+    private static void configure() {
+        Properties properties = ConfigurationUtils.loadProperties("src/main/config/global.properties",
+                "src/main/config/local.properties");
+
+        String chromePath = properties.getProperty("chrome.path");
+        ChromeOptions options = new ChromeOptions();
+        options.setBinary(chromePath);
+
+        String chromeDriverPath = properties.getProperty("webdriver.chrome.driver");
+        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
     }
 }
