@@ -21,7 +21,6 @@ gradlew.bat
 # User-specific configurations
 .idea/
 *.iml
-src/main/config/local.properties
 
 # OS-specific files
 .DS_Store
@@ -31,3 +30,6 @@ src/main/config/local.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# temp files
+.tmp

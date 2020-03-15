@@ -1,9 +1,10 @@
+package main;
+
 import crawler.Crawler;
 import crawler.DefaultCrawler;
 import crawler.DefaultLinkFilter;
 import crawler.LinkFilter;
 import database.Database;
-import database.DatabaseImpl;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
@@ -12,7 +13,6 @@ import util.HTML;
 import util.Link;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;

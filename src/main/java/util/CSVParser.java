@@ -1,3 +1,5 @@
+package util;
+
 import util.Link;
 
 import java.io.BufferedReader;
@@ -15,7 +17,7 @@ public class CSVParser {
     private Map<String, Integer> domainsIds = new HashMap<>();
     private List<Link> links = new ArrayList<>();
 
-    void parse(String filePath) {
+    public void parse(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(new File(filePath)))) {
             var line = br.readLine();
             while ((line = br.readLine()) != null) {
@@ -31,11 +33,11 @@ public class CSVParser {
         }
     }
 
-    List<Link> getLinks() {
+    public List<Link> getLinks() {
         return links;
     }
 
-    Map<String, Integer> getDomainsIds() {
+    public Map<String, Integer> getDomainsIds() {
         return domainsIds;
     }
 }
