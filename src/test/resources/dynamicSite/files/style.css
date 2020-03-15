@@ -1,0 +1,141 @@
+html, body {
+  width:100%;
+  min-width:1160px;
+  min-height:100%;
+  margin:0;
+  padding:0;
+  font-size:14px;
+  line-height: 1.2;
+  color: #3a3a3a;
+  position: relative;
+  letter-spacing: 0px;
+}
+* {
+  margin:0;
+  padding:0;
+}
+*:focus, *:active {
+  outline:0;
+}
+.container {
+  width:100%;
+  min-width: 1140px;
+  text-align: center;
+  overflow:hidden;
+  box-sizing: border-box;
+}
+.wrapper {
+    max-width: 1140px;
+    width: 100%;
+    margin: 0px auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 28px;
+}
+
+p {
+    font-size: 20px;
+    letter-spacing: 0;
+    margin: 0 0 16px;
+}
+
+.answer input {
+    display: none;
+}
+
+.answer label {
+    display: inline-block;
+    padding: 15px 10px;
+    background: #E3B32F;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #E3B32F;
+}
+
+.answer label:hover {
+    cursor: pointer;
+    background: #FFFFFF;
+}
+
+.answer input:checked+label {
+    background: #FFFFFF;
+}
+
+
+.result>p {
+    padding-top: 0;
+    width: 500px;
+    display: table-row;
+    height: 35px;
+    vertical-align: middle;
+}
+
+span.length span {
+    background: #008c2c;
+    height: 100%;
+    display: block;
+}
+
+span#length11 {
+    width: 50%;
+}
+
+.result>p>span {
+    display: table-cell;
+    margin: 0 20px;
+    text-align: center;
+    padding: 0 30px;
+    vertical-align: middle;
+}
+p.more {
+    background: #fff;
+}
+
+.result>p .spdiv {
+	display:block;
+    height: 26px;
+    width: 100%;
+    background: #d1d1d1;
+    margin-top: 2px;
+}
+.result>p>span.length {
+    padding: 0;
+    height: 26px;
+    width: 50%;
+}
+
+
+.bot2 {
+        margin:20px auto;
+    color: #000000;
+    display: block;
+    font:bold 16px arial;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    text-decoration: none;
+    width: 160px;
+        background: linear-gradient(to bottom, #E1D633, #E3B32F) repeat scroll 0 0 / 100% 200% rgba(0, 0, 0, 0);
+    transition: all 0.5s linear 0s;
+        border-bottom: 4px solid #ccc;
+}
+.bot2:hover,.bot2:focus{
+    background-position: 0 -102%;
+}
+.center-img {
+  text-align: center;
+}
+ .cent {
+    text-align: center;
+  } 
+a {
+  text-decoration: none;
+  color: Black;
+}
+a:hover {
+    font-size: 15px;
+    color: black;
+   }      

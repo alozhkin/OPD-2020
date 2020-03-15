@@ -1,10 +1,29 @@
 package config;
 
+import org.openqa.selenium.chrome.ChromeOptions;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class ConfigurationUtils {
+    public static void configure() {
+        Properties properties = ConfigurationUtils.loadProperties("src/main/config/global.properties",
+                "src/main/config/local.properties");
+
+        String chromePath = properties.getProperty("chrome.path");
+        ChromeOptions options = new ChromeOptions();
+        options.setBinary(chromePath);
+
+        String chromeDriverPath = properties.getProperty("webdriver.chrome.driver");
+        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
+
+        String projectPath = properties.getProperty("project.path");
+        System.setProperty("project.path", projectPath);
+
+        ConfigurationUtils.setConsoleEncoding();
+    }
+
     // last properties files override first
     public static Properties loadProperties(String... propertiesPaths) {
         var res = new Properties();

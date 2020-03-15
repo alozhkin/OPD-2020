@@ -25,7 +25,6 @@ public class WordsExtractor {
     private static Executor EXECUTOR_SERVICE = Executors.newFixedThreadPool(2);
 
     public static void main(String[] args) {
-        configure();
         List<Link> links = new ArrayList<>();
         var csvParser = new CSVParser();
         Map<String, Integer> domainsIds = csvParser.getDomainsIds();
@@ -42,19 +41,5 @@ public class WordsExtractor {
             EXECUTOR_SERVICE.execute(parser::start);
             EXECUTOR_SERVICE.execute(scraper::start);
         }
-    }
-
-    private static void configure() {
-        Properties properties = ConfigurationUtils.loadProperties("src/main/config/global.properties",
-                "src/main/config/local.properties");
-
-        String chromePath = properties.getProperty("chrome.path");
-        ChromeOptions options = new ChromeOptions();
-        options.setBinary(chromePath);
-
-        String chromeDriverPath = properties.getProperty("webdriver.chrome.driver");
-        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
-
-        ConfigurationUtils.setConsoleEncoding();
     }
 }
