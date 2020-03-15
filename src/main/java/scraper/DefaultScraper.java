@@ -4,7 +4,7 @@ import org.jsoup.Jsoup;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import utils.HTML;
+import utils.Html;
 import utils.Link;
 
 import java.io.IOException;
@@ -13,27 +13,27 @@ import java.util.concurrent.BlockingQueue;
 public class DefaultScraper implements Scraper {
 
     private BlockingQueue<Link> linkQueue;
-    private BlockingQueue<HTML> HTMLQueue;
+    private BlockingQueue<Html> HtmlQueue;
 
-    public DefaultScraper(BlockingQueue<Link> linkQueue, BlockingQueue<HTML> HTMLQueue) {
+    public DefaultScraper(BlockingQueue<Link> linkQueue, BlockingQueue<Html> HtmlQueue) {
         this.linkQueue = linkQueue;
-        this.HTMLQueue = HTMLQueue;
+        this.HtmlQueue = HtmlQueue;
     }
 
     public void start() {
         while (true) {
             try {
-                HTMLQueue.put(scrape(linkQueue.take()));
+                HtmlQueue.put(scrape(linkQueue.take()));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private HTML scrape(Link link) {
+    private Html scrape(Link link) {
         // TODO
         try {
-            return new HTML(Jsoup.connect(link.toString()).get().toString(), link);
+            return new Html(Jsoup.connect(link.toString()).get().toString(), link);
         } catch (IOException e) {
             e.printStackTrace();
         }

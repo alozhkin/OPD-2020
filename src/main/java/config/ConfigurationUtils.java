@@ -1,8 +1,7 @@
 package config;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class ConfigurationUtils {
@@ -19,5 +18,9 @@ public class ConfigurationUtils {
             throw new ConfigurationFailException("Configuration files are not loaded", e);
         }
         return res;
+    }
+
+    public static void setConsoleEncoding() {
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
     }
 }

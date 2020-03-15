@@ -1,10 +1,10 @@
 package crawler;
 
-import utils.HTML;
+import utils.Html;
 import utils.Link;
 
 import java.util.List;
 
 public interface Crawler {
-    List<Link> crawl(HTML html);
+    List<Link> crawl(Html html);
 }

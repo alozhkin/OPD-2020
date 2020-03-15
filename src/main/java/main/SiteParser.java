@@ -9,7 +9,7 @@ import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
 import extractor.WordFilter;
-import utils.HTML;
+import utils.Html;
 import utils.Link;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class SiteParser {
 
     public static class Builder {
         BlockingQueue<Link> linkQueue;
-        BlockingQueue<HTML> HTMLQueue;
+        BlockingQueue<Html> HtmlQueue;
         Database db;
         String domain;
 
@@ -32,10 +32,10 @@ public class SiteParser {
         WordFilter wordFilter = new DefaultWordFilter();
         LinkFilter linkFilter = new DefaultLinkFilter();
 
-        public Builder(BlockingQueue<Link> linkQueue, BlockingQueue<HTML> HTMLQueue, Database db,
+        public Builder(BlockingQueue<Link> linkQueue, BlockingQueue<Html> HtmlQueue, Database db,
                        String domain) {
             this.linkQueue = linkQueue;
-            this.HTMLQueue = HTMLQueue;
+            this.HtmlQueue = HtmlQueue;
             this.db = db;
             this.domain = domain;
         }
@@ -66,7 +66,7 @@ public class SiteParser {
     }
 
     private BlockingQueue<Link> linkQueue;
-    private BlockingQueue<HTML> HTMLQueue;
+    private BlockingQueue<Html> HtmlQueue;
     private Database db;
     private String domain;
     private Crawler crawler;
@@ -76,7 +76,7 @@ public class SiteParser {
 
     public SiteParser(Builder builder) {
         linkQueue = builder.linkQueue;
-        HTMLQueue = builder.HTMLQueue;
+        HtmlQueue = builder.HtmlQueue;
         db = builder.db;
         domain = builder.domain;
         crawler = builder.crawler;
@@ -90,7 +90,7 @@ public class SiteParser {
     public void start() {
         while (true) {
             try {
-                var html = HTMLQueue.take();
+                var html = HtmlQueue.take();
                 CompletableFuture<List<Link>> crawlerFuture = CompletableFuture.supplyAsync(
                         () -> crawler.crawl(html),
                         EXECUTOR_SERVICE);
