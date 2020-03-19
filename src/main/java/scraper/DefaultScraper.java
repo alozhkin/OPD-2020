@@ -4,8 +4,8 @@ import org.jsoup.Jsoup;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import utils.HTML;
-import utils.Link;
+import util.HTML;
+import util.Link;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;

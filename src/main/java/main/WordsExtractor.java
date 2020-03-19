@@ -4,9 +4,9 @@ import config.ConfigurationUtils;
 import database.DatabaseImpl;
 import org.openqa.selenium.chrome.ChromeOptions;
 import scraper.DefaultScraper;
-import utils.CSVParser;
-import utils.HTML;
-import utils.Link;
+import util.CSVParser;
+import util.HTML;
+import util.Link;
 
 import java.io.IOException;
 import java.io.PrintStream;
