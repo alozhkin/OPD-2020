@@ -1,9 +1,10 @@
+package main;
+
 import crawler.Crawler;
 import crawler.DefaultCrawler;
 import crawler.DefaultLinkFilter;
 import crawler.LinkFilter;
 import database.Database;
-import database.DatabaseImpl;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
@@ -12,10 +13,9 @@ import util.HTML;
 import util.Link;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -97,7 +97,7 @@ public class SiteParser {
                         () -> crawler.crawl(html),
                         EXECUTOR_SERVICE);
                 crawlerFuture.thenAccept(result -> linkQueue.addAll(linkFilter.filter(result, domain)));
-                CompletableFuture<HashSet<String>> extractorFuture = CompletableFuture.supplyAsync(
+                CompletableFuture<Collection<String>> extractorFuture = CompletableFuture.supplyAsync(
                         () -> extractor.extract(html),
                         EXECUTOR_SERVICE);
                 extractorFuture.thenAccept(result -> {

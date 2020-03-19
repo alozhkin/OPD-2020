@@ -6,5 +6,5 @@ import java.util.HashSet;
 
 
 public interface WordFilter {
-    Collection<String> filter(HashSet<String> words) throws IOException;
+    Collection<String> filter(Collection<String> words) throws IOException;
 }
