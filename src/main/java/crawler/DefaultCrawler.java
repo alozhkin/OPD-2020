@@ -19,29 +19,24 @@ public class DefaultCrawler implements Crawler {
         List<Link> list = new ArrayList<>();
         Document doc = Jsoup
                 .parse(html.toString(), html.getUrl().toString());
-
-        Elements media = doc.select("[src]");
         Elements linksOnPage = doc.select("a[href]");
-        for (Element zz : media) {
-                System.out.println(zz.normalName());
-
-        }
 
         for (Element page : linksOnPage) {
             Link url = new Link(page.attr("abs:href"));
-            if (!url.toString().equals(""))
-
-                list.add(url);
-
+            if (!url.toString().equals("")) {
+                String zzz = page.text();
+                if (zzz.contains(".")) {
+                    zzz = zzz.substring(zzz.lastIndexOf("."));
+                    System.out.println(zzz);
+                    //if (zzz) {
+                    //    list.add(url);
+                    //}
+                } else list.add(url);
+            }
         }
         return list;
     }
-    private static String trim(String s, int width) {
-        if (s.length() > width)
-            return s.substring(0, width-1) + ".";
-        else
-            return s;
-    }
+
     private static void print(String msg, Object... args) {
         System.out.println(String.format(msg, args));
     }
