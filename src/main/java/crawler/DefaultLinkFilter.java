@@ -32,7 +32,8 @@ public class DefaultLinkFilter implements LinkFilter {
             if (url.contains(domain) && !url.contains("#")) {
                 if (true) {
                     exit.add(new Link(url));
-                }            }
+                }
+            }
         }
         return exit;
     }
