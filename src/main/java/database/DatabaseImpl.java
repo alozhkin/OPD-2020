@@ -120,7 +120,6 @@ class DatabaseImpl implements Database {
             String header = "\"id\";\"website_id\";\"word\"";
             writer.append(header);
             List<Word> list = getWordsData();
-            assert list != null;
             for (Word w : list) {
                 writer.append(String.format("\n%d;%d;\"%s\"", w.getId(), w.getWebsiteId(), w.getWord()));
             }
@@ -129,7 +128,6 @@ class DatabaseImpl implements Database {
             e.printStackTrace();
             return false;
         }
-
     }
 
     @Override
@@ -343,7 +341,7 @@ class DatabaseImpl implements Database {
         }
     }
 
-    private List<Word> getWordsData() {
+    private List<Word> getWordsData() throws SQLException {
         String query = "SELECT * FROM words";
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
@@ -359,9 +357,6 @@ class DatabaseImpl implements Database {
                     return wordList;
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }
