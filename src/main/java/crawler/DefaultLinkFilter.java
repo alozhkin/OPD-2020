@@ -25,11 +25,10 @@ public class DefaultLinkFilter implements LinkFilter {
 
 
     public boolean formatChecker(@NotNull String url, String domain) {
-
         String test = url.replaceAll(domain, "");
         if (test.equals(""))
             return false;
 
-        return false;
+        return true;
     }
 }
