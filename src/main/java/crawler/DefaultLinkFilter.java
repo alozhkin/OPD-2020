@@ -15,14 +15,11 @@ public class DefaultLinkFilter implements LinkFilter {
    // List<String> fileDate;
     //List<String> langDate;
 
-   // {
-   //     try {
+   // {     try {
    //       //langDate = new ArrayList<>(Files.readAllLines(Paths.get("src/main/resources/language.txt")));
    //         fileDate = new ArrayList<>(Files.readAllLines(Paths.get("src/main/resources/FilesTeg.txt")));
    //     } catch (IOException e) {
-   //         e.printStackTrace();
-   //     }
-   // }
+   //         e.printStackTrace();}}
 
     public Set<Link> filter(@NotNull List<Link> links, String domain) {
 
