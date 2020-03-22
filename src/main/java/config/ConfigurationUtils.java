@@ -42,4 +42,9 @@ public class ConfigurationUtils {
     public static void setConsoleEncoding() {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
     }
+
+    public static String parseDatabaseUrl() {
+        Properties properties = loadProperties("src/main/config/database.properties");
+        return properties.getProperty("url");
+    }
 }

@@ -24,6 +24,7 @@ public class Link {
         return null;
     }
 
+
     public int length() {
         return absoluteURL.length();
     }
@@ -31,6 +32,9 @@ public class Link {
     public String fixer() {
         if (absoluteURL.charAt(absoluteURL.length() - 1) == '/')
             return absoluteURL.substring(0, absoluteURL.length() - 1);
+
+    public String getAbsoluteURL() {
+
         return absoluteURL;
     }
 

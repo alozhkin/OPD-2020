@@ -5,6 +5,7 @@ import crawler.DefaultCrawler;
 import crawler.DefaultLinkFilter;
 import crawler.LinkFilter;
 import database.Database;
+import database.models.Word;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
@@ -18,6 +19,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class SiteParser {
 
@@ -98,7 +100,13 @@ public class SiteParser {
                 CompletableFuture<Set<String>> extractorFuture = CompletableFuture.supplyAsync(
                         () -> extractor.extract(html),
                         EXECUTOR_SERVICE);
-                extractorFuture.thenAccept(result -> db.insertAll(wordFilter.filter(result), domain));
+                extractorFuture.thenAccept(result -> {
+                    var words = result.stream()
+                            // TODO: Put website_id instead of domain.hashCode()
+                            .map(word -> new Word(domain.hashCode(), word))
+                            .collect(Collectors.toSet());
+                    db.putWords(words);
+                });
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
