@@ -1,6 +1,7 @@
 package database.utils;
 
 import database.models.Website;
+import util.Link;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,7 +21,7 @@ public class CSVUtils {
             scanner.nextLine();
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
-                list.add(new Website(Integer.parseInt(line.get(1)), line.get(2)));
+                list.add(new Website(Integer.parseInt(line.get(1)), new Link(line.get(2))));
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

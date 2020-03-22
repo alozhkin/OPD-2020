@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import util.Link;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -31,50 +32,25 @@ public class DatabaseTest {
         assertTrue(database.putWebsite(75, "https://nagel-gruppe.de"));
         assertTrue(database.putWebsite(6, "http://velte-steinmetz.de"));
 
-        assertTrue(database.putWebsite(new Website(1233, "https://aalb-dach.de")));
-        assertTrue(database.putWebsite(new Website(344, "https://wwolfsperger-landmaschinen.de")));
-        assertTrue(database.putWebsite(new Website(75, "https://nnagel-gruppe.de")));
-        assertTrue(database.putWebsite(new Website(6, "http://vvelte-steinmetz.de")));
+        assertTrue(database.putWebsite(new Website(1233, new Link("https://aalb-dach.de"))));
+        assertTrue(database.putWebsite(new Website(344, new Link("https://wwolfsperger-landmaschinen.de"))));
+        assertTrue(database.putWebsite(new Website(75, new Link("https://nnagel-gruppe.de"))));
+        assertTrue(database.putWebsite(new Website(6, new Link("http://vvelte-steinmetz.de"))));
     }
 
     @Test
     public void testInsertWebsites() {
         List<Website> list = new ArrayList<>();
 
-        list.add(new Website(12345, "https://alb-dach.de"));
-        list.add(new Website(123456, "https://wolfsperger-landmaschinen.de"));
-        list.add(new Website(123567, "https://nagel-gruppe.de"));
-        list.add(new Website(12346, "http://velte-steinmetz.de"));
+        list.add(new Website(12345, new Link("https://alb-dach.de")));
+        list.add(new Website(123456, new Link( "https://wolfsperger-landmaschinen.de")));
+        list.add(new Website(123567,  new Link("https://nagel-gruppe.de")));
+        list.add(new Website(12346,  new Link("http://velte-steinmetz.de")));
 
-        list.add(new Website(1235, "https://alb-dach.dsde"));
-        list.add(new Website(12356, "https://wolfssdsdperger-landmaschinen.de"));
-        list.add(new Website(12367, "https://nagel-gsdsdruppe.de"));
-        list.add(new Website(1236, "http://velte-steinmsdsdetz.de"));
-
-        list.add(new Website(1245, "https://asdsdASlb-dach.de"));
-        list.add(new Website(12456, "https://wolfspersdsdger-landmaschinen.de"));
-        list.add(new Website(1255567, "https://nagasasesdsdl-gruppe.de"));
-        list.add(new Website(1246, "http://velte-ASAssteinmsdsdetz.de"));
-
-        list.add(new Website(1245, "https://asdssdASsddlb-dach.de"));
-        list.add(new Website(12456, "https://wolfsdASAssdspersdssdsddger-landmaschinen.de"));
-        list.add(new Website(1255567, "https://nagsASAsdsdesdsdl-gruppe.de"));
-        list.add(new Website(1246, "http://velte-sdASAssdsteinmsdsdetz.de"));
-
-        list.add(new Website(1245, "https://sdsdsd-ASASdach.de"));
-        list.add(new Website(12456, "https://wolfspASAssdsdersdsdger-landmaschinen.de"));
-        list.add(new Website(1253467, "https://nagsASAsdsdesdsdl-gruppe.de"));
-        list.add(new Website(1246, "http://veltesdsASAsd-steinmsdsdetz.de"));
-
-        list.add(new Website(1245, "https://asdssdsddlb-ASAsdach.de"));
-        list.add(new Website(12456, "https://wolfsdsdsperASAssdsdger-landmaschinen.de"));
-        list.add(new Website(12567, "https://nagessdsASAddsdl-gruppe.de"));
-        list.add(new Website(1246, "http://velte-stsdsASASdeinmsdsdetz.de"));
-
-        list.add(new Website(1245, "https://asdsdlbsdsdASAs-dach.de"));
-        list.add(new Website(12456, "https://wolfspesdsASASdrsdsdger-landmaschinen.de"));
-        list.add(new Website(125167, "https://nagesdssdsASAsASAsddl-gruppe.de"));
-        list.add(new Website(1246, "http://velte-stessdASAsinmsdsdetz.de"));
+        list.add(new Website(1235,  new Link("https://alb-dach.dsde")));
+        list.add(new Website(12356,  new Link("https://wolfssdsdperger-landmaschinen.de")));
+        list.add(new Website(12367,  new Link("https://nagel-gsdsdruppe.de")));
+        list.add(new Website(1236,  new Link("http://velte-steinmsdsdetz.de")));
 
         assertTrue(database.putWebsites(list));
     }
@@ -202,10 +178,10 @@ public class DatabaseTest {
         assertTrue(database.clearWebsites());
         assertTrue(database.clearWords());
 
-        Website site1 = new Website(1, "website1");
-        Website site2 = new Website(2, "website2");
-        Website site3 = new Website(3, "website3");
-        Website site5 = new Website(5, "website5");
+        Website site1 = new Website(1,  new Link("website1"));
+        Website site2 = new Website(2,  new Link("website2"));
+        Website site3 = new Website(3,  new Link("website3"));
+        Website site5 = new Website(5,  new Link("website5"));
 
         database.putWebsite(site1);
         database.putWebsite(site2);

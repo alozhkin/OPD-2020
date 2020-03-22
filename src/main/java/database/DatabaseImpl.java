@@ -4,14 +4,16 @@ import database.models.Website;
 import database.models.Word;
 import database.utils.CSVUtils;
 import database.utils.DatabaseUtil;
+import util.Link;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
 
 class DatabaseImpl implements Database {
 
@@ -47,7 +49,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean putWebsite(Website website) {
-        return putWebsite(website.getCompanyId(), website.getLink());
+        return putWebsite(website.getCompanyId(), website.getLink().getAbsoluteURL());
     }
 
     @Override
@@ -132,7 +134,7 @@ class DatabaseImpl implements Database {
             writer.append(header);
             List<Word> list = getWordsData();
             assert list != null;
-            for (Word w: list) {
+            for (Word w : list) {
                 writer.append(String.format("\n%d;%d;\"%s\"", w.getId(), w.getWebsiteId(), w.getWord()));
             }
             return true;
@@ -151,7 +153,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public HashSet<Website> getWebsites(String word) {
-        String query = "SELECT * FROM websites WHERE company_id=(SELECT website_id FROM words WHERE word='"+word+"')";
+        String query = "SELECT * FROM websites WHERE company_id=(SELECT website_id FROM words WHERE word='" + word + "')";
         return getWebsitesByQuery(query);
     }
 
@@ -168,7 +170,7 @@ class DatabaseImpl implements Database {
 
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                try(ResultSet rset = statement.executeQuery(query)) {
+                try (ResultSet rset = statement.executeQuery(query)) {
                     while (rset.next()) {
                         String link = rset.getString(3);
                         set.add(link);
@@ -190,7 +192,7 @@ class DatabaseImpl implements Database {
 
     @Override
     public HashSet<Word> getWords(int websiteId) {
-        String query = "SELECT * FROM words WHERE website_id = '"+websiteId+"'";
+        String query = "SELECT * FROM words WHERE website_id = '" + websiteId + "'";
         return getWords(query);
     }
 
@@ -333,7 +335,7 @@ class DatabaseImpl implements Database {
                     while (rset.next()) {
                         int companyId = rset.getInt(2);
                         String website = rset.getString(3);
-                        set.add(new Website(companyId, website));
+                        set.add(new Website(companyId, new Link(website)));
                     }
                     return set;
                 }

@@ -39,7 +39,7 @@ public class DatabaseUtil {
         int position = 1;
         for (Website element : websites) {
             preparedStatement.setInt(position, element.getCompanyId());
-            preparedStatement.setString(position + 1, element.getLink());
+            preparedStatement.setString(position + 1, element.getLink().getAbsoluteURL());
 
             position += 2;
         }

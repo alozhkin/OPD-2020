@@ -22,6 +22,10 @@ public class Link {
         return null;
     }
 
+    public String getAbsoluteURL() {
+        return absoluteURL;
+    }
+
     @Override
     public String toString() {
         return absoluteURL;

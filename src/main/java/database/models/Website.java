@@ -1,12 +1,14 @@
 package database.models;
 
+import util.Link;
+
 import java.util.Objects;
 
 public class Website {
     private final int companyId;
-    private final String link;
+    private final Link link;
 
-    public Website(int companyId, String link) {
+    public Website(int companyId, Link link) {
         this.companyId = companyId;
         this.link = link;
     }
@@ -15,7 +17,7 @@ public class Website {
         return companyId;
     }
 
-    public String getLink() {
+    public Link getLink() {
         return link;
     }
 
@@ -23,9 +25,8 @@ public class Website {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Website website1 = (Website) o;
-        return companyId == website1.companyId &&
-                Objects.equals(link, website1.link);
+        Website website = (Website) o;
+        return companyId == website.companyId && Objects.equals(link.getAbsoluteURL(), website.link.getAbsoluteURL());
     }
 
     @Override
@@ -37,7 +38,7 @@ public class Website {
     public String toString() {
         return "Website{" +
                 "companyId=" + companyId +
-                ", link='" + link + '\'' +
+                ", link=" + link.getAbsoluteURL() +
                 '}';
     }
 }
