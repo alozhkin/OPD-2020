@@ -26,6 +26,11 @@ public class DatabaseTest {
     }
 
     @Test
+    void putWebsitesFromCsv() {
+        assertTrue(database.putWebsitesFromCsv("src\\main\\resources\\websites_data.csv"));
+    }
+
+    @Test
     public void testInsertWebsite() {
         assertTrue(database.putWebsite(1233, "https://alb-dach.de"));
         assertTrue(database.putWebsite(344, "https://wolfsperger-landmaschinen.de"));

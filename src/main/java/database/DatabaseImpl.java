@@ -2,8 +2,8 @@ package database;
 
 import database.models.Website;
 import database.models.Word;
-import database.utils.CSVUtils;
 import database.utils.DatabaseUtil;
+import utils.CSVParser;
 import utils.Link;
 
 import java.io.*;
@@ -35,7 +35,9 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean putWebsitesFromCsv(String csvFile) {
-        return putWebsites(CSVUtils.parseLines(csvFile));
+        CSVParser parser = new CSVParser();
+        parser.parse(csvFile);
+        return putWebsites(parser.getWebsites());
     }
 
     @Override
