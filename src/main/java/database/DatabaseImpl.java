@@ -1,22 +1,24 @@
 package database;
 
+import config.ConfigurationUtils;
 import database.models.Website;
 import database.models.Word;
 import database.utils.DatabaseUtil;
 import utils.CSVParser;
 import utils.Link;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 class DatabaseImpl implements Database {
 
     private String url;
-    private String username;
-    private String password;
 
     /* package-private
 
@@ -26,7 +28,7 @@ class DatabaseImpl implements Database {
    */
     DatabaseImpl() {
         try {
-            parseProperties();
+            url = ConfigurationUtils.parseDatabaseProperties();
             initDatabase();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -218,20 +220,6 @@ class DatabaseImpl implements Database {
         }
     }
 
-    private void parseProperties() {
-        Properties properties = new Properties();
-
-        try (InputStream in = Files.newInputStream(Paths.get("src\\main\\config\\database.properties"))) {
-            properties.load(in);
-
-            url = properties.getProperty("url");
-            username = properties.getProperty("username");
-            password = properties.getProperty("password");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void initDatabase() throws ClassNotFoundException {
         Class.forName("org.sqlite.JDBC");
 
@@ -246,7 +234,7 @@ class DatabaseImpl implements Database {
     }
 
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, username, password);
+        return DriverManager.getConnection(url);
     }
 
     private boolean putWebsite(int companyId, String website) {
