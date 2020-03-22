@@ -44,7 +44,7 @@ public class ConfigurationUtils {
     }
 
     public static String parseDatabaseProperties() {
-        Properties properties = loadProperties("src\\main\\config\\database.properties");
+        Properties properties = loadProperties("src/main/config/database.properties");
         return properties.getProperty("url");
     }
 }

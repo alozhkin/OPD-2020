@@ -27,7 +27,7 @@ public class DatabaseTest {
 
     @Test
     void putWebsitesFromCSV() {
-        assertTrue(database.putWebsitesFromCSV("src\\main\\resources\\websites_data.csv"));
+        assertTrue(database.putWebsitesFromCSV("src/main/resources/websites_data.csv"));
     }
 
     @Test
@@ -144,7 +144,7 @@ public class DatabaseTest {
         database.putWord(word3);
         database.putWord(word5);
 
-        String csvpath = "src\\test\\resources\\actualExportData.csv";
+        String csvpath = "src/test/resources/actualExportData.csv";
 
         assertTrue(database.exportDataToCSV(csvpath));
 
