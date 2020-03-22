@@ -1,7 +1,7 @@
 package database.utils;
 
 import database.models.Website;
-import util.Link;
+import utils.Link;
 
 import java.io.File;
 import java.io.FileNotFoundException;

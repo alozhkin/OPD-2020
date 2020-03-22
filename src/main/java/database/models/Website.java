@@ -1,6 +1,6 @@
 package database.models;
 
-import util.Link;
+import utils.Link;
 
 import java.util.Objects;
 

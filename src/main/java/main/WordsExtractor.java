@@ -1,8 +1,6 @@
 package main;
 
-import config.ConfigurationUtils;
-import database.DatabaseImpl;
-import org.openqa.selenium.chrome.ChromeOptions;
+import database.Database;
 import scraper.DefaultScraper;
 import utils.CSVParser;
 import utils.Html;
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -35,7 +32,7 @@ public class WordsExtractor {
             linkQueue.add(link);
             var parser = new SiteParser.Builder(linkQueue,
                     HtmlQueue,
-                    new DatabaseImpl(domainsIds),
+                    Database.newInstance(),
                     link.getDomain()).build();
             var scraper = new DefaultScraper(linkQueue, HtmlQueue);
             EXECUTOR_SERVICE.execute(parser::start);

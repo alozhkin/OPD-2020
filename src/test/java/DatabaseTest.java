@@ -1,26 +1,26 @@
 import database.Database;
 import database.models.Website;
 import database.models.Word;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import util.Link;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import utils.Link;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(JUnit4.class)
 public class DatabaseTest {
 
     private Database database;
 
-    @Before
+    @BeforeEach
     public void initDb() {
         database = Database.newInstance();
     }
