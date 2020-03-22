@@ -41,12 +41,6 @@ class DatabaseImpl implements Database {
     }
 
     @Override
-    public boolean putWebsite(int companyId, String website) {
-        String statement = "INSERT INTO websites (company_id, website) VALUES (?, ?)";
-        return executeStatementWithParams(companyId, website, statement);
-    }
-
-    @Override
     public boolean putWebsite(Website website) {
         return putWebsite(website.getCompanyId(), website.getLink().getAbsoluteURL());
     }
@@ -62,12 +56,6 @@ class DatabaseImpl implements Database {
             e.printStackTrace();
             return false;
         }
-    }
-
-    @Override
-    public boolean putWord(int websiteId, String word) {
-        String statement = "INSERT INTO words (website_id, word) VALUES (?, ?)";
-        return executeStatementWithParams(websiteId, word, statement);
     }
 
     @Override
@@ -261,6 +249,16 @@ class DatabaseImpl implements Database {
 
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, username, password);
+    }
+
+    private boolean putWebsite(int companyId, String website) {
+        String statement = "INSERT INTO websites (company_id, website) VALUES (?, ?)";
+        return executeStatementWithParams(companyId, website, statement);
+    }
+
+    private boolean putWord(int websiteId, String word) {
+        String statement = "INSERT INTO words (website_id, word) VALUES (?, ?)";
+        return executeStatementWithParams(websiteId, word, statement);
     }
 
     private boolean executeStatement(String statement) {

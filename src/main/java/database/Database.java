@@ -30,17 +30,6 @@ public interface Database {
      * Inserts a website into the database,
      * if such an entry already exists, then does not insert anything
      *
-     * @param companyId id of company
-     * @param website   website link
-     * @return true, if the insert was successful,
-     * false, if it was not possible to insert
-     */
-    boolean putWebsite(int companyId, String website);
-
-    /**
-     * Inserts a website into the database,
-     * if such an entry already exists, then does not insert anything
-     *
      * @param website site object containing company id and link
      * @return true, if the insert was successful,
      * false, if it was not possible to insert
@@ -56,17 +45,6 @@ public interface Database {
      * false, if it was not possible to insert
      */
     boolean putWebsites(Collection<Website> websites);
-
-    /**
-     * Inserts a word into the database,
-     * if such an entry already exists, then does not insert anything
-     *
-     * @param websiteId id of website
-     * @param word      word to insert
-     * @return true, if the insert was successful,
-     * false, if it was not possible to insert
-     */
-    boolean putWord(int websiteId, String word);
 
     /**
      * Inserts a word into the database,

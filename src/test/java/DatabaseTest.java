@@ -32,10 +32,10 @@ public class DatabaseTest {
 
     @Test
     public void testInsertWebsite() {
-        assertTrue(database.putWebsite(1233, "https://alb-dach.de"));
-        assertTrue(database.putWebsite(344, "https://wolfsperger-landmaschinen.de"));
-        assertTrue(database.putWebsite(75, "https://nagel-gruppe.de"));
-        assertTrue(database.putWebsite(6, "http://velte-steinmetz.de"));
+        assertTrue(database.putWebsite(new Website(1233, new Link("https://alb-dach.de"))));
+        assertTrue(database.putWebsite(new Website(344, new Link("https://wolfsperger-landmaschinen.de"))));
+        assertTrue(database.putWebsite(new Website(75, new Link("https://nagel-gruppe.de"))));
+        assertTrue(database.putWebsite(new Website(6, new Link("http://velte-steinmetz.de"))));
 
         assertTrue(database.putWebsite(new Website(1233, new Link("https://aalb-dach.de"))));
         assertTrue(database.putWebsite(new Website(344, new Link("https://wwolfsperger-landmaschinen.de"))));
@@ -62,11 +62,11 @@ public class DatabaseTest {
 
     @Test
     public void testInsertWord() {
-        assertTrue(database.putWord(1, "abarbeitung"));
-        assertTrue(database.putWord(2, "abbaubaren"));
-        assertTrue(database.putWord(1, "abbestellung"));
-        assertTrue(database.putWord(3, "abbestellung"));
-        assertTrue(database.putWord(4, "abbestellung"));
+        assertTrue(database.putWord(new Word(1, "abarbeitung")));
+        assertTrue(database.putWord(new Word(2, "abbaubaren")));
+        assertTrue(database.putWord(new Word(1, "abbestellung")));
+        assertTrue(database.putWord(new Word(3, "abbestellung")));
+        assertTrue(database.putWord(new Word(4, "abbestellung")));
 
         assertTrue(database.putWord(new Word(1, "abarbeitung")));
         assertTrue(database.putWord(new Word(2, "abbaubaren")));
@@ -103,13 +103,13 @@ public class DatabaseTest {
         assertTrue(database.clearWords());
         assertEquals(0, database.getWordsSize());
 
-        database.putWord(1, "test_word");
+        database.putWord(new Word(1, "test_word"));
         assertEquals(1, database.getWordsSize());
 
-        database.putWord(2, "2test_word");
-        database.putWord(3, "3test_word");
-        database.putWord(4, "4test_word");
-        database.putWord(4, "4test_word");
+        database.putWord(new Word(2, "2test_word"));
+        database.putWord(new Word(3, "3test_word"));
+        database.putWord(new Word(4, "4test_word"));
+        database.putWord(new Word(4, "4test_word"));
 
         assertEquals(5, database.getWordsSize());
     }
@@ -119,13 +119,13 @@ public class DatabaseTest {
         assertTrue(database.clearWebsites());
         assertEquals(0, database.getWebsitesSize());
 
-        database.putWebsite(1, "hhtlsdsd");
+        database.putWebsite(new Website(1, new Link("hhtlsdsd")));
         assertEquals(1, database.getWebsitesSize());
 
-        database.putWebsite(2, "sdasd");
-        database.putWebsite(3, "sdsdsd");
-        database.putWebsite(5, "sdsdasdasd");
-        database.putWebsite(5, "sdsdasdasd");
+        database.putWebsite(new Website(2, new Link("sdasd")));
+        database.putWebsite(new Website(3, new Link("sdsdsd")));
+        database.putWebsite(new Website(5, new Link("sdsdasdasd")));
+        database.putWebsite(new Website(5, new Link("sdsdasdasd")));
 
         assertEquals(5, database.getWebsitesSize());
     }
