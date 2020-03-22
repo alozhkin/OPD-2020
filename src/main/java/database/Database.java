@@ -3,7 +3,7 @@ package database;
 import database.models.Website;
 import database.models.Word;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.HashSet;
 
 public interface Database {
@@ -51,11 +51,11 @@ public interface Database {
      * Inserts a websites into the database,
      * if such an entry already exists, then does not insert anything
      *
-     * @param websites list of websites
+     * @param websites collection of websites
      * @return true, if the insert was successful,
      * false, if it was not possible to insert
      */
-    boolean putWebsites(List<Website> websites);
+    boolean putWebsites(Collection<Website> websites);
 
     /**
      * Inserts a word into the database,
@@ -82,11 +82,11 @@ public interface Database {
      * Inserts a word into the database,
      * if such an entry already exists, then does not insert anything
      *
-     * @param words list of words
+     * @param words collection of words
      * @return true, if the insert was successful,
      * false, if it was not possible to insert
      */
-    boolean putWords(List<Word> words);
+    boolean putWords(Collection<Word> words);
 
     /**
      * Clears all columns of the 'websites' table

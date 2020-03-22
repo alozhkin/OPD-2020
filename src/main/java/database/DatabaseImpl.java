@@ -4,16 +4,13 @@ import database.models.Website;
 import database.models.Word;
 import database.utils.CSVUtils;
 import database.utils.DatabaseUtil;
-import util.Link;
+import utils.Link;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 class DatabaseImpl implements Database {
 
@@ -53,7 +50,7 @@ class DatabaseImpl implements Database {
     }
 
     @Override
-    public boolean putWebsites(List<Website> websites) {
+    public boolean putWebsites(Collection<Website> websites) {
         try (Connection connection = getConnection()) {
             try (PreparedStatement preparedStatement = DatabaseUtil.getWebsitesPreparedStatement(websites, connection)) {
                 preparedStatement.executeUpdate();
@@ -77,7 +74,7 @@ class DatabaseImpl implements Database {
     }
 
     @Override
-    public boolean putWords(List<Word> words) {
+    public boolean putWords(Collection<Word> words) {
         try (Connection connection = getConnection()) {
             try (PreparedStatement preparedStatement = DatabaseUtil.getWordsPreparedStatement(words, connection)) {
                 preparedStatement.executeUpdate();

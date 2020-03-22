@@ -3,11 +3,14 @@ package database.utils;
 import database.models.Website;
 import database.models.Word;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Collection;
 
 public class DatabaseUtil {
 
@@ -28,7 +31,7 @@ public class DatabaseUtil {
         sr.runScript(reader);
     }
 
-    public static PreparedStatement getWebsitesPreparedStatement(List<Website> websites, Connection connection) throws SQLException {
+    public static PreparedStatement getWebsitesPreparedStatement(Collection<Website> websites, Connection connection) throws SQLException {
         StringBuilder statement = new StringBuilder();
         statement.append("INSERT INTO websites (company_id, website) VALUES (?, ?)");
 
@@ -47,7 +50,7 @@ public class DatabaseUtil {
         return preparedStatement;
     }
 
-    public static PreparedStatement getWordsPreparedStatement(List<Word> words, Connection connection) throws SQLException {
+    public static PreparedStatement getWordsPreparedStatement(Collection<Word> words, Connection connection) throws SQLException {
         StringBuilder statement = new StringBuilder();
         statement.append("INSERT INTO words (website_id, word) VALUES (?, ?)");
 
