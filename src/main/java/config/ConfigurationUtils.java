@@ -43,7 +43,7 @@ public class ConfigurationUtils {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
     }
 
-    public static String parseDatabaseProperties() {
+    public static String parseDatabaseUrl() {
         Properties properties = loadProperties("src/main/config/database.properties");
         return properties.getProperty("url");
     }

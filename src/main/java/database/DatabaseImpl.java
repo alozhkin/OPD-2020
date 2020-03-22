@@ -28,7 +28,7 @@ class DatabaseImpl implements Database {
    */
     DatabaseImpl() {
         try {
-            url = ConfigurationUtils.parseDatabaseProperties();
+            url = ConfigurationUtils.parseDatabaseUrl();
             initDatabase();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
