@@ -4,7 +4,7 @@ import database.models.Website;
 import database.models.Word;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Set;
 
 public interface Database {
 
@@ -109,7 +109,7 @@ public interface Database {
      *
      * @return Set of websites from websites table
      */
-    HashSet<Website> getWebsites();
+    Set<Website> getWebsites();
 
     /**
      * Returns a set containing the websites in which such word occurred from the "words" table
@@ -117,7 +117,7 @@ public interface Database {
      * @param word word by which to find websites
      * @return Set of Website objects
      */
-    HashSet<Website> getWebsites(String word);
+    Set<Website> getWebsites(String word);
 
     /**
      * Returns a set of site objects containing the link of website and company ID
@@ -125,7 +125,7 @@ public interface Database {
      * @param companyId websites' company ID in "websites" table
      * @return set of website objects with website link and company id
      */
-    HashSet<Website> getWebsites(int companyId);
+    Set<Website> getWebsites(int companyId);
 
     /**
      * Returns a set of string containing the links of websites by its company ID
@@ -133,14 +133,14 @@ public interface Database {
      * @param companyId websites' company ID in "websites" table
      * @return set of Strings with websites link
      */
-    HashSet<String> getWebsiteLink(int companyId);
+    Set<String> getWebsiteLink(int companyId);
 
     /**
      * Returns a set containing all found words from "words" table
      *
      * @return set of Word objects
      */
-    HashSet<Word> getWords();
+    Set<Word> getWords();
 
     /**
      * Returns a set containing all found words from the specified website
@@ -148,7 +148,7 @@ public interface Database {
      * @param websiteId id of website
      * @return set of Word objects
      */
-    HashSet<Word> getWords(int websiteId);
+    Set<Word> getWords(int websiteId);
 
     /**
      * Returns a word ID from the "words" table
