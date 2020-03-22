@@ -8,23 +8,20 @@ import org.jsoup.select.Elements;
 import utils.Html;
 import utils.Link;
 
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DefaultCrawler implements Crawler {
     @Override
-    public List<Link> crawl(@NotNull Html html) {
-        List<Link> list = new ArrayList<>();
-        Document doc = Jsoup
-                .parse(html.toString(), html.getUrl().toString());
+    public Set<Link> crawl(@NotNull Html html) {
+        Set<Link> list = new HashSet<>();
+        Document doc = Jsoup.parse(html.toString(), html.getUrl().toString());
         Elements linksOnPage = doc.select("a[href]");
 
         for (Element page : linksOnPage) {
             Link url = new Link(page.attr("abs:href"));
-            if (!url.toString().equals("")) {//page.text()
-                if (url != html.getUrl())
-                        list.add(url);
+            if (!url.toString().equals("") && url != html.getUrl()) {
+                list.add(url);
             }
         }
         return list;
