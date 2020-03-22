@@ -221,7 +221,7 @@ class DatabaseImpl implements Database {
     private void parseProperties() {
         Properties properties = new Properties();
 
-        try (InputStream in = Files.newInputStream(Paths.get("src/main/java/database/properties/database.properties"))) {
+        try (InputStream in = Files.newInputStream(Paths.get("src\\main\\config\\database.properties"))) {
             properties.load(in);
 
             url = properties.getProperty("url");
