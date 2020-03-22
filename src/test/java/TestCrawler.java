@@ -9,8 +9,7 @@ import utils.Link;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,18 +22,15 @@ public class TestCrawler {
 
     public static void main(String[] args) {
         try {
-            Document document = Jsoup.connect(rootURL2).get();
-            List<Link> zzz = new DefaultCrawler().crawl(new Html(document.toString(), new Link(rootURL)));
+            List<Link> zzz = new DefaultCrawler().crawl(new Html(Jsoup.connect(rootURL).get().toString(), new Link(rootURL)));
 
             DefaultLinkFilter ff = new DefaultLinkFilter();
 
-            for (Link each : zzz) System.out.println(each);
+            zzz.addAll(new DefaultCrawler().crawl(new Html(Jsoup.connect(rootURL2).get().toString(), new Link(rootURL2))));
 
-            System.out.println("||||||||||||||||||||||||||||||Desty_Fistek|||||||||||||||||||||||||||||||||||||||");
+            Set<Link> ppp = ff.filter(zzz, rootURL);
 
-            ///Set<Link> ppp = ff.filter(zzz, rootURL);
-
-            //for (Link each : ppp) System.out.println(each);
+            for (Link each : ppp) System.out.println(each);
 
         } catch (IOException e) {
             e.printStackTrace();

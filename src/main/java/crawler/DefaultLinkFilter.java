@@ -28,7 +28,6 @@ public class DefaultLinkFilter implements LinkFilter {
         String test = url.replaceAll(domain, "");
         if (test.equals(""))
             return false;
-
         return true;
     }
 }

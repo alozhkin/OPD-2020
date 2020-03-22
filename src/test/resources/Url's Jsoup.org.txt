@@ -35,3 +35,14 @@ https://github.com/jhy/jsoup/blob/master/src/main/java/org/jsoup/examples/Wikipe
 https://www.opensource.org/
 https://github.com/jhy/jsoup/
 https://jhy.io/
+https://jsoup.org/
+https://jsoup.org/news/
+https://jsoup.org/bugs
+https://jsoup.org/discussion
+https://jsoup.org/download
+https://jsoup.org/apidocs/
+https://jsoup.org/cookbook/
+https://jsoup.org/packages/jsoup-1.13.1.jar
+https://jsoup.org/packages/jsoup-1.13.1-javadoc.jar
+https://jsoup.org/packages/jsoup-1.13.1-sources.jar
+https://jsoup.org/news/release-1.13.1
