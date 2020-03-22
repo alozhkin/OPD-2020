@@ -46,3 +46,8 @@ https://jsoup.org/packages/jsoup-1.13.1.jar
 https://jsoup.org/packages/jsoup-1.13.1-javadoc.jar
 https://jsoup.org/packages/jsoup-1.13.1-sources.jar
 https://jsoup.org/news/release-1.13.1
+https://try.jsoup.org/
+https://github.com/jhy/jsoup/blob/master/CHANGES
+https://github.com/jhy/jsoup/releases
+https://maven.apache.org/
+https://jhy.io/
