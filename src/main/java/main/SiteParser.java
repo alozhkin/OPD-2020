@@ -93,7 +93,7 @@ public class SiteParser {
         while (true) {
             try {
                 var html = HtmlQueue.take();
-                CompletableFuture<List<Link>> crawlerFuture = CompletableFuture.supplyAsync(
+                CompletableFuture<Set<Link>> crawlerFuture = CompletableFuture.supplyAsync(
                         () -> crawler.crawl(html),
                         EXECUTOR_SERVICE);
                 crawlerFuture.thenAccept(result -> linkQueue.addAll(linkFilter.filter(result, domain)));

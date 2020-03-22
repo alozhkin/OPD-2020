@@ -3,7 +3,8 @@ package crawler;
 import utils.Link;
 
 import java.util.List;
+import java.util.Set;
 
 public interface LinkFilter {
-    List<Link> filter(List<Link> links, String domain);
+    Set<Link> filter(Set<Link> links, String domain);
 }
