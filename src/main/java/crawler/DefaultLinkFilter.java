@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public class DefaultLinkFilter implements LinkFilter {
+   // static List<String> langList;    static {        try {            langList = new ArrayList<>(Files.readAllLines(Paths.get("src/main/resources/language.txt")));        } catch (IOException e) { e.printStackTrace(); } }
 
     public Set<Link> filter(@NotNull List<Link> links, String domain) {
 
@@ -15,19 +16,15 @@ public class DefaultLinkFilter implements LinkFilter {
         for (Link unUrl : links) {
             String url = unUrl.fixer();
             if (url.contains(domain) && !url.contains("#")) {
-                if (formatChecker(url, domain)) {
-                    exit.add(new Link(url.toLowerCase()));
-                }
+                exit.add(new Link(url.toLowerCase()));
             }
         }
         return exit;
     }
 
 
-    public boolean formatChecker(@NotNull String url, String domain) {
-        String test = url.replaceAll(domain, "");
-        if (test.equals(""))
-            return false;
-        return true;
-    }
+   // public static boolean formatChecker(@NotNull String lang, @NotNull Link url) { ///не работает тк человек не робот но должно убирать страницы на других языках
+   //     String actUrl = url.toString() + "/";if (lang.equals("") || !langList.contains(lang)) return true;
+   //     for (String actLang : langList) {if (actUrl.contains("/" + actLang + "/") && !actLang.equals(lang)) {
+   //     System.out.println(actUrl);return true; }}return true;}
 }

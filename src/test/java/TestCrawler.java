@@ -1,17 +1,12 @@
 import crawler.DefaultCrawler;
 import crawler.DefaultLinkFilter;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.junit.jupiter.api.Test;
 import utils.Html;
 import utils.Link;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TestCrawler {
@@ -26,7 +21,7 @@ public class TestCrawler {
 
             DefaultLinkFilter ff = new DefaultLinkFilter();
 
-            zzz.addAll(new DefaultCrawler().crawl(new Html(Jsoup.connect(rootURL2).get().toString(), new Link(rootURL2))));
+           zzz.addAll(new DefaultCrawler().crawl(new Html(Jsoup.connect(rootURL2).get().toString(), new Link(rootURL2))));
 
             Set<Link> ppp = ff.filter(zzz, rootURL);
 
