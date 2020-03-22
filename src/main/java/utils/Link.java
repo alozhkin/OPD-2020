@@ -1,5 +1,7 @@
 package utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
@@ -20,6 +22,16 @@ public class Link {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public int length() {
+        return absoluteURL.length();
+    }
+
+    public String fixer() {
+        if (absoluteURL.charAt(absoluteURL.length() - 1) == '/')
+            return absoluteURL.substring(0, absoluteURL.length() - 1);
+        return absoluteURL;
     }
 
     @Override

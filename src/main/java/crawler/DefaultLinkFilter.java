@@ -8,43 +8,28 @@ import java.util.List;
 import java.util.Set;
 
 public class DefaultLinkFilter implements LinkFilter {
-   // List<String> fileDate;
-    //List<String> langDate;
-
-   // {     try {
-   //       //langDate = new ArrayList<>(Files.readAllLines(Paths.get("src/main/resources/language.txt")));
-   //         fileDate = new ArrayList<>(Files.readAllLines(Paths.get("src/main/resources/FilesTeg.txt")));
-   //     } catch (IOException e) {
-   //         e.printStackTrace();}}
 
     public Set<Link> filter(@NotNull List<Link> links, String domain) {
 
         Set<Link> exit = new HashSet<>();
         for (Link unUrl : links) {
-            String url = fixer(unUrl);
+            String url = unUrl.fixer();
             if (url.contains(domain) && !url.contains("#")) {
-                if (true) {
-                    exit.add(new Link(url));
+                if (formatChecker(url, domain)) {
+                    exit.add(new Link(url.toLowerCase()));
                 }
             }
         }
         return exit;
     }
 
-    public String fixer(@NotNull Link url) {
-        if (url.toString().charAt(url.toString().length() - 1) == '/') return url.toString();
-        return url.toString() + '/';
-    }
 
-    // public boolean formatChecker(@NotNull String url, String domain) {
-    //     String test = url.replaceAll(domain, "");
-    //     if (test.equals(""))
-    //         return false;
-    //     if (test.contains(".")) {
-    //         if (fileDate.contains(test)) {
-    //             return true;
-    //         } else return false;
-    //     }
-    //     return true;
-    // }
+    public boolean formatChecker(@NotNull String url, String domain) {
+
+        String test = url.replaceAll(domain, "");
+        if (test.equals(""))
+            return false;
+
+        return false;
+    }
 }
