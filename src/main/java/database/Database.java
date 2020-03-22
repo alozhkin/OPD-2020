@@ -20,11 +20,11 @@ public interface Database {
     /**
      * Parses a CSV file and inserts the result of parsing into a database
      *
-     * @param csvFile path to the CSV file
+     * @param CSVFile path to the CSV file
      * @return true, if the insert was successful,
      * false, if it was not possible to insert
      */
-    boolean putWebsitesFromCsv(String csvFile);
+    boolean putWebsitesFromCSV(String CSVFile);
 
     /**
      * Inserts a website into the database,
@@ -136,7 +136,7 @@ public interface Database {
     /**
      * Returns a set containing the websites in which such word occurred from the "words" table
      *
-     * @param word      word by which to find websites
+     * @param word word by which to find websites
      * @return Set of Website objects
      */
     HashSet<Website> getWebsites(String word);
@@ -144,7 +144,7 @@ public interface Database {
     /**
      * Returns a set of site objects containing the link of website and company ID
      *
-     * @param companyId     websites' company ID in "websites" table
+     * @param companyId websites' company ID in "websites" table
      * @return set of website objects with website link and company id
      */
     HashSet<Website> getWebsites(int companyId);
@@ -152,7 +152,7 @@ public interface Database {
     /**
      * Returns a set of string containing the links of websites by its company ID
      *
-     * @param companyId      websites' company ID in "websites" table
+     * @param companyId websites' company ID in "websites" table
      * @return set of Strings with websites link
      */
     HashSet<String> getWebsiteLink(int companyId);
@@ -167,7 +167,7 @@ public interface Database {
     /**
      * Returns a set containing all found words from the specified website
      *
-     * @param websiteId     id of website
+     * @param websiteId id of website
      * @return set of Word objects
      */
     HashSet<Word> getWords(int websiteId);
@@ -175,14 +175,15 @@ public interface Database {
     /**
      * Returns a word ID from the "words" table
      *
-     * @param word    word which id is required
+     * @param word word which id is required
      * @return word ID
      */
     int getWordId(String word);
+
     /**
      * Returns a word object by its id in "words" table
      *
-     * @param wordId     id of required word
+     * @param wordId id of required word
      * @return Word object
      */
     Word getWord(int wordId);

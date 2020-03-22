@@ -34,9 +34,9 @@ class DatabaseImpl implements Database {
     }
 
     @Override
-    public boolean putWebsitesFromCsv(String csvFile) {
+    public boolean putWebsitesFromCSV(String CSVFile) {
         CSVParser parser = new CSVParser();
-        parser.parse(csvFile);
+        parser.parse(CSVFile);
         return putWebsites(parser.getWebsites());
     }
 
