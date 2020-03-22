@@ -1,14 +1,14 @@
 package crawler;
 
-import util.HTML;
-import util.Link;
+import utils.Html;
+import utils.Link;
 
 import java.util.List;
 
 public class DefaultCrawler implements Crawler {
 
     @Override
-    public List<Link> crawl(HTML html) {
+    public List<Link> crawl(Html html) {
         // TODO
         return null;
     }

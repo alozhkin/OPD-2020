@@ -1,12 +1,12 @@
-package util;
+package utils;
 
 import java.util.Objects;
 
-public class HTML {
+public class Html {
     private String html;
     private Link url;
 
-    public HTML(String html, Link url) {
+    public Html(String html, Link url) {
         this.html = html;
         this.url = url;
     }
@@ -24,7 +24,7 @@ public class HTML {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HTML html1 = (HTML) o;
+        Html html1 = (Html) o;
         return Objects.equals(html, html1.html) &&
                 Objects.equals(url, html1.url);
     }

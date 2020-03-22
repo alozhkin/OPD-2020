@@ -1,12 +1,18 @@
-import database.Database;
+package main;
+
+import config.ConfigurationUtils;
+import database.DatabaseImpl;
+import org.openqa.selenium.chrome.ChromeOptions;
 import scraper.DefaultScraper;
-import util.HTML;
-import util.Link;
+import utils.CSVParser;
+import utils.Html;
+import utils.Link;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -14,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class WordsExtractor {
     private static BlockingQueue<Link> linkQueue = new ArrayBlockingQueue<>(1000000);
-    private static BlockingQueue<HTML> HTMLQueue = new ArrayBlockingQueue<>(1000000);
+    private static BlockingQueue<Html> HtmlQueue = new ArrayBlockingQueue<>(1000000);
     private static Map<String, Integer> sitesId = new HashMap<>();
     private static Executor EXECUTOR_SERVICE = Executors.newFixedThreadPool(2);
 
@@ -28,10 +34,10 @@ public class WordsExtractor {
         for (Link link : links) {
             linkQueue.add(link);
             var parser = new SiteParser.Builder(linkQueue,
-                    HTMLQueue,
-                    Database.newInstance(),
+                    HtmlQueue,
+                    new DatabaseImpl(domainsIds),
                     link.getDomain()).build();
-            var scraper = new DefaultScraper(linkQueue, HTMLQueue);
+            var scraper = new DefaultScraper(linkQueue, HtmlQueue);
             EXECUTOR_SERVICE.execute(parser::start);
             EXECUTOR_SERVICE.execute(scraper::start);
         }
