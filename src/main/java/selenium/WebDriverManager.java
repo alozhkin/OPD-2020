@@ -15,18 +15,26 @@ import java.util.concurrent.BlockingQueue;
 
 public class WebDriverManager {
     private String url;
-    private static WebDriver driver = new ChromeDriver();
+    private WebDriver driver;
     private Html currentHtml;
 
     public WebDriverManager() {
+        init("");
+    }
+
+    public void init(String url){
+        driver = new ChromeDriver();
+        if (!url.isEmpty()) {
+            connect(url);
+        }
     }
 
     public WebDriverManager(String url) {
-        connect(url);
+        init(url);
     }
 
     public WebDriverManager(Link link) {
-        connect(link.toString());
+        init(link.toString());
     }
 
     public WebDriverManager getNextWebsite(String url) {
