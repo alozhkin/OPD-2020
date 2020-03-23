@@ -1,7 +1,6 @@
 package selenium;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -10,8 +9,6 @@ import utils.Link;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 public class WebDriverManager {
     private Link currentLink;
@@ -19,7 +16,7 @@ public class WebDriverManager {
     private Html currentHtml;
 
     public WebDriverManager() {
-        init(null);
+        this(null);
     }
 
     public WebDriverManager(Link link) {
@@ -64,18 +61,15 @@ public class WebDriverManager {
         for (By by : bySet) {
             elements.addAll(driver.findElements(by));
         }
-        BlockingQueue<Html> htmls = new ArrayBlockingQueue<>(1000);
+        ArrayList<Html> htmls = new ArrayList<>();
         for (WebElement element : elements) {
-            try {
-                element.click();
-                Html difference = getDifference(currentHtml, parseHtml());
-                if (!difference.toString().isEmpty()) {
-                    htmls.add(difference);
-                }
-            } catch (ElementNotInteractableException enie) {
-                //TODO
+            element.click();
+            Html difference = getDifference(currentHtml, parseHtml());
+            if (!difference.toString().isEmpty()) {
+                htmls.add(difference);
             }
         }
+
         return htmls;
     }
 
