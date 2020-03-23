@@ -12,11 +12,11 @@ public class DefaultLinkFilter implements LinkFilter {
 
     public Collection<Link> filter(@NotNull Collection<Link> links, String domain) {
         Set<Link> result = new HashSet<>();
-        for (Link unUrl : links) {
-            String url = unUrl.fixer().toLowerCase();
-            if (url.contains(domain.toLowerCase()) && !url.contains("#") && !visitedLinks.contains(url)) {
-                visitedLinks.add(url);
-                result.add(new Link(url));
+        for (Link link : links) {
+            String strLink = link.toString().toLowerCase();
+            if (strLink.contains(domain.toLowerCase()) && !strLink.contains("#") && !visitedLinks.contains(strLink)) {
+                visitedLinks.add(strLink);
+                result.add(new Link(strLink));
             }
         }
         return result;
