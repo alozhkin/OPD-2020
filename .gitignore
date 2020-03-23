@@ -33,3 +33,6 @@ Thumbs.db
 
 # temp files
 .tmp
+
+# database files
+.db

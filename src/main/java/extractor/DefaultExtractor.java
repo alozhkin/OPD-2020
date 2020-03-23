@@ -37,10 +37,8 @@ public class DefaultExtractor implements Extractor {
             e.printStackTrace();
         }
         String allInfo = doc.text();
-        System.out.println(allInfo);
         String[] stringsArray;
         stringsArray = allInfo.split("\\s");
-        // System.out.println(setOfWords);
         return new HashSet<>(Arrays.asList(stringsArray));
     }
 

@@ -1,13 +1,11 @@
 package extractor;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
 
 public class DefaultWordFilter implements WordFilter {
 
     @Override
-    public List<String> filter(Set<String> words) {
-        // TODO
-        return null;
+    public Collection<String> filter(Collection<String> words) {
+        return words;
     }
 }

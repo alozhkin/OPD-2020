@@ -1,3 +1,8 @@
 package scraper;
 
-public interface Scraper {}
+import utils.Html;
+import utils.Link;
+
+public interface Scraper {
+    Html scrape(Link site);
+}

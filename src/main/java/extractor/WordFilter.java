@@ -1,8 +1,7 @@
 package extractor;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
 
 public interface WordFilter {
-    List<String> filter(Set<String> words);
+    Collection<String> filter(Collection<String> words);
 }
