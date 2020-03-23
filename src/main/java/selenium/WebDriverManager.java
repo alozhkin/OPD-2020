@@ -14,57 +14,52 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class WebDriverManager {
-    private String url;
+    private Link currentLink;
     private WebDriver driver;
     private Html currentHtml;
 
     public WebDriverManager() {
-        init("");
-    }
-
-    public void init(String url){
-        driver = new ChromeDriver();
-        if (!url.isEmpty()) {
-            connect(url);
-        }
-    }
-
-    public WebDriverManager(String url) {
-        init(url);
+        init(null);
     }
 
     public WebDriverManager(Link link) {
-        init(link.toString());
+        init(link);
     }
 
-    public WebDriverManager getNextWebsite(String url) {
-        connect(url);
-        return this;
+    public void init(Link link) {
+        driver = new ChromeDriver();
+        if (link != null) {
+            connect(link);
+        }
     }
 
-    public WebDriverManager getNextWebsite(Link link) {
-        return getNextWebsite(link.toString());
+    public void connect(Link link) {
+        this.currentLink = link;
+        driver.get(link.getAbsoluteURL());
+        currentHtml = parseHtml();
     }
 
-    public void setURL(String url) {
-        this.url = url;
+    public Html parseHtml() {
+        return new Html(driver.getPageSource(), currentLink);
     }
 
-    public String getUrl(){
-        return url;
+    public void setCurrentLink(Link link) {
+        currentLink = link;
     }
 
-    private void connect(String url) {
-        this.url = url;
-        driver.get(url);
-        currentHtml = getHtml();
+    public Link getCurrentLink() {
+        return currentLink;
     }
 
-    public Html getHtml() {
-        return new Html(driver.getPageSource(), new Link(url));
+    public void resetCurrentHtml() {
+        currentHtml = parseHtml();
     }
 
-    public Collection<Html> getDynamicContent(BySet bySet){
+    public Html getCurrentHtml() {
+        return currentHtml;
+    }
+
+    public Collection<Html> getDynamicContent(BySet bySet) {
         Collection<WebElement> elements = new ArrayList<>();
         for (By by : bySet) {
             elements.addAll(driver.findElements(by));
@@ -73,7 +68,7 @@ public class WebDriverManager {
         for (WebElement element : elements) {
             try {
                 element.click();
-                Html difference = getDifference(currentHtml, getHtml());
+                Html difference = getDifference(currentHtml, parseHtml());
                 if (!difference.toString().isEmpty()) {
                     htmls.add(difference);
                 }
@@ -84,7 +79,7 @@ public class WebDriverManager {
         return htmls;
     }
 
-    private Html getDifference(Html html1, Html html2){
+    private Html getDifference(Html html1, Html html2) {
         Html result = new Html("", new Link(""));
         //TODO
         return result;

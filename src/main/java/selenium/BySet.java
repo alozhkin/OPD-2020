@@ -1,13 +1,14 @@
 package selenium;
 
 import org.openqa.selenium.By;
+
 import java.util.HashSet;
 
 public class BySet extends HashSet<By> {
 
     public class Builder {
 
-        public Builder addTagNames(String... selectors){
+        public Builder addTagNames(String... selectors) {
             for (String o : selectors) {
                 add(By.tagName(o));
             }
@@ -64,7 +65,7 @@ public class BySet extends HashSet<By> {
         }
     }
 
-    public Builder getBuilder(){
+    public Builder builder() {
         return new Builder();
     }
 
