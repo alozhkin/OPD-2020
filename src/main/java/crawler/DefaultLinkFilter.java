@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    Set<Link> visitedLinks = ConcurrentHashMap.newKeySet();
+    private Set<Link> visitedLinks = ConcurrentHashMap.newKeySet();
 
     public Collection<Link> filter(@NotNull Collection<Link> links, String domain) {
         Set<Link> result = new HashSet<>();

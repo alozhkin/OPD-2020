@@ -39,26 +39,29 @@ public class Main {
         var cs = new ExecutorCompletionService<Collection<String>>(exec);
         var dbExec = Executors.newSingleThreadExecutor();
 
-        for (Link domain : domains) {
-            var allWords = new HashSet<String>();
-            cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, domain, linkQueue)::run);
-            submittedTasksCount.incrementAndGet();
-            // order is important
-            while (completedTaskCount.get() - submittedTasksCount.get() != 0 || linkQueue.size() != 0) {
-                var link = linkQueue.poll(50, TimeUnit.MILLISECONDS);
-                if (link != null) {
-                    cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, link, linkQueue)::run);
-                    submittedTasksCount.incrementAndGet();
+        try {
+            for (Link domain : domains) {
+                var allWords = new HashSet<String>();
+                cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, domain, linkQueue)::run);
+                submittedTasksCount.incrementAndGet();
+                // order is important
+                while (completedTaskCount.get() - submittedTasksCount.get() != 0 || linkQueue.size() != 0) {
+                    var link = linkQueue.poll(50, TimeUnit.MILLISECONDS);
+                    if (link != null) {
+                        cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, link, linkQueue)::run);
+                        submittedTasksCount.incrementAndGet();
+                    }
+                    var wordsFuture = cs.poll(50, TimeUnit.MILLISECONDS);
+                    if (wordsFuture != null) {
+                        allWords.addAll(wordsFuture.get());
+                    }
                 }
-                var wordsFuture = cs.poll(50, TimeUnit.MILLISECONDS);
-                if (wordsFuture != null) {
-                    allWords.addAll(wordsFuture.get());
-                }
+                dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
-            dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
+        } finally {
+            exec.shutdown();
+            dbExec.shutdown();
+            scraper.quit();
         }
-        exec.shutdown();
-        dbExec.shutdown();
-        System.out.println(submittedTasksCount.get());
     }
 }
