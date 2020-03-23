@@ -8,59 +8,59 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class DefaultWordFilter implements WordFilter {
-
     @Override
-    public Collection<String> filter(Collection<String> words) throws IOException {
-        Collection<String> newSet = setToLowerCase(punctuationMarkFilter(words));
+    public Collection<String> filter(Collection<String> words) {
+        Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
         return newSet;
     }
 
-
     // Фильтр ненужных слов
-    // Кпд данного метода не определен из-за кодировок
+    public void unnecessaryWordsFilter(Collection<String> setOfWords) {
+        List<String> listOfPath = new ArrayList<>();
+        listOfPath.add("src/main/resources/list_of_words_for_filtration/english_words.txt");
+        listOfPath.add("src/main/resources/list_of_words_for_filtration/russian_words.txt");
+        listOfPath.add("src/main/resources/list_of_words_for_filtration/german_words.txt");
 
-    public static void unnecessaryWordsFilter(Collection<String> set) throws IOException {
-        String fileName = "src\\main\\resources\\ListOfWordsForFiltration.txt";
+        for (String path : listOfPath) {
+            Collection<String> filterWords = parseFiltrationFile(path);
+            setOfWords.removeAll(filterWords);
+        }
+    }
 
-        String content = Files.lines(Paths.get(fileName), StandardCharsets.UTF_8).reduce("", String::concat);
-        String[] stringsArray = content.split("\\s");
-        Collection<String> filterWords = new HashSet<>(Arrays.asList(stringsArray));
-
-        set.removeAll(filterWords);
-
+    private Collection<String> parseFiltrationFile(String filterLanguageFileName) {
+        List<String> filteredWords = null;
+        try {
+            filteredWords = Files.readAllLines(Paths.get(filterLanguageFileName), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return filteredWords;
     }
 
     //Удаление пустого элемента
-    public static void deleteBlankLines(Collection<String> set) {
-        set.removeIf(String::isEmpty);
+    public void deleteBlankLines(Collection<String> setOfWords) {
+        setOfWords.removeIf(String::isEmpty);
     }
 
-    public static Collection<String> setToLowerCase(Collection<String> set) {
-
-        return set.stream().map(String::toLowerCase)
+    public Collection<String> wordsToLowerCase(Collection<String> setOfWords) {
+        return setOfWords.stream().map(String::toLowerCase)
                 .collect(Collectors.toSet());
     }
 
-
     //Фильтр знаков препинания
-
-    public static Collection<String> punctuationMarkFilter(Collection<String> set) {
-
+    public Collection<String> punctuationMarkFilter(Collection<String> setOfWords) {
         Collection<String> newSet = new HashSet<>();
 
-        for (String setObj : set)
-            newSet.add(delNoDigOrLet(setObj));
-
+        for (String setObj : setOfWords) {
+            newSet.add(removingPunctuation(setObj));
+        }
         return newSet;
     }
 
     // Метод удаления знаков препинания из строки
-    // Кпд данного метода не определен из-за кодировок
-
-    private static String delNoDigOrLet(String s) {
-
+    private String removingPunctuation(String s) {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < s.length(); i++) {
@@ -70,8 +70,4 @@ public class DefaultWordFilter implements WordFilter {
 
         return sb.toString();
     }
-
-    //Удаляет умляубля (äöü)
-    // String result = s.replaceAll("\\W", "");
-
 }

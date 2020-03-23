@@ -1,5 +1,10 @@
 package util;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 public class HTML {
@@ -9,6 +14,19 @@ public class HTML {
     public HTML(String html, Link url) {
         this.html = html;
         this.url = url;
+    }
+
+    public HTML(String html) {
+        this.html = html;
+    }
+
+    public HTML(Path path) {
+        try {
+            this.html = Files.lines(path, StandardCharsets.UTF_8)
+                    .reduce("", String::concat);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Link getUrl() {
