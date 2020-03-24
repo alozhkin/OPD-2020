@@ -65,7 +65,7 @@ public class WebDriverManager {
         for (WebElement element : elements) {
             element.click();
             Html difference = getDifference(currentHtml, parseHtml());
-            if (!difference.toString().isEmpty()) {
+            if (difference != null) {
                 htmls.add(difference);
             }
         }
@@ -74,9 +74,7 @@ public class WebDriverManager {
     }
 
     private Html getDifference(Html html1, Html html2) {
-        Html result = new Html("", new Link(""));
-        //TODO
-        return result;
+        return null;
     }
 
 }
