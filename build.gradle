@@ -28,6 +28,5 @@ dependencies {
     compile 'org.jetbrains:annotations:13.0'
     implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
     implementation 'org.seleniumhq.selenium:selenium-chrome-driver:3.141.59'
-
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.30.1'
 }

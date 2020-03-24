@@ -19,6 +19,12 @@ public class LinkTest {
     }
 
     @Test
+    void shouldAcceptEmptyString() {
+        var url = "";
+        assertEquals("", new Link(url).toString());
+    }
+
+    @Test
     void shouldRemoveTrailingSlash() {
         var expected = "http://test.com";
         var slashUrl = "http://test.com/";
@@ -28,13 +34,13 @@ public class LinkTest {
     @Test
     void shouldParseQueryString() {
         var url = "http://test.com/?value=true";
-        assertEquals(url, new Link(url).toString());
+        assertEquals("value=true", new Link(url).getQuery());
     }
 
     @Test
     void shouldParseAnchor() {
         var url = "http://test.com#content";
-        assertEquals(url, new Link(url).toString());
+        assertEquals("content", new Link(url).getFragment());
     }
 
     @Test
@@ -45,8 +51,25 @@ public class LinkTest {
 
     @Test
     void shouldAddProtocol() {
-        var expected = "http://test.com";
         var urlWithoutProtocol = "test.com";
-        assertEquals(expected, new Link(urlWithoutProtocol).toString());
+        assertEquals("http://test.com", new Link(urlWithoutProtocol).toString());
+    }
+
+    @Test
+    void shouldGetUrlWithoutFragmentAndQuery() {
+        var url = "http://example:8080/?name=you#content";
+        assertEquals("http://example:8080/", new Link(url).getWithoutQueryAndFragment());
+    }
+
+    @Test
+    void shouldGetUrlWithoutFragmentAndQueryPortExcluded() {
+        var url = "http://example/?name=you#content";
+        assertEquals("http://example/", new Link(url).getWithoutQueryAndFragment());
+    }
+
+    @Test
+    void shouldGetUrlWithoutFragmentAndQueryPathIncluded() {
+        var url = "http://example/ttt?name=you#content";
+        assertEquals("http://example/ttt", new Link(url).getWithoutQueryAndFragment());
     }
 }
