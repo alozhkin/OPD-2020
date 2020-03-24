@@ -2,7 +2,10 @@ package config;
 
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -11,15 +14,14 @@ public class ConfigurationUtils {
         Properties properties = ConfigurationUtils.loadProperties("src/main/config/global.properties",
                 "src/main/config/local.properties");
 
+        for (String key : properties.stringPropertyNames()) {
+            String value = properties.getProperty(key);
+            System.setProperty(key, value);
+        }
+
         String chromePath = properties.getProperty("chrome.path");
         ChromeOptions options = new ChromeOptions();
         options.setBinary(chromePath);
-
-        String chromeDriverPath = properties.getProperty("webdriver.chrome.driver");
-        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
-
-        String projectPath = properties.getProperty("project.path");
-        System.setProperty("project.path", projectPath);
 
         ConfigurationUtils.setConsoleEncoding();
     }
