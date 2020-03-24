@@ -13,7 +13,7 @@ public class Link {
     // removes trailing slash
     public Link(String url) {
         if (url.equals("")) {
-            url = null;
+            uri = null;
         } else {
             try {
                 uri = new URL(fix(url)).toURI();

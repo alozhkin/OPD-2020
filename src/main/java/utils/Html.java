@@ -2,6 +2,10 @@ package utils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class Html {
@@ -15,6 +19,10 @@ public class Html {
 
     public Link getUrl() {
         return url;
+    }
+
+    public Html(Path path) throws IOException {
+        this.html = Files.readString(path, StandardCharsets.UTF_8);
     }
 
     @Override
