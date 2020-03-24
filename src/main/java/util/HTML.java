@@ -1,10 +1,11 @@
 package util;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 public class HTML {
@@ -20,13 +21,8 @@ public class HTML {
         this.html = html;
     }
 
-    public HTML(Path path) {
-        try {
-            this.html = Files.lines(path, StandardCharsets.UTF_8)
-                    .reduce("", String::concat);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public HTML(Path path) throws IOException {
+        this.html = Files.readString(path, StandardCharsets.UTF_8);
     }
 
     public Link getUrl() {

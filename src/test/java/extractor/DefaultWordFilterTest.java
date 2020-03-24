@@ -26,7 +26,6 @@ class DefaultWordFilterTest {
         expected.add("11");
         expected.add("сентября");
         Collection<String> filteredSet = new DefaultWordFilter().filter(wordSForFiltrationSet);
-        assertTrue(expected.containsAll(filteredSet));
         assertEquals(expected, filteredSet);
     }
 

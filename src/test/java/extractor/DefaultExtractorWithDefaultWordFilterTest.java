@@ -16,8 +16,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultExtractorWithDefaultWordFilterTest {
-    Path path = Paths.get("src/test/java/resources/html_for_test.txt");
-    HTML h = new HTML(path);
+   private HTML h = new HTML(Paths.get("src/test/java/resources/html_for_test.txt"));
+    public DefaultExtractorWithDefaultWordFilterTest() throws IOException {
+    }
 
     @Test
     void extractWithWordFilterTest() {
@@ -27,8 +28,6 @@ public class DefaultExtractorWithDefaultWordFilterTest {
                 "brauerei", "berlin", "vlb", "ev");
         Collection<String> set = new DefaultExtractor().extract(h);
         Collection<String> setWithFiltration = new DefaultWordFilter().filter(set);
-
         assertEquals(setWithFiltration, expected);
     }
-
 }

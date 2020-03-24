@@ -100,13 +100,7 @@ public class SiteParser {
                 CompletableFuture<Collection<String>> extractorFuture = CompletableFuture.supplyAsync(
                         () -> extractor.extract(html),
                         EXECUTOR_SERVICE);
-                extractorFuture.thenAccept(result -> {
-                    try {
-                        db.insertAll(wordFilter.filter(result), domain);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                extractorFuture.thenAccept(result -> db.insertAll(wordFilter.filter(result), domain));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class DefaultExtractorTest {
     Path path = Paths.get("src/test/java/resources/html_for_test.txt");
     HTML h = new HTML(path);
+    DefaultExtractorTest() throws IOException {
+    }
 
     @Test
     void extractTest() {
@@ -31,9 +33,6 @@ class DefaultExtractorTest {
                 "Versuchs-", "und", "Lehranstalt", "für", "Brauerei",
                 "in", "Berlin", "(VLB)", "e.V.");
         Collection<String> set = new DefaultExtractor().extract(h);
-
         assertEquals(expected, set);
-
     }
-
 }
