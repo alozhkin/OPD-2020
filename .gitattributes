@@ -1,0 +1,6 @@
+src/main/java/diff_match_patch/* linguist-vendored
+src/main/java/database/utils/ScriptRunner.java linguist-vendored
+*.html linguist-vendored
+*.css linguist-vendored
+*.csv linguist-vendored
+*.txt linguist-vendored
