@@ -11,27 +11,45 @@ public class Link {
     // wrong url changes to ""
     // removes trailing slash
     public Link(String url) {
-        try {
-            uri = new URL(fix(url)).toURI();
-        } catch (Exception e) {
-            uri = URI.create("");
+        if (url.equals("")) {
+            url = null;
+        } else {
+            try {
+                uri = new URL(fix(url)).toURI();
+            } catch (Exception e) {
+                uri = null;
+            }
         }
     }
 
-    private String fix(String url) {
+    private Link(URI uri) {
+        this.uri = uri;
+    }
+
+    public static Link getFileLink(String relativePath) {
+        var pathWithProtocol = "file://" + System.getProperty("project.path") + relativePath;
+        try {
+            return new Link(new URL(fix(pathWithProtocol)).toURI());
+        } catch (Exception e) {
+            return new Link("");
+        }
+    }
+
+    private static String fix(String url) {
+        if (url.isEmpty()) return url;
         var urlFixed1 = fixProtocol(url);
         return fixTrailingSlash(urlFixed1);
     }
 
-    private String fixProtocol(String url) {
-        if (url.contains(":")) {
+    private static String fixProtocol(String url) {
+        if (url.contains("://")) {
             return url;
         } else {
             return DEFAULT_PROTOCOL + "://" + url;
         }
     }
 
-    private String fixTrailingSlash(String url) {
+    private static String fixTrailingSlash(String url) {
         if (url.charAt(url.length() - 1) == '/') {
             return url.substring(0, url.length() - 1);
         }
@@ -39,92 +57,75 @@ public class Link {
     }
 
     public int length() {
+        if (uri == null) return 0;
         return uri.toString().length();
     }
 
+    public String getWithoutQueryAndFragment() {
+        var str = getScheme() + "://" + getHost();
+        if (getPort() != -1) {
+            str = str + ":" + getPort();
+        }
+        if (getPath() != null) {
+            str = str + getPath();
+        }
+        return str;
+    }
 
     public String getAbsoluteURL() {
+        if (uri == null) return null;
         return uri.toString();
     }
 
     public String getScheme() {
+        if (uri == null) return null;
         return uri.getScheme();
     }
 
-    public boolean isAbsolute() {
-        return uri.isAbsolute();
-    }
-
-    public boolean isOpaque() {
-        return uri.isOpaque();
-    }
-
-    public String getRawSchemeSpecificPart() {
-        return uri.getRawSchemeSpecificPart();
-    }
-
     public String getSchemeSpecificPart() {
+        if (uri == null) return null;
         return uri.getSchemeSpecificPart();
     }
 
-    public String getRawAuthority() {
-        return uri.getRawAuthority();
-    }
-
     public String getAuthority() {
+        if (uri == null) return null;
         return uri.getAuthority();
     }
 
-    public String getRawUserInfo() {
-        return uri.getRawUserInfo();
-    }
-
     public String getUserInfo() {
+        if (uri == null) return null;
         return uri.getUserInfo();
     }
 
     public String getHost() {
+        if (uri == null) return null;
         return uri.getHost();
     }
 
     public int getPort() {
+        if (uri == null) return -1;
         return uri.getPort();
     }
 
-    public String getRawPath() {
-        return uri.getRawPath();
-    }
-
     public String getPath() {
-        return uri.getPath();
-    }
-
-    public String getRawQuery() {
-        return uri.getRawQuery();
+        if (uri == null) return null;
+        String path = uri.getPath();
+        return path.equals("") ? null : path;
     }
 
     public String getQuery() {
+        if (uri == null) return null;
         return uri.getQuery();
     }
 
-    public String getRawFragment() {
-        return uri.getRawFragment();
-    }
-
     public String getFragment() {
+        if (uri == null) return null;
         return uri.getFragment();
-    }
-
-    public int compareTo(URI that) {
-        return uri.compareTo(that);
-    }
-
-    public String toASCIIString() {
-        return uri.toASCIIString();
     }
 
     @Override
     public String toString() {
+        if (uri == null) return "";
         return uri.toString();
     }
 
