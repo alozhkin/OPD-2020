@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SiteTask {
     private Scraper scraper;
     private Crawler crawler;
@@ -19,6 +22,8 @@ public class SiteTask {
     private WordFilter wordFilter;
     private Link link;
     private BlockingQueue<Link> linkQueue;
+
+    private final Logger log = LoggerFactory.getLogger("main");
 
     public SiteTask(Scraper s,
                     Crawler c,

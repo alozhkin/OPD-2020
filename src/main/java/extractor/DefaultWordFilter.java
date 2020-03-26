@@ -10,12 +10,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DefaultWordFilter implements WordFilter {
+    private final Logger log = LoggerFactory.getLogger("extractor");
+
     @Override
     public Collection<String> filter(Collection<String> words) {
+        log.info("filtration process started");
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
+        log.info("filtration process completed");
         return newSet;
     }
 
@@ -37,7 +44,7 @@ public class DefaultWordFilter implements WordFilter {
         try {
             filteredWords = Files.readAllLines(Paths.get(filterLanguageFileName), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read a file {}", filterLanguageFileName, e);
         }
         return filteredWords;
     }

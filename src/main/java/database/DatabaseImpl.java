@@ -17,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.util.StatusPrinter;
 
 class DatabaseImpl implements Database {
 
@@ -30,12 +28,16 @@ class DatabaseImpl implements Database {
 
         Use IDatabase.newInstance() to create database object
    */
+
+    private final Logger log = LoggerFactory.getLogger("database");
+
+
     DatabaseImpl() {
         try {
             url = ConfigurationUtils.parseDatabaseUrl();
             initDatabase();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            log.error("Failed to find a class in classpath", e);
         }
     }
 
@@ -59,7 +61,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return false;
         }
     }
@@ -78,7 +80,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return false;
         }
     }
@@ -131,7 +133,7 @@ class DatabaseImpl implements Database {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return false;
         }
     }
@@ -170,7 +172,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return set;
         }
     }
@@ -202,7 +204,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return null;
         }
     }
@@ -219,7 +221,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return -1;
         }
     }
@@ -233,7 +235,7 @@ class DatabaseImpl implements Database {
             statement.execute("CREATE TABLE IF NOT EXISTS websites ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'company_id' int(11) NOT NULL , 'website' TEXT NOT NULL)");
             statement.execute("CREATE TABLE IF NOT EXISTS words ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'website_id' int(11) NOT NULL , 'word' TEXT NOT NULL)");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
         }
     }
 
@@ -258,7 +260,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return false;
         }
     }
@@ -274,7 +276,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return false;
         }
     }
@@ -288,7 +290,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return -1;
         }
     }
@@ -309,7 +311,7 @@ class DatabaseImpl implements Database {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return set;
         }
     }
@@ -328,17 +330,17 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Fatal error occurred:", e);
             return set;
         }
     }
 
-    private List<Word> getWordsData() throws SQLException {
+    private List<Word> getWordsData() {
         String query = "SELECT * FROM words";
+        List<Word> wordList = new ArrayList<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 try (ResultSet rset = statement.executeQuery(query)) {
-                    List<Word> wordList = new ArrayList<>();
                     while (rset.next()) {
                         int id = rset.getInt(1);
                         int websiteId = rset.getInt(2);
@@ -349,6 +351,10 @@ class DatabaseImpl implements Database {
                     return wordList;
                 }
             }
+        }
+        catch (Exception e) {
+            log.error("Fatal error occurred:", e);
+            return wordList;
         }
     }
 }
