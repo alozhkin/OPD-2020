@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private Set<Link> visitedLinks = ConcurrentHashMap.newKeySet();
+    private Set<Link> occurredLinks = ConcurrentHashMap.newKeySet();
     private static Set<String> languages;
     private static Set<String> fileExtensions;
 
@@ -34,32 +34,26 @@ public class DefaultLinkFilter implements LinkFilter {
     public Collection<Link> filter(@NotNull Collection<Link> links, String domain) {
         Set<Link> result = new HashSet<>();
         for (Link link : links) {
-            if (isLinkSuitable(link, domain)) {
+            if (isLinkSuitable(link, domain) && isNotOccurred(link)) {
                 result.add(link);
             }
         }
-        visitedLinks.addAll(result);
         return result;
     }
 
     private boolean isLinkSuitable(Link link, String domain) {
         return isOnSameDomain(link, domain)
                 && hasNoFragment(link)
-                && wasNotVisited(link)
                 && hasRightLang(link)
                 && isFileExtensionSuitable(link);
     }
 
     private boolean isOnSameDomain(Link link, String domain) {
-        return link.getHost().contains(domain);
+        return domain.contains(link.getHost());
     }
 
     private boolean hasNoFragment(Link link) {
         return link.getFragment() == null;
-    }
-
-    private boolean wasNotVisited(Link link) {
-        return !visitedLinks.contains(link);
     }
 
     private boolean hasRightLang(Link link) {
@@ -87,6 +81,14 @@ public class DefaultLinkFilter implements LinkFilter {
             }
         }
         return true;
+    }
+
+    private synchronized boolean isNotOccurred(Link link) {
+        var contains = occurredLinks.contains(link);
+        if (!contains) {
+            occurredLinks.add(link);
+        }
+        return !contains;
     }
 
     private int indexOfSlash(String str) {
