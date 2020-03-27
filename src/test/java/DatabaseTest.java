@@ -221,10 +221,10 @@ public class DatabaseTest {
         assertEquals(testSet2, database.getWebsites());
 
         HashSet<String> testLink1 = new HashSet<>();
-        testLink1.add("website3");
+        testLink1.add("http://website3");
 
         HashSet<String> testLink2 = new HashSet<>();
-        testLink2.add("website5");
+        testLink2.add("http://website5");
 
         assertEquals(testLink1, database.getWebsiteLink(3));
         assertEquals(testLink2, database.getWebsiteLink(5));
