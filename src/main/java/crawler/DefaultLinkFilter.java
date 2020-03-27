@@ -52,7 +52,7 @@ public class DefaultLinkFilter implements LinkFilter {
         if (path != null) {
             var t = path.substring(1);
             var firstSegment = t.substring(0, indexOfSlash(t));
-            if (!firstSegment.equals("")) {
+            if (!firstSegment.isEmpty()) {
                 return !System.getProperty("site.langs").contains(firstSegment) && languages.contains(firstSegment);
             }
         }
