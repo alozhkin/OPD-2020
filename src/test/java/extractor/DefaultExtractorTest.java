@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import utils.Html;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Set;
@@ -12,8 +11,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DefaultExtractorTest {
-    Path path = Paths.get("src/test/java/resources/html_for_test.txt");
-    Html h = new Html(path);
+    private Html h = Html.fromFile(Paths.get("src/test/resources/html_for_test.txt"));
     DefaultExtractorTest() throws IOException {
     }
 
