@@ -22,15 +22,14 @@ class DatabaseImpl implements Database {
 
     private String url;
 
+    private static Logger log = LoggerFactory.getLogger("database");
+
     /* package-private
 
         DO NOT CHANGE ACCESS MODIFIER!
 
         Use IDatabase.newInstance() to create database object
    */
-
-    private final Logger log = LoggerFactory.getLogger("database");
-
 
     DatabaseImpl() {
         try {
