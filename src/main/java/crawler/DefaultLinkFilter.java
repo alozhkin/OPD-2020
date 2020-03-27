@@ -64,6 +64,8 @@ public class DefaultLinkFilter implements LinkFilter {
         if (path != null) {
             var lastIndex = path.lastIndexOf('/');
             var lastSegment = path.substring(lastIndex);
+            // since in the url path a dot can only indicate a separator between the name and the file extension,
+            // if we can split path into two parts, then second path is file extension
             var splitted = lastSegment.split("\\.");
             if (splitted.length == 2) {
                 return fileExtensions.contains(splitted[1]);
