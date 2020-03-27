@@ -90,4 +90,10 @@ public class LinkFilterTest {
         var filtered = linkFilter.filter(Set.of(new Link("sub.example.com/path/index.java")), "");
         assertEquals(0, filtered.size());
     }
+
+    @Test
+    void shouldNotAcceptLinksWithUserInfo() {
+        var filtered = linkFilter.filter(Set.of(new Link("http://mailto:beate.nowak@zwick-edelstahl.de/impressm")), "");
+        assertEquals(0, filtered.size());
+    }
 }

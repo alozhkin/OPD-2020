@@ -44,6 +44,7 @@ public class DefaultLinkFilter implements LinkFilter {
     private boolean isLinkSuitable(Link link, String domain) {
         return isOnSameDomain(link, domain)
                 && hasNoFragment(link)
+                && hasNoUserInfo(link)
                 && hasRightLang(link)
                 && isFileExtensionSuitable(link);
     }
@@ -54,6 +55,10 @@ public class DefaultLinkFilter implements LinkFilter {
 
     private boolean hasNoFragment(Link link) {
         return link.getFragment() == null;
+    }
+
+    private boolean hasNoUserInfo(Link link) {
+        return link.getUserInfo() == null;
     }
 
     private boolean hasRightLang(Link link) {
