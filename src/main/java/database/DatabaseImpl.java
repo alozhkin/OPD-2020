@@ -37,7 +37,7 @@ class DatabaseImpl implements Database {
             url = ConfigurationUtils.parseDatabaseUrl();
             initDatabase();
         } catch (ClassNotFoundException e) {
-            log.error("Failed to find a class in classpath", e);
+            log.error("Failed to initialize database", e);
         }
     }
 
@@ -61,7 +61,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to put websites to database:", e);
             return false;
         }
     }
@@ -80,7 +80,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to put words to database:", e);
             return false;
         }
     }
@@ -133,7 +133,7 @@ class DatabaseImpl implements Database {
             }
             return true;
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to export data from database:", e);
             return false;
         }
     }
@@ -172,7 +172,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to get website information from database:", e);
             return set;
         }
     }
@@ -204,7 +204,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to get words from database:", e);
             return null;
         }
     }
@@ -221,7 +221,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to get word information from database:", e);
             return -1;
         }
     }
@@ -235,7 +235,7 @@ class DatabaseImpl implements Database {
             statement.execute("CREATE TABLE IF NOT EXISTS websites ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'company_id' int(11) NOT NULL , 'website' TEXT NOT NULL)");
             statement.execute("CREATE TABLE IF NOT EXISTS words ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'website_id' int(11) NOT NULL , 'word' TEXT NOT NULL)");
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to initialize database:", e);
         }
     }
 
@@ -260,7 +260,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to execute statement:", e);
             return false;
         }
     }
@@ -276,7 +276,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to execute statement:", e);
             return false;
         }
     }
@@ -290,7 +290,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to get information from database:", e);
             return -1;
         }
     }
@@ -311,7 +311,7 @@ class DatabaseImpl implements Database {
             }
 
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to get words from database:", e);
             return set;
         }
     }
@@ -330,7 +330,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("Fatal error occurred:", e);
+            log.error("Failed to get websites from database:", e);
             return set;
         }
     }
