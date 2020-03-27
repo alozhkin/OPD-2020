@@ -335,12 +335,12 @@ class DatabaseImpl implements Database {
         }
     }
 
-    private List<Word> getWordsData() {
+    private List<Word> getWordsData() throws SQLException {
         String query = "SELECT * FROM words";
-        List<Word> wordList = new ArrayList<>();
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 try (ResultSet rset = statement.executeQuery(query)) {
+                    List<Word> wordList = new ArrayList<>();
                     while (rset.next()) {
                         int id = rset.getInt(1);
                         int websiteId = rset.getInt(2);
@@ -351,10 +351,6 @@ class DatabaseImpl implements Database {
                     return wordList;
                 }
             }
-        }
-        catch (Exception e) {
-            log.error("Fatal error occurred:", e);
-            return wordList;
         }
     }
 }
