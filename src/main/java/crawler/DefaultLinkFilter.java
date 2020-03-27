@@ -34,29 +34,44 @@ public class DefaultLinkFilter implements LinkFilter {
     public Collection<Link> filter(@NotNull Collection<Link> links, String domain) {
         Set<Link> result = new HashSet<>();
         for (Link link : links) {
-            String strLink = link.toString();
-            if (strLink.contains(domain)
-                    && !strLink.contains("#")
-                    && !visitedLinks.contains(new Link(strLink))
-                    && !hasWrongLang(link)
-                    && isFileExtensionSuitable(link)) {
-                result.add(new Link(strLink));
+            if (isLinkSuitable(link, domain)) {
+                result.add(link);
             }
         }
         visitedLinks.addAll(result);
         return result;
     }
 
-    private boolean hasWrongLang(Link link) {
+    private boolean isLinkSuitable(Link link, String domain) {
+        return isOnSameDomain(link, domain)
+                && hasNoFragment(link)
+                && wasNotVisited(link)
+                && hasRightLang(link)
+                && isFileExtensionSuitable(link);
+    }
+
+    private boolean isOnSameDomain(Link link, String domain) {
+        return link.getHost().contains(domain);
+    }
+
+    private boolean hasNoFragment(Link link) {
+        return link.getFragment() == null;
+    }
+
+    private boolean wasNotVisited(Link link) {
+        return !visitedLinks.contains(link);
+    }
+
+    private boolean hasRightLang(Link link) {
         var path = link.getPath();
         if (path != null) {
             var t = path.substring(1);
             var firstSegment = t.substring(0, indexOfSlash(t));
             if (!firstSegment.isEmpty()) {
-                return !System.getProperty("site.langs").contains(firstSegment) && languages.contains(firstSegment);
+                return System.getProperty("site.langs").contains(firstSegment) || !languages.contains(firstSegment);
             }
         }
-        return false;
+        return true;
     }
 
     private boolean isFileExtensionSuitable(Link link) {
