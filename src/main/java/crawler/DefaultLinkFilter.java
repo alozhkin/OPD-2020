@@ -50,7 +50,7 @@ public class DefaultLinkFilter implements LinkFilter {
     }
 
     private boolean isOnSameDomain(Link link, String domain) {
-        return domain.contains(link.getHost());
+        return link.getHost().contains(domain);
     }
 
     private boolean hasNoFragment(Link link) {
