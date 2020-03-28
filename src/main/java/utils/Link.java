@@ -2,7 +2,7 @@ package utils;
 
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class Link {
@@ -27,9 +27,9 @@ public class Link {
         this.uri = uri;
     }
 
-    public static Link getFileLink(String relativePath) {
+    public static Link getFileLink(Path path) {
         try {
-            return new Link(Paths.get(relativePath).toUri());
+            return new Link(path.toUri());
         } catch (Exception e) {
             return new Link("");
         }

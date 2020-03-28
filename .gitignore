@@ -32,10 +32,10 @@ ehthumbs.db
 Thumbs.db
 
 # temp files
-.tmp
+*.tmp
 
 # database files
-.db
+*.db
 
 # log files
 *.log
