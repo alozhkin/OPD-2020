@@ -1,10 +1,7 @@
-package crawler;
-
-import org.junit.jupiter.api.BeforeEach;
+import crawler.DefaultCrawler;
 import org.junit.jupiter.api.Test;
 import utils.Html;
 import utils.Link;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
@@ -13,15 +10,9 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CrawlerTest {
-    Crawler crawler;
-
-    @BeforeEach
-    void init() {
-        crawler = new DefaultCrawler();
-    }
-
     @Test
-    void shouldNotFailOnEmptyHtml() throws IOException {
+    public void drillingUrlOutput() throws IOException {
+        Html htmlSite = Html.fromFile(Path.of("src/test/resources/telefort.spb.ru.html"));
         Set<String> inSet = Set.of(
                 "http://telefort.spb.ru/contacts.htm",
                 "http://telefort.spb.ru/obj.pdf",
@@ -33,7 +24,7 @@ public class CrawlerTest {
                 "http://telefort.spb.ru/documents.htm"
         );
         Set<Link> editedInSet = inSet.stream().map(Link::new).collect(Collectors.toSet());
-        Html html = Html.fromFile(Path.of("src/test/resources/telefort.spb.ru.html"), new Link("http://telefort.spb.ru/"));
-        assertEquals(editedInSet, crawler.crawl(html));
+        assertEquals(editedInSet,
+                new DefaultCrawler().crawl(new Html(htmlSite.toString(), new Link("http://telefort.spb.ru/"))));
     }
 }
