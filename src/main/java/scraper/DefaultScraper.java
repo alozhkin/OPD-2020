@@ -34,13 +34,19 @@ public class DefaultScraper implements Scraper {
     public Html scrape(Link link) {
         WebDriver driver = driverThreadLocal.get();
         driver.get(link.toString());
-        return new Html(driver.getPageSource(), link);
+        var html = new Html(driver.getPageSource(), link);
+        return hasRightLang(html) ? html : Html.emptyHtml();
     }
 
     public Collection<String> getNewWords(Html html1, Html html2) {
         var a = Jsoup.parse(html1.toString()).text();
         var b = Jsoup.parse(html2.toString()).text();
         return diffMatchPatch.getNewWords(" " + a + " ", " " + b + " ");
+    }
+
+    private boolean hasRightLang(Html html) {
+        var siteLangs = System.getProperty("site.langs");
+        return siteLangs.contains(Jsoup.parse(html.toString()).selectFirst("html").attr("lang"));
     }
 
     public void quit() {
