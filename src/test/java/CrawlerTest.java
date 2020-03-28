@@ -2,7 +2,6 @@ import crawler.DefaultCrawler;
 import org.junit.jupiter.api.Test;
 import utils.Html;
 import utils.Link;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
