@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CrawlerTest {
     @Test
     public void drillingUrlOutput() throws IOException {
-        Html htmlSite = Html.fromFile(Path.of("src/test/resourcestelefort.spb.ru.html"));
-        Set<String> InList = Set.of(
+        Html htmlSite = Html.fromFile(Path.of("src/test/resources/telefort.spb.ru.html"));
+        Set<String> inSet = Set.of(
                 "http://telefort.spb.ru/contacts.htm",
                 "http://telefort.spb.ru/obj.pdf",
                 "http://metrika.yandex.ru/stat/?id=6380740&from=informer",
@@ -23,8 +23,8 @@ public class CrawlerTest {
                 "http://telefort.spb.ru/vacancy.htm",
                 "http://telefort.spb.ru/documents.htm"
         );
-        Set<Link> editedInList = InList.stream().map(Link::new).collect(Collectors.toSet());
-        assertEquals(editedInList,
+        Set<Link> editedInSet = inSet.stream().map(Link::new).collect(Collectors.toSet());
+        assertEquals(editedInSet,
                 new DefaultCrawler().crawl(new Html(htmlSite.toString(), new Link("http://telefort.spb.ru/"))));
     }
 }
