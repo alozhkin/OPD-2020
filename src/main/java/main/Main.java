@@ -15,10 +15,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
     public static AtomicLong submittedTasksCount = new AtomicLong(0);
     public static AtomicLong completedTaskCount = new AtomicLong(0);
+    public static Logger log = LoggerFactory.getLogger("ROOT");
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         ConfigurationUtils.configure();

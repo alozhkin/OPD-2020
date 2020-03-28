@@ -19,22 +19,6 @@
         </encoder>
     </appender>
 
-    <logger name="crawler" level="debug" additivity="false">
-        <appender-ref ref="FILE-ROLLING"/>
-    </logger>
-
-    <logger name="extractor" level="debug" additivity="false">
-        <appender-ref ref="FILE-ROLLING"/>
-    </logger>
-
-    <logger name="database" level="debug" additivity="false">
-        <appender-ref ref="FILE-ROLLING"/>
-    </logger>
-
-    <logger name="main" level="debug" additivity="false">
-        <appender-ref ref="FILE-ROLLING"/>
-    </logger>
-
     <root level="error">
         <appender-ref ref="FILE-ROLLING"/>
     </root>

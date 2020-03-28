@@ -4,6 +4,7 @@ import config.ConfigurationUtils;
 import database.models.Website;
 import database.models.Word;
 import database.utils.DatabaseUtil;
+import main.Main;
 import utils.CSVParser;
 import utils.Link;
 
@@ -15,14 +16,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class DatabaseImpl implements Database {
 
     private String url;
-
-    private static Logger log = LoggerFactory.getLogger("DATABASE");
 
     /* package-private
 
@@ -36,7 +33,7 @@ class DatabaseImpl implements Database {
             url = ConfigurationUtils.parseDatabaseUrl();
             initDatabase();
         } catch (ClassNotFoundException e) {
-            log.error("DatabaseImpl class - DatabaseImpl() - Failed to initialize database", e);
+            Main.log.error("DatabaseImpl - Failed to initialize database", e);
         }
     }
 
@@ -60,7 +57,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - putWebsites method - Failed to put websites into database:", e);
+            Main.log.error("DatabaseImpl - Failed to put websites into database:", e);
             return false;
         }
     }
@@ -79,7 +76,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - putWords method - Failed to put words into database:", e);
+            Main.log.error("DatabaseImpl - Failed to put words into database:", e);
             return false;
         }
     }
@@ -132,7 +129,7 @@ class DatabaseImpl implements Database {
             }
             return true;
         } catch (Exception e) {
-            log.error("DatabaseImpl class - exportDataToCSV method - Failed to export data from database:", e);
+            Main.log.error("DatabaseImpl - Failed to export data from database:", e);
             return false;
         }
     }
@@ -171,7 +168,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - getWebsiteLink method - Failed to get website information from database:", e);
+            Main.log.error("DatabaseImpl - Failed to get website information from database:", e);
             return set;
         }
     }
@@ -203,7 +200,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - getWord method - Failed to get words from database:", e);
+            Main.log.error("DatabaseImpl - Failed to get words from database:", e);
             return null;
         }
     }
@@ -220,7 +217,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - getWordId method - Failed to get word information from database:", e);
+            Main.log.error("DatabaseImpl - Failed to get word information from database:", e);
             return -1;
         }
     }
@@ -234,7 +231,7 @@ class DatabaseImpl implements Database {
             statement.execute("CREATE TABLE IF NOT EXISTS websites ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'company_id' int(11) NOT NULL , 'website' TEXT NOT NULL)");
             statement.execute("CREATE TABLE IF NOT EXISTS words ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'website_id' int(11) NOT NULL , 'word' TEXT NOT NULL)");
         } catch (Exception e) {
-            log.error("DatabaseImpl class - initDatabase method - Failed to initialize database:", e);
+            Main.log.error("DatabaseImpl - Failed to initialize database:", e);
         }
     }
 
@@ -259,7 +256,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - executeStatement method - Failed to execute statement:", e);
+            Main.log.error("DatabaseImpl - Failed to execute statement:", e);
             return false;
         }
     }
@@ -275,7 +272,7 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - executeStatementWithParams method - Failed to execute statement:", e);
+            Main.log.error("DatabaseImpl - Failed to execute statement:", e);
             return false;
         }
     }
@@ -289,7 +286,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - getSizeByQuery method - Failed to get information from database:", e);
+            Main.log.error("DatabaseImpl - Failed to get information from database:", e);
             return -1;
         }
     }
@@ -310,7 +307,7 @@ class DatabaseImpl implements Database {
             }
 
         } catch (Exception e) {
-            log.error("DatabaseImpl class - getWords method - Failed to get words from database:", e);
+            Main.log.error("DatabaseImpl - Failed to get words from database:", e);
             return set;
         }
     }
@@ -329,7 +326,7 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            log.error("DatabaseImpl class - getWebsitesByQuery method - Failed to get websites from database:", e);
+            Main.log.error("DatabaseImpl - Failed to get websites from database:", e);
             return set;
         }
     }
