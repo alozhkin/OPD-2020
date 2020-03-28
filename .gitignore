@@ -38,5 +38,5 @@ Thumbs.db
 *.db
 
 # log files
-.log
+*.log
 logs/
