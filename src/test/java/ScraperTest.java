@@ -1,3 +1,5 @@
+import com.github.tomakehurst.wiremock.WireMockServer;
+import config.ConfigurationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import scraper.DefaultScraper;
@@ -15,10 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ScraperTest {
     private DefaultScraper scraper;
+    private WireMockServer wireMockServer;
 
     @BeforeEach
-    void initScraper() {
+    void initTests() {
         scraper = new DefaultScraper();
+        ConfigurationUtils.configure();
+    }
+
+    void initMockServer() {
+        wireMockServer = new WireMockServer();
+        wireMockServer.start();
     }
 
     @Test
@@ -49,5 +58,11 @@ public class ScraperTest {
         }
         long timeSpend = System.currentTimeMillis() - start;
         assertTrue(10000 > timeSpend);
+    }
+
+    @Test
+    void shouldIgnoreHtmlOnWrongLanguage() {
+        var html = scraper.scrape(Link.getFileLink(Paths.get("src/test/resources/scraper_res/wrong_language.html")));
+        assertEquals(Html.emptyHtml(), html);
     }
 }
