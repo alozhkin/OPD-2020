@@ -9,7 +9,7 @@ public class BySetTest {
     @Test
     public void testBuilder() {
         BySet bySet = new BySet();
-        bySet.builder()
+        bySet
                 .addTagNames("button", "div", "a")
                 .addClassNames("button", "someClass", "click")
                 .addIds("19234", "13424", "12435", "13342", "18378", "12223");
@@ -19,8 +19,8 @@ public class BySetTest {
     @Test
     public void testElementHasRightInstance() {
         BySet bySet = new BySet();
-        bySet.builder().addClassNames("111", "222", "333");
-        Assertions.assertEquals(By.ByClassName.class, bySet.iterator().next().getClass());
+        bySet.addIds("111", "222", "333");
+        Assertions.assertEquals(By.ById.class, bySet.iterator().next().getClass());
     }
 
 }
