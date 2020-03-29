@@ -40,7 +40,7 @@ public class Html {
     private static String getCharset(String html) {
         // <meta attr=value(/)>
         String metaTagStrPattern = "<\\s*meta\\s+[\\w\\s=\\-\";/]*/?\\s*>"
-        // <meta attr=value></meta>
+                // <meta attr=value></meta>
                 + "|<\\s*meta\\s+[\\w\\s=\\-\";/]*>.*<\\s*/\\s*meta\\s*>";
         Pattern metaTagPattern = Pattern.compile(metaTagStrPattern);
         Matcher metaTagMatcher = metaTagPattern.matcher(html);
@@ -61,6 +61,10 @@ public class Html {
 
     public Link getUrl() {
         return url;
+    }
+
+    String setDomain(Link domain) {
+        this.url = domain;
     }
 
     public String getLang() {

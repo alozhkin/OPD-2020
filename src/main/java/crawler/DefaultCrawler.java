@@ -20,7 +20,7 @@ public class DefaultCrawler implements Crawler {
 
         for (Element page : linksOnPage) {
             Link url = new Link(page.attr("abs:href"));
-            if (!url.toString().equals("") && url != html.getUrl() && !url.toString().contains("#")) {
+            if (!url.toString().equals("") && url != html.getUrl()) {
                 list.add(url);
             }
         }
