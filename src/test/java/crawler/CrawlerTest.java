@@ -37,4 +37,4 @@ public class CrawlerTest {
         html.setDomain(new Link("http://telefort.spb.ru/"));
         assertEquals(editedInSet, crawler.crawl(html));
     }
-}
+} 
