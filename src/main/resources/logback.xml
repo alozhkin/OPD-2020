@@ -25,7 +25,7 @@
         </encoder>
     </appender>
 
-    <logger name="console" level="error" additivity="false">
+    <logger name="stdout" level="error" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 

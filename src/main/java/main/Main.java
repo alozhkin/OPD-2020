@@ -21,7 +21,9 @@ import org.slf4j.LoggerFactory;
 public class Main {
     public static AtomicLong submittedTasksCount = new AtomicLong(0);
     public static AtomicLong completedTaskCount = new AtomicLong(0);
-    public static Logger log = LoggerFactory.getLogger("ROOT");
+
+    public static Logger debugLog = LoggerFactory.getLogger("FILE");
+    public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         ConfigurationUtils.configure();
