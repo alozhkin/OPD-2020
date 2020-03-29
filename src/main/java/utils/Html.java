@@ -35,13 +35,13 @@ public class Html {
         }
     }
 
-    public static Html fromFile(Path path, String domain) throws IOException {
+    public static Html fromFile(Path path, Link domain) throws IOException {
         String html = Files.readString(path, StandardCharsets.ISO_8859_1);
         String charset = getCharset(html);
         if (charset == null) {
-            return new Html(Files.readString(path, StandardCharsets.UTF_8), new Link(domain));
+            return new Html(Files.readString(path, StandardCharsets.UTF_8), domain);
         } else {
-            return new Html(Files.readString(path, Charset.forName(charset)), new Link(domain));
+            return new Html(Files.readString(path, Charset.forName(charset)), domain);
         }
     }
 

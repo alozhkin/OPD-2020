@@ -33,7 +33,7 @@ public class CrawlerTest {
                 "http://telefort.spb.ru/documents.htm"
         );
         Set<Link> editedInSet = inSet.stream().map(Link::new).collect(Collectors.toSet());
-        Html html = Html.fromFile(Path.of("src/test/resources/telefort.spb.ru.html"), "http://telefort.spb.ru/");
+        Html html = Html.fromFile(Path.of("src/test/resources/telefort.spb.ru.html"), new Link("http://telefort.spb.ru/"));
         assertEquals(editedInSet, crawler.crawl(html));
     }
 }
