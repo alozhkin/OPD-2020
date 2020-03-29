@@ -32,10 +32,8 @@ public class CrawlerTest {
                 "http://telefort.spb.ru/vacancy.htm",
                 "http://telefort.spb.ru/documents.htm"
         );
-
         Set<Link> editedInSet = inSet.stream().map(Link::new).collect(Collectors.toSet());
-        Html html = Html.fromFile(Path.of("src/test/resources/telefort.spb.ru.html"));
-        html.setDomain(new Link("http://telefort.spb.ru/"));
+        Html html = Html.fromFile(Path.of("src/test/resources/telefort.spb.ru.html"), "http://telefort.spb.ru/");
         assertEquals(editedInSet, crawler.crawl(html));
     }
 }
