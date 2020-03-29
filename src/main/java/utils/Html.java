@@ -35,6 +35,16 @@ public class Html {
         }
     }
 
+    public static Html fromFile(Path path, String domain) throws IOException {
+        String html = Files.readString(path, StandardCharsets.ISO_8859_1);
+        String charset = getCharset(html);
+        if (charset == null) {
+            return new Html(Files.readString(path, StandardCharsets.UTF_8), new Link(domain));
+        } else {
+            return new Html(Files.readString(path, Charset.forName(charset)), new Link(domain));
+        }
+    }
+
     // returns first charset of all in last meta tag with charset attr
     // cannot define if meta tag is incorrect and would not be parsed by browser.
     private static String getCharset(String html) {
@@ -61,10 +71,6 @@ public class Html {
 
     public Link getUrl() {
         return url;
-    }
-
-    public void setDomain(Link domain) {
-        this.url = domain;
     }
 
     public String getLang() {
