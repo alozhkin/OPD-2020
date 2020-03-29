@@ -1,5 +1,7 @@
 package extractor;
 
+import main.Main;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,9 +15,11 @@ import java.util.stream.Collectors;
 public class DefaultWordFilter implements WordFilter {
     @Override
     public Collection<String> filter(Collection<String> words) {
+        Main.log.debug("Filtration task started");
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
+        Main.log.info("Filtration task completed");
         return newSet;
     }
 
@@ -30,6 +34,7 @@ public class DefaultWordFilter implements WordFilter {
             Collection<String> filterWords = parseFiltrationFile(path);
             setOfWords.removeAll(filterWords);
         }
+        Main.log.debug("Unnecessary words have been removed");
     }
 
     private Collection<String> parseFiltrationFile(String filterLanguageFileName) {
@@ -37,7 +42,7 @@ public class DefaultWordFilter implements WordFilter {
         try {
             filteredWords = Files.readAllLines(Paths.get(filterLanguageFileName), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            e.printStackTrace();
+            Main.log.error("DefaultWordFilter - Failed to parse file with filter words", e);
         }
         return filteredWords;
     }
@@ -59,6 +64,7 @@ public class DefaultWordFilter implements WordFilter {
         for (String setObj : setOfWords) {
             newSet.add(removingPunctuation(setObj));
         }
+        Main.log.debug("Punctuation has been removed");
         return newSet;
     }
 
