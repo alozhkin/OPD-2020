@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DefaultWordFilter implements WordFilter {
+
+    private Collection<String> filteredWords = getFilterWords();
+
     @Override
     public Collection<String> filter(Collection<String> words) {
         Main.log.debug("Filtration task started");
@@ -25,26 +28,8 @@ public class DefaultWordFilter implements WordFilter {
 
     // Фильтр ненужных слов
     public void unnecessaryWordsFilter(Collection<String> setOfWords) {
-        List<String> listOfPath = new ArrayList<>();
-        listOfPath.add("src/main/resources/list_of_words_for_filtration/english_words.txt");
-        listOfPath.add("src/main/resources/list_of_words_for_filtration/russian_words.txt");
-        listOfPath.add("src/main/resources/list_of_words_for_filtration/german_words.txt");
-
-        for (String path : listOfPath) {
-            Collection<String> filterWords = parseFiltrationFile(path);
-            setOfWords.removeAll(filterWords);
-        }
+        setOfWords.removeAll(filteredWords);
         Main.log.debug("Unnecessary words have been removed");
-    }
-
-    private Collection<String> parseFiltrationFile(String filterLanguageFileName) {
-        List<String> filteredWords = null;
-        try {
-            filteredWords = Files.readAllLines(Paths.get(filterLanguageFileName), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            Main.log.error("DefaultWordFilter - Failed to parse file with filter words", e);
-        }
-        return filteredWords;
     }
 
     //Удаление пустого элемента
@@ -78,5 +63,21 @@ public class DefaultWordFilter implements WordFilter {
         }
 
         return sb.toString();
+    }
+
+    private Collection<String> getFilterWords() {
+        List<String> filteredWords = new ArrayList<>();
+        List<String> listOfPaths = new ArrayList<>();
+        listOfPaths.add("src/main/resources/list_of_words_for_filtration/english_words.txt");
+        listOfPaths.add("src/main/resources/list_of_words_for_filtration/russian_words.txt");
+        listOfPaths.add("src/main/resources/list_of_words_for_filtration/german_words.txt");
+        try {
+            for (String path : listOfPaths) {
+               filteredWords.addAll(Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8));
+            }
+        } catch (IOException e) {
+            Main.log.error("DefaultWordFilter - Failed to parse file with filter words", e);
+        }
+        return filteredWords;
     }
 }
