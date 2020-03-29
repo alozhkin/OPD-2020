@@ -18,18 +18,18 @@ public class DefaultWordFilter implements WordFilter {
 
     @Override
     public Collection<String> filter(Collection<String> words) {
-        Main.log.debug("Filtration task started");
+        Main.debugLog.debug("Filtration task started");
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
-        Main.log.info("Filtration task completed");
+        Main.debugLog.info("Filtration task completed");
         return newSet;
     }
 
     // Фильтр ненужных слов
     public void unnecessaryWordsFilter(Collection<String> setOfWords) {
         setOfWords.removeAll(filteredWords);
-        Main.log.debug("Unnecessary words have been removed");
+        Main.debugLog.debug("Unnecessary words have been removed");
     }
 
     //Удаление пустого элемента
@@ -49,7 +49,7 @@ public class DefaultWordFilter implements WordFilter {
         for (String setObj : setOfWords) {
             newSet.add(removingPunctuation(setObj));
         }
-        Main.log.debug("Punctuation has been removed");
+        Main.debugLog.debug("Punctuation has been removed");
         return newSet;
     }
 
@@ -76,7 +76,13 @@ public class DefaultWordFilter implements WordFilter {
                filteredWords.addAll(Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8));
             }
         } catch (IOException e) {
-            Main.log.error("DefaultWordFilter - Failed to parse file with filter words", e);
+            //e.toString() will print only what exception has been thrown
+            //for example, java.lang.ArithmeticException: / by zero
+            Main.consoleLog.error("DefaultWordFilter - Failed to parse file with filter words: {}",e.toString());
+            //will write to the file exception with stacktrace
+            //for example, java.lang.ArithmeticException: / by zero
+            //              at Test.main(Test.java:9)
+            Main.debugLog.error("DefaultWordFilter - Failed to parse file with filter words:", e);
         }
         return filteredWords;
     }
