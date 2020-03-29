@@ -25,6 +25,14 @@
         </encoder>
     </appender>
 
+    <logger name="console" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="file" level="debug" additivity="false">
+        <appender-ref ref="FILE-ROLLING"/>
+    </logger>
+
     <root level="error">
         <appender-ref ref="FILE-ROLLING"/>
     </root>
