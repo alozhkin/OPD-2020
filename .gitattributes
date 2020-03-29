@@ -1,0 +1,6 @@
+src/main/java/diff_match_patch/* linguist-generated
+src/main/java/database/utils/ScriptRunner.java linguist-generated
+*.html linguist-generated
+*.css linguist-generated
+*.csv linguist-generated
+*.txt linguist-generated
