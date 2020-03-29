@@ -63,7 +63,7 @@ public class Html {
         return url;
     }
 
-    String setDomain(Link domain) {
+    public void setDomain(Link domain) {
         this.url = domain;
     }
 
