@@ -35,12 +35,22 @@ public class Html {
         }
     }
 
+    public static Html fromFile(Path path, Link domain) throws IOException {
+        String html = Files.readString(path, StandardCharsets.ISO_8859_1);
+        String charset = getCharset(html);
+        if (charset == null) {
+            return new Html(Files.readString(path, StandardCharsets.UTF_8), domain);
+        } else {
+            return new Html(Files.readString(path, Charset.forName(charset)), domain);
+        }
+    }
+
     // returns first charset of all in last meta tag with charset attr
     // cannot define if meta tag is incorrect and would not be parsed by browser.
     private static String getCharset(String html) {
         // <meta attr=value(/)>
         String metaTagStrPattern = "<\\s*meta\\s+[\\w\\s=\\-\";/]*/?\\s*>"
-        // <meta attr=value></meta>
+                // <meta attr=value></meta>
                 + "|<\\s*meta\\s+[\\w\\s=\\-\";/]*>.*<\\s*/\\s*meta\\s*>";
         Pattern metaTagPattern = Pattern.compile(metaTagStrPattern);
         Matcher metaTagMatcher = metaTagPattern.matcher(html);
