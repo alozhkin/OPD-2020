@@ -1,6 +1,12 @@
 <configuration>
     <property name="HOME_LOG" value="logs/debug.log"/>
 
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${HOME_LOG}</file>
 
@@ -18,6 +24,14 @@
             <pattern>%d %p %c{1.} [%t] %m%n</pattern>
         </encoder>
     </appender>
+
+    <logger name="stdout" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="file" level="debug" additivity="false">
+        <appender-ref ref="FILE-ROLLING"/>
+    </logger>
 
     <root level="error">
         <appender-ref ref="FILE-ROLLING"/>
