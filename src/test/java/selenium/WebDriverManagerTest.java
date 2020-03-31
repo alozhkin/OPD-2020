@@ -24,7 +24,6 @@ public class WebDriverManagerTest {
         bySet.addTagNames("div", "a", "button");
         Collection<String> words = webDriverManager.getDynamicContentWithClicking(bySet);
         Assertions.assertFalse(words.isEmpty());
-
         //TODO
     }
 

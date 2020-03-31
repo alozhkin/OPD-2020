@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 public class WebDriverManager {
     private Link currentLink;
@@ -40,8 +41,10 @@ public class WebDriverManager {
 
     private static WebDriver initDriver() {
         var options = new ChromeOptions();
-        options.addArguments("--headless");
+        options.addArguments("--headless", "--disable-gpu");
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        System.setProperty("webdriver.chrome.silentOutput", "true");
+        java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
         var driver = new ChromeDriver(options);
         drivers.add(driver);
         return driver;
@@ -99,10 +102,7 @@ public class WebDriverManager {
                 result.addAll(getNewWords(currentHtml, parseHtml()));
             } catch (ElementNotInteractableException | StaleElementReferenceException ignored) {
             }
-
         }
-
-
         return result;
     }
 
@@ -116,6 +116,7 @@ public class WebDriverManager {
         }
         return parsedHtml;
     }
+
     public Html parseHtmlWithJsoup() {
         return parseHtmlWithJsoup(currentLink);
     }
