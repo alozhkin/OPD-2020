@@ -2,6 +2,7 @@ package crawler;
 
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
+import main.Main;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,24 +21,28 @@ public class DefaultLinkFilter implements LinkFilter {
         try {
             languages = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/languages.txt")));
         } catch (IOException e) {
-            e.printStackTrace();
+            Main.consoleLog.error("DefaultLinkFilter - Failed to get languages from the file: {}", e.toString());
+            Main.debugLog.error("DefaultLinkFilter - Failed to get languages from the file:", e);
             languages = new HashSet<>();
         }
         try {
             fileExtensions = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/file_extensions.txt")));
         } catch (IOException e) {
-            e.printStackTrace();
+            Main.consoleLog.error("DefaultLinkFilter - Failed to get file extensions from the file: {}", e.toString());
+            Main.debugLog.error("DefaultLinkFilter - Failed to get file extensions from the file:", e);
             fileExtensions = new HashSet<>();
         }
     }
 
     public Collection<Link> filter(@NotNull Collection<Link> links, String domain) {
+        Main.debugLog.debug("Link filtration task started");
         Set<Link> result = new HashSet<>();
         for (Link link : links) {
             if (isLinkSuitable(link, domain) && isNotOccurred(link)) {
                 result.add(link);
             }
         }
+        Main.debugLog.debug("Link filtration task completed");
         return result;
     }
 
