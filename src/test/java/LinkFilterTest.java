@@ -99,4 +99,11 @@ public class LinkFilterTest {
                 new Link("example.com"));
         assertEquals(0, filtered.size());
     }
+
+    @Test
+    void shouldNotBeConfusedWithDotsInPath() {
+        var filtered = linkFilter.filter(Set.of(new Link("http://www.jsoup.org/packages/jsoup-1.13.1.jar")),
+                new Link("jsoup.org"));
+        assertEquals(0, filtered.size());
+    }
 }

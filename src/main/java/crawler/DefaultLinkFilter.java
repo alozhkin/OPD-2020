@@ -83,11 +83,12 @@ public class DefaultLinkFilter implements LinkFilter {
         if (path != null) {
             var lastIndex = path.lastIndexOf('/');
             var lastSegment = path.substring(lastIndex);
-            // lastSegmentSplitted[0] -- name
-            // lastSegmentSplitted[1] -- file extension, if  exists
+            // last array part is file extension if array has size > 1
             var lastSegmentSplitted = lastSegment.split("\\.");
-            if (lastSegmentSplitted.length == 2) {
-                return fileExtensions.contains(lastSegmentSplitted[1]);
+            if (lastSegmentSplitted.length == 1) {
+                return true;
+            } else {
+                return fileExtensions.contains(lastSegmentSplitted[lastSegmentSplitted.length - 1]);
             }
         }
         return true;
