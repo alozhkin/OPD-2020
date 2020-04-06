@@ -40,7 +40,7 @@ public class SiteTask {
         try {
             var html = scraper.scrape(link);
             var links = crawler.crawl(html);
-            var filteredLinks = linkFilter.filter(links, link.toString());
+            var filteredLinks = linkFilter.filter(links, link);
             linkQueue.addAll(filteredLinks);
             var words = extractor.extract(html);
             return wordFilter.filter(words);
