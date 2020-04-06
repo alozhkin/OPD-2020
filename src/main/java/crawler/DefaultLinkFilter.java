@@ -1,8 +1,8 @@
 package crawler;
 
+import main.Main;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
-import main.Main;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,7 +34,7 @@ public class DefaultLinkFilter implements LinkFilter {
         }
     }
 
-    public Collection<Link> filter(@NotNull Collection<Link> links, String domain) {
+    public Collection<Link> filter(@NotNull Collection<Link> links, Link domain) {
         Main.debugLog.debug("Link filtration task started");
         Set<Link> result = new HashSet<>();
         for (Link link : links) {
@@ -46,7 +46,7 @@ public class DefaultLinkFilter implements LinkFilter {
         return result;
     }
 
-    private boolean isLinkSuitable(Link link, String domain) {
+    private boolean isLinkSuitable(Link link, Link domain) {
         return isOnSameDomain(link, domain)
                 && hasNoFragment(link)
                 && hasNoUserInfo(link)
@@ -54,8 +54,8 @@ public class DefaultLinkFilter implements LinkFilter {
                 && isFileExtensionSuitable(link);
     }
 
-    private boolean isOnSameDomain(Link link, String domain) {
-        return link.getHost().contains(domain);
+    private boolean isOnSameDomain(Link link, Link domain) {
+        return link.getHost().contains(domain.getHost());
     }
 
     private boolean hasNoFragment(Link link) {

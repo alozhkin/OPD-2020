@@ -56,6 +56,10 @@ public class Link {
         return url;
     }
 
+    public static Link getEmptyLink() {
+        return new Link("");
+    }
+
     public int length() {
         if (uri == null) return 0;
         return uri.toString().length();
