@@ -5,7 +5,6 @@ import org.jsoup.Jsoup;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import utils.Html;
 import utils.Link;
@@ -47,7 +46,7 @@ public class DefaultScraper implements Scraper {
 
     private boolean hasRightLang(Html html) {
         var siteLangs = System.getProperty("site.langs");
-        return siteLangs.contains(Jsoup.parse(html.toString()).selectFirst("html").attr("lang"));
+        return siteLangs.contains(html.getLang());
     }
 
     public void quit() {
