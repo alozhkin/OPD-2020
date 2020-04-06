@@ -6,6 +6,8 @@ import crawler.DefaultLinkFilter;
 import database.Database;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scraper.DefaultScraper;
 import utils.CSVParser;
 import utils.Link;
@@ -15,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Main {
     public static AtomicLong submittedTasksCount = new AtomicLong(0);
@@ -40,7 +40,8 @@ public class Main {
         var database = Database.newInstance();
         var linkQueue = new LinkedBlockingDeque<Link>();
 
-        var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(6);
+        var numberOfThreads = Integer.valueOf(System.getProperty("threads.number"));
+        var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads);
         var cs = new ExecutorCompletionService<Collection<String>>(exec);
         var dbExec = Executors.newSingleThreadExecutor();
 
