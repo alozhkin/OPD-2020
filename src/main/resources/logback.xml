@@ -25,11 +25,11 @@
         </encoder>
     </appender>
 
-    <logger name="stdout" level="error" additivity="false">
+    <logger name="STDOUT" level="error" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="file" level="debug" additivity="false">
+    <logger name="FILE" level="debug" additivity="false">
         <appender-ref ref="FILE-ROLLING"/>
     </logger>
 
