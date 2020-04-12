@@ -1,5 +1,6 @@
+package utils;
+
 import org.junit.jupiter.api.Test;
-import utils.Link;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
