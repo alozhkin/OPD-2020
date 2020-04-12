@@ -40,7 +40,7 @@ public class Main {
         var database = Database.newInstance();
         var linkQueue = new LinkedBlockingDeque<Link>();
 
-        var numberOfThreads = Integer.valueOf(System.getProperty("threads.number"));
+        var numberOfThreads = Integer.parseInt(System.getProperty("threads.number"));
         var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads);
         var cs = new ExecutorCompletionService<Collection<String>>(exec);
         var dbExec = Executors.newSingleThreadExecutor();
