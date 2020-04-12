@@ -106,4 +106,26 @@ public class LinkFilterTest {
                 new Link("jsoup.org"));
         assertEquals(0, filtered.size());
     }
+
+    @Test
+    void shouldNotConsiderLinksWithFragmentDifferent() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("https://github.com/features"),
+                        new Link("https://github.com/features#hosting")
+                ),
+                new Link("github.com"));
+        assertEquals(1, filtered.size());
+    }
+
+    @Test
+    void shouldNotConsiderLinksWithQueryDifferent() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("https://github.com/features"),
+                        new Link("https://github.com/features?value=1")
+                ),
+                new Link("github.com"));
+        assertEquals(1, filtered.size());
+    }
 }
