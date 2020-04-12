@@ -66,4 +66,12 @@ public class ScraperTest {
         var html = scraper.scrape(Link.getFileLink(Paths.get("src/test/resources/scraper_res/wrong_language.html")));
         assertEquals(Html.emptyHtml(), html);
     }
+
+    @Test
+    void shouldNotIgnoreHtmlOnNotValidButRightLanguage() {
+        var html = scraper.scrape(
+                Link.getFileLink(Paths.get("src/test/resources/scraper_res/not_valid_but_right_language.html"))
+        );
+        assertTrue(html.toString().length() != 0);
+    }
 }
