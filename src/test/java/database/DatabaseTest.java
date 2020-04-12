@@ -1,4 +1,5 @@
-import database.Database;
+package database;
+
 import database.models.Website;
 import database.models.Word;
 import org.junit.jupiter.api.BeforeEach;

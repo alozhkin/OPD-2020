@@ -1,6 +1,6 @@
+package crawler;
+
 import config.ConfigurationUtils;
-import crawler.DefaultLinkFilter;
-import crawler.LinkFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Link;

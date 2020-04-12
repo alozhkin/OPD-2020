@@ -1,8 +1,9 @@
+package scraper;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import config.ConfigurationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import scraper.DefaultScraper;
 import utils.Html;
 import utils.Link;
 

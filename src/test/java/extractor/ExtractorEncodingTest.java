@@ -1,4 +1,5 @@
-import extractor.DefaultExtractor;
+package extractor;
+
 import org.junit.jupiter.api.Test;
 import utils.Html;
 
