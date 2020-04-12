@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private final Set<Link> occurredLinks = ConcurrentHashMap.newKeySet();
+    private final Set<String> occurredLinks = ConcurrentHashMap.newKeySet();
     private static Set<String> languages;
     private static Set<String> fileExtensions;
 
@@ -95,9 +95,10 @@ public class DefaultLinkFilter implements LinkFilter {
     }
 
     private synchronized boolean isNotOccurred(Link link) {
-        var contains = occurredLinks.contains(link);
+        String url = link.getWithoutQueryAndFragment();
+        var contains = occurredLinks.contains(url);
         if (!contains) {
-            occurredLinks.add(link);
+            occurredLinks.add(url);
         }
         return !contains;
     }
