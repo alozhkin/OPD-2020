@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private Set<Link> occurredLinks = ConcurrentHashMap.newKeySet();
+    private final Set<Link> occurredLinks = ConcurrentHashMap.newKeySet();
     private static Set<String> languages;
     private static Set<String> fileExtensions;
 
