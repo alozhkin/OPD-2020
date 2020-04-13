@@ -6,3 +6,4 @@ phtml
 shtml
 jsp
 aspx
+cfm
