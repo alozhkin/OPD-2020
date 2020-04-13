@@ -28,6 +28,8 @@ public class DatabaseTask {
             Main.consoleLog.error("DatabaseTask - Failed to put words into database: {}", e.toString());
             Main.debugLog.error("DatabaseTask - Failed to put words into database:", e);
             return false;
+        } finally {
+            Main.debugLog.info("Database task completed");
         }
     }
 }
