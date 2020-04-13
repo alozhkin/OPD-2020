@@ -25,7 +25,8 @@ public class DatabaseTask {
                     .map(word -> new Word(domain.toString().hashCode(), word))
                     .collect(Collectors.toSet()));
         } catch (Exception e) {
-            e.printStackTrace();
+            Main.consoleLog.error("DatabaseTask - Failed to put words into database: {}", e.toString());
+            Main.debugLog.error("DatabaseTask - Failed to put words into database:", e);
             return false;
         }
     }
