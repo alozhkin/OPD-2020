@@ -1,6 +1,7 @@
 package scraper;
 
 import diff_match_patch.DiffMatchPatch;
+import main.Main;
 import org.jsoup.Jsoup;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
@@ -35,7 +36,9 @@ public class DefaultScraper implements Scraper {
         WebDriver driver = driverThreadLocal.get();
         driver.get(link.toString());
         var html = new Html(driver.getPageSource(), link);
-        return hasRightLang(html) ? html : Html.emptyHtml();
+        var scrapeOutput = hasRightLang(html) ? html : Html.emptyHtml();
+        Main.debugLog.info("Scraping task completed");
+        return scrapeOutput;
     }
 
     public Collection<String> getNewWords(Html html1, Html html2) {
