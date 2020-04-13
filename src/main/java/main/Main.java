@@ -65,6 +65,7 @@ public class Main {
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } finally {
+            Main.debugLog.info("Main task completed");
             exec.shutdown();
             dbExec.shutdown();
             scraper.quit();
