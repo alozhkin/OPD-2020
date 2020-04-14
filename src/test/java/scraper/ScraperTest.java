@@ -74,4 +74,11 @@ public class ScraperTest {
         );
         assertTrue(html.toString().length() != 0);
     }
+
+    @Test
+    void shouldUnderstandUmlautInUrl() {
+        var html = scraper.scrape(new Link("https://www.rummel-matratzen.de/fileadmin/pdf/kur" +
+                "zanleitungen/Kurzanleitung_Dauerläufer_anlernen_OFFLINE_MOTOR.pdf"));
+        assertTrue(html.toString().length() != 0);
+    }
 }
