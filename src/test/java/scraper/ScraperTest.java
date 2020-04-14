@@ -13,8 +13,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ScraperTest {
     private DefaultScraper scraper;
@@ -68,17 +67,8 @@ public class ScraperTest {
     }
 
     @Test
-    void shouldNotIgnoreHtmlOnNotValidButRightLanguage() {
-        var html = scraper.scrape(
-                Link.getFileLink(Paths.get("src/test/resources/scraper_res/not_valid_but_right_language.html"))
-        );
-        assertTrue(html.toString().length() != 0);
-    }
-
-    @Test
-    void shouldUnderstandUmlautInUrl() {
-        var html = scraper.scrape(new Link("https://www.rummel-matratzen.de/fileadmin/pdf/kur" +
-                "zanleitungen/Kurzanleitung_Dauerläufer_anlernen_OFFLINE_MOTOR.pdf"));
-        assertTrue(html.toString().length() != 0);
+    void shouldNotIgnoreHtmlOnRightLanguage() {
+        var html = scraper.scrape(Link.getFileLink(Paths.get("src/test/resources/scraper_res/right_language.html")));
+        assertNotEquals(Html.emptyHtml(), html);
     }
 }

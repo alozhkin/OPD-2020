@@ -49,8 +49,10 @@ public class DefaultScraper implements Scraper {
     private boolean hasRightLang(Html html) {
         var siteLangs = System.getProperty("site.langs");
         var htmlLang = html.getLang();
-        for (String siteLang : siteLangs.split(",")) {
-            if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
+        if (htmlLang != null) {
+            for (String siteLang : siteLangs.split(",")) {
+                if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
+            }
         }
         return false;
     }
