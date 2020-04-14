@@ -3,7 +3,9 @@ package utils;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Link {
     private URI uri;
@@ -65,12 +67,27 @@ public class Link {
         return uri.toString().length();
     }
 
+    public Set<Parameter> getParams() {
+        var res = new HashSet<Parameter>();
+        var query = getQuery();
+        if (query != null) {
+            var querySplitted = query.split("&");
+            for (String parameter : querySplitted) {
+                var paramSplitted = parameter.split("=");
+                var name = paramSplitted[0];
+                var value = paramSplitted[1];
+                res.add(new Parameter(name, value));
+            }
+        }
+        return res;
+    }
+
     public String getWithoutQueryAndFragment() {
         var str = getScheme() + "://" + getHost();
         if (getPort() != -1) {
             str = str + ":" + getPort();
         }
-        if (getPath() != null) {
+        if (!getPath().equals("")) {
             str = str + getPath();
         }
         return str;
@@ -112,9 +129,8 @@ public class Link {
     }
 
     public String getPath() {
-        if (uri == null) return null;
-        String path = uri.getPath();
-        return path.equals("") ? null : path;
+        if (uri == null) return "";
+        return uri.getPath();
     }
 
     public String getQuery() {

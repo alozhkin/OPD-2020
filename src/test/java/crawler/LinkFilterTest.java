@@ -108,14 +108,14 @@ public class LinkFilterTest {
     }
 
     @Test
-    void shouldNotConsiderLinksWithFragmentDifferent() {
+    void shouldIgnoreLinksWithFragmentDifferent() {
         var filtered = linkFilter.filter(
                 Set.of(
-                        new Link("https://github.com/features"),
+                        new Link("https://github.com/features#issue"),
                         new Link("https://github.com/features#hosting")
                 ),
                 new Link("github.com"));
-        assertEquals(1, filtered.size());
+        assertEquals(0, filtered.size());
     }
 
     @Test
@@ -126,6 +126,69 @@ public class LinkFilterTest {
                         new Link("https://github.com/features?value=1")
                 ),
                 new Link("github.com"));
+        assertEquals(1, filtered.size());
+    }
+
+    @Test
+    void shouldNotConsiderLinksWithQueryDifferent2() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("https://github.com/features?value=2"),
+                        new Link("https://github.com/features?value=1")
+                ),
+                new Link("github.com"));
+        assertEquals(1, filtered.size());
+    }
+
+    @Test
+    void shouldConsiderLinksWithContentQueryDifferent() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("https://www.alfa-tools.de/kontakt.php?content=datenschutz"),
+                        new Link("https://www.alfa-tools.de/kontakt.php?content=montage")
+                ),
+                new Link("alfa-tools.de"));
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    void shouldConsiderLinksWithContentQueryDifferentSeveralParams() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("https://www.alfa-tools.de/kontakt.php?value=true&content=datenschutz"),
+                        new Link("https://www.alfa-tools.de/kontakt.php?value=false&content=montage")
+                ),
+                new Link("alfa-tools.de"));
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    void shouldNotConsiderLinksWithDifferentProtocolsDifferent() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("https://www.les-graveurs.de"),
+                        new Link("http://www.les-graveurs.de")
+                ),
+                new Link("les-graveurs.de"));
+        assertEquals(1, filtered.size());
+    }
+
+    @Test
+    void shouldUnderstandUmlautInUrl() {
+        var filtered = linkFilter.filter(Set.of(new Link("https://www.matratzen.de/Pflegehinweise_und_Gewährleistung")),
+                new Link("www.matratzen.de")
+        );
+        assertEquals(1, filtered.size());
+    }
+
+    @Test
+    void shouldNotConsiderLinksWithWWWDifferent() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("www.les-graveurs.de"),
+                        new Link("les-graveurs.de")
+                ),
+                new Link("les-graveurs.de"));
         assertEquals(1, filtered.size());
     }
 }
