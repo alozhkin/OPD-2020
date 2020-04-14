@@ -1,7 +1,6 @@
 package utils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -13,15 +12,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Html {
-    private static Html EMPTY_HTML = new Html("", new Link(""));
+    private static final Html EMPTY_HTML = new Html("", new Link(""));
 
-    private String html;
-    private Link url;
+    private final String html;
+    private final Link url;
     private String lang;
 
     public Html(String html, @NotNull Link url) {
         this.html = html;
         this.url = url;
+        this.lang = findLang(html);
     }
 
     // tries to parse encoding, if it is not possible uses UTF-8
@@ -69,15 +69,34 @@ public class Html {
         return charset;
     }
 
-    public Link getUrl() {
-        return url;
+    private static String findLang(String html) {
+        // <html attr=value(/)>
+        String htmlTagStrPattern = "<\\s*html\\s+[\\w\\s=\\-\";/]*/?\\s*>"
+                // <html attr=value></meta>
+                + "|<\\s*html\\s+[\\w\\s=\\-\";/]*>.*<\\s*/\\s*html\\s*>";
+        Pattern htmlTagPattern = Pattern.compile(htmlTagStrPattern);
+        Matcher htmlTagMatcher = htmlTagPattern.matcher(html);
+        // lang = ...
+        String langStrPattern = "lang\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?";
+        Pattern langPattern = Pattern.compile(langStrPattern);
+        String aLang = null;
+        while (htmlTagMatcher.find()) {
+            var htmlTag = htmlTagMatcher.group();
+            Matcher langMatcher = langPattern.matcher(htmlTag);
+            if (langMatcher.find()) {
+                var langAttr = langMatcher.group();
+                aLang = langAttr.substring(langAttr.indexOf("=") + 1).replace("\\s", "").replace("\"", "");
+            }
+        }
+        return aLang;
     }
 
     public String getLang() {
-        if (lang == null) {
-            lang = Jsoup.parse(this.html, url.toString()).selectFirst("html").attr("lang");
-        }
         return lang;
+    }
+
+    public Link getUrl() {
+        return url;
     }
 
     public static Html emptyHtml() {
