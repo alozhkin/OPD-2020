@@ -3,19 +3,29 @@ package crawler;
 import main.Main;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
+import utils.Parameter;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private final Set<String> occurredLinks = ConcurrentHashMap.newKeySet();
+    private final Set<RelativeURL> occurredLinks;
     private static Set<String> languages;
     private static Set<String> fileExtensions;
+
+    //suggests that main page were visited
+    public DefaultLinkFilter() {
+        occurredLinks = ConcurrentHashMap.newKeySet();
+        occurredLinks.add(new RelativeURL(""));
+        occurredLinks.add(new RelativeURL("index.html"));
+        occurredLinks.add(new RelativeURL("index.php"));
+    }
 
     static {
         try {
@@ -34,16 +44,56 @@ public class DefaultLinkFilter implements LinkFilter {
         }
     }
 
+    // for link occurrence check
+    private static class RelativeURL {
+
+        private String path;
+        private Set<Parameter> params;
+
+        public RelativeURL(String path) {
+            this.path = path;
+            params = null;
+        }
+
+        public RelativeURL(String path, Set<Parameter> params) {
+            this.path = path;
+            this.params = params;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RelativeURL that = (RelativeURL) o;
+            return Objects.equals(path, that.path) &&
+                    Objects.equals(params, that.params);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(path, params);
+        }
+
+        @Override
+        public String toString() {
+            return "RelativeURL{" +
+                    "path='" + path + '\'' +
+                    ", params=" + params +
+                    '}';
+        }
+    }
+
     public Collection<Link> filter(@NotNull Collection<Link> links, Link domain) {
-        Main.debugLog.debug("Link filtration task started");
-        Set<Link> result = new HashSet<>();
+        Set<Link> res = new HashSet<>();
         for (Link link : links) {
-            if (isLinkSuitable(link, domain) && isNotOccurred(link)) {
-                result.add(link);
+            if (isLinkSuitable(link, domain)
+                    && isLinkNotOccurred(new RelativeURL(link.getPath(), getContentParams(link)))
+            ) {
+                res.add(link);
             }
         }
         Main.debugLog.debug("Link filtration task completed");
-        return result;
+        return res;
     }
 
     private boolean isLinkSuitable(Link link, Link domain) {
@@ -68,7 +118,7 @@ public class DefaultLinkFilter implements LinkFilter {
 
     private boolean hasRightLang(Link link) {
         var path = link.getPath();
-        if (path != null) {
+        if (!path.equals("")) {
             var t = path.substring(1);
             var firstSegment = t.substring(0, indexOfSlash(t));
             if (!firstSegment.isEmpty()) {
@@ -80,7 +130,7 @@ public class DefaultLinkFilter implements LinkFilter {
 
     private boolean isFileExtensionSuitable(Link link) {
         var path = link.getPath();
-        if (path != null) {
+        if (!path.equals("")) {
             var lastIndex = path.lastIndexOf('/');
             var lastSegment = path.substring(lastIndex);
             // last array part is file extension if array has size > 1
@@ -94,11 +144,25 @@ public class DefaultLinkFilter implements LinkFilter {
         return true;
     }
 
-    private synchronized boolean isNotOccurred(Link link) {
-        String url = link.getWithoutQueryAndFragment();
-        var contains = occurredLinks.contains(url);
+    private Set<Parameter> getContentParams(Link link) {
+        var params = link.getParams();
+        var res = new HashSet<Parameter>();
+        for (Parameter param : params) {
+            var name = param.getName().toLowerCase();
+            if (name.contains("id")
+                    || name.equals("content")
+                    || name.equals("page")
+                    || name.equals("objectpath")) {
+                res.add(param);
+            }
+        }
+        return res;
+    }
+
+    private synchronized boolean isLinkNotOccurred(RelativeURL relativeURL) {
+        var contains = occurredLinks.contains(relativeURL);
         if (!contains) {
-            occurredLinks.add(url);
+            occurredLinks.add(relativeURL);
         }
         return !contains;
     }
