@@ -1,8 +1,10 @@
 package selenium;
 
 import diff_match_patch.DiffMatchPatch;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -10,10 +12,7 @@ import utils.Html;
 import utils.Link;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -129,9 +128,30 @@ public class WebDriverManager {
 
     public BySet constructBySet() {
         BySet bySet = new BySet();
-        //есть идея читать html и парсить все элементы которые там есть и создавать из этого bySet)
-        //TODO
+        Element html = Jsoup.parse(currentHtml.toString(), currentLink.toString()).body();
+        bySet.addTagNames(html.parent().tagName());
+        bySet = (scan(html, bySet));
+        System.out.println("");
         return bySet;
+    }
+
+    BySet scan(@NotNull Element html, @NotNull BySet set) {
+        //BySet bySet = new BySet();
+        set.addTagNames(html.tagName());
+        for (int i = 0; i < html.childrenSize(); i++) {
+            if (!html.tagName().equals("")) {
+                if (html.tagName().equals("br")){
+                    System.out.println(html);
+                }
+                set.addTagNames(html.tagName());
+            }
+        }
+        if (html.childrenSize() != 0) {
+            for (int i = 0; i < html.childrenSize(); i++) {
+                set.addAll(scan(html.child(i), set));
+            }
+        }
+        return set;
     }
 
     public void quit() {

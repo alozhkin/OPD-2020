@@ -6,12 +6,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import utils.Html;
 import utils.Link;
+
 import java.util.Collection;
 
 public class WebDriverManagerTest {
 
     @BeforeAll
-    static void init(){
+    static void init() {
         ConfigurationUtils.configure();
     }
 
@@ -28,7 +29,7 @@ public class WebDriverManagerTest {
     }
 
     @Test
-    void contentShouldBeDifferent(){
+    void contentShouldBeDifferent() {
         WebDriverManager webDriverManager = new WebDriverManager();
         Link link = new Link("https://albrecht-dill.de/");
         Html parsedHtml = webDriverManager.parseHtmlWithJsoup(link);
@@ -41,5 +42,15 @@ public class WebDriverManagerTest {
 //        }
     }
 
+    @Test
+    void constructBySetTest() {
+        BySet expectedBySet = new BySet().addTagNames(
+                "a", "pre", "b", "code", "h1", "i", "h2", "h3", "h4",
+                "script", "div", "p", "ul", "abbr", "li", "ol", "span", "body", "ul", "html", "br"); //br-иногда проподат??
 
+        Link link = new Link("https://jsoup.org");
+        WebDriverManager manager = new WebDriverManager(link);
+        BySet actualBySet = manager.constructBySet();
+        Assertions.assertEquals(expectedBySet, actualBySet);
+    }
 }
