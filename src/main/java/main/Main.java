@@ -34,9 +34,7 @@ public class Main {
 
         var scraper = new DefaultScraper();
         var crawler = new DefaultCrawler();
-        var linkFilter = new DefaultLinkFilter();
         var extractor = new DefaultExtractor();
-        var wordFilter = new DefaultWordFilter();
         var database = Database.newInstance();
         var linkQueue = new LinkedBlockingDeque<Link>();
 
@@ -47,6 +45,10 @@ public class Main {
 
         try {
             for (Link domain : domains) {
+                var linkFilter = new DefaultLinkFilter();
+
+                var wordFilter = new DefaultWordFilter();
+
                 var allWords = new HashSet<String>();
                 cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, domain, linkQueue)::run);
                 submittedTasksCount.incrementAndGet();
