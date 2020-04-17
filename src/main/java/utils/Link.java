@@ -74,9 +74,11 @@ public class Link {
             var querySplitted = query.split("&");
             for (String parameter : querySplitted) {
                 var paramSplitted = parameter.split("=");
-                var name = paramSplitted[0];
-                var value = paramSplitted[1];
-                res.add(new Parameter(name, value));
+                if (paramSplitted.length == 2) {
+                    var name = paramSplitted[0];
+                    var value = paramSplitted[1];
+                    res.add(new Parameter(name, value));
+                }
             }
         }
         return res;
