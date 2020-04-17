@@ -15,4 +15,11 @@ public class HtmlTest {
         var lang = html.getLang();
         assertEquals("it", lang);
     }
+
+    @Test
+    void shouldReadLangAttrWithSeveralLangs() throws IOException {
+        var html = Html.fromFile(Paths.get("src/test/resources/scraper_res/several_langs.html"));
+        var lang = html.getLang();
+        assertEquals("de-DE", lang);
+    }
 }
