@@ -29,14 +29,6 @@ public class Link {
         this.uri = uri;
     }
 
-    public static Link getFileLink(Path path) {
-        try {
-            return new Link(path.toUri());
-        } catch (Exception e) {
-            return new Link("");
-        }
-    }
-
     private static String fix(String url) {
         if (url.isEmpty()) return url;
         var urlFixed1 = fixProtocol(url);
@@ -58,7 +50,15 @@ public class Link {
         return url;
     }
 
-    public static Link getEmptyLink() {
+    public static Link createFileLink(Path path) {
+        try {
+            return new Link(path.toUri());
+        } catch (Exception e) {
+            return new Link("");
+        }
+    }
+
+    public static Link createEmptyLink() {
         return new Link("");
     }
 

@@ -1,7 +1,9 @@
 package scraper;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import config.ConfigurationUtils;
+import extractor.DefaultExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Html;
@@ -9,10 +11,12 @@ import utils.Link;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ScraperTest {
@@ -32,8 +36,8 @@ public class ScraperTest {
 
     @Test
     void shouldFindNewWords() throws IOException {
-        var html1 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/1.html")), new Link(""));
-        var html2 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/2.html")), new Link(""));
+        var html1 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/1.html")), Link.createEmptyLink());
+        var html2 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/2.html")), Link.createEmptyLink());
         var actual = scraper.getNewWords(html1, html2);
         var expected = Set.of("new", "very", "useful", "and", ",", ">", "content");
         assertEquals(expected, new HashSet<>(actual));
@@ -42,8 +46,8 @@ public class ScraperTest {
 
     @Test
     void shouldNotFindNewWords() throws IOException {
-        var html1 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/2.html")), new Link(""));
-        var html2 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/2.html")), new Link(""));
+        var html1 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/2.html")), Link.createEmptyLink());
+        var html2 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/2.html")), Link.createEmptyLink());
         var actual = scraper.getNewWords(html1, html2);
         assertEquals(0, actual.size());
     }
@@ -51,8 +55,8 @@ public class ScraperTest {
     @Test
     void shouldWorkFast() throws IOException {
         long start = System.currentTimeMillis();
-        var html1 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/1.html")), new Link(""));
-        var html2 = new Html(Files.readString(Paths.get("src/test/resources/wikipedia.html")), new Link(""));
+        var html1 = new Html(Files.readString(Paths.get("src/test/resources/scraper_res/1.html")), Link.createEmptyLink());
+        var html2 = new Html(Files.readString(Paths.get("src/test/resources/wikipedia.html")), Link.createEmptyLink());
         for (int i = 0; i < 1000; i++) {
             scraper.getNewWords(html1, html2);
         }
@@ -62,13 +66,32 @@ public class ScraperTest {
 
     @Test
     void shouldIgnoreHtmlOnWrongLanguage() {
-        var html = scraper.scrape(Link.getFileLink(Paths.get("src/test/resources/scraper_res/wrong_language.html")));
+        var html = scraper.scrape(Link.createFileLink(Paths.get("src/test/resources/scraper_res/wrong_language.html")));
         assertEquals(Html.emptyHtml(), html);
     }
 
     @Test
     void shouldNotIgnoreHtmlOnRightLanguage() {
-        var html = scraper.scrape(Link.getFileLink(Paths.get("src/test/resources/scraper_res/right_language.html")));
+        var html = scraper.scrape(Link.createFileLink(Paths.get("src/test/resources/scraper_res/right_language.html")));
         assertNotEquals(Html.emptyHtml(), html);
+    }
+
+    @Test
+    void shouldBeAbleToHandleRedirect() throws IOException {
+        initMockServer();
+        var html = Html.fromFile(Path.of("src/test/resources/scraper_res/simple.html"));
+        stubFor(
+                get(
+                        urlEqualTo("/redirect"))
+                        .willReturn(
+                                permanentRedirect("/redirect_to")));
+        stubFor(
+                get(
+                        urlEqualTo("/redirect_to"))
+                        .willReturn(
+                                aResponse().withBody(html.toString())));
+        var resHtml = scraper.scrape(new Link("localhost:8080/redirect"));
+        var words = new DefaultExtractor().extract(resHtml);
+        assertEquals(Set.of("test"), words);
     }
 }
