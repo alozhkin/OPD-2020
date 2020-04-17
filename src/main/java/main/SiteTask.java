@@ -1,10 +1,5 @@
 package main;
 
-import crawler.Crawler;
-import crawler.LinkFilter;
-import extractor.Extractor;
-import extractor.WordFilter;
-import scraper.Scraper;
 import utils.Link;
 
 import java.util.ArrayList;
@@ -12,39 +7,27 @@ import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 
 public class SiteTask {
-    private Scraper scraper;
-    private Crawler crawler;
-    private LinkFilter linkFilter;
-    private Extractor extractor;
-    private WordFilter wordFilter;
+    private Context context;
     private Link link;
     private BlockingQueue<Link> linkQueue;
 
-    public SiteTask(Scraper s,
-                    Crawler c,
-                    LinkFilter lF,
-                    Extractor e,
-                    WordFilter wF,
-                    Link l,
+    public SiteTask(Context c,
+                    Link site,
                     BlockingQueue<Link> q) {
-        scraper = s;
-        crawler = c;
-        linkFilter = lF;
-        extractor = e;
-        wordFilter = wF;
-        link = l;
+        context = c;
+        link = site;
         linkQueue = q;
     }
 
     public Collection<String> run() {
         try {
             Main.debugLog.info("Site " + link.toString() + " task start");
-            var html = scraper.scrape(link);
-            var links = crawler.crawl(html);
-            var filteredLinks = linkFilter.filter(links, html.getUrl());
+            var html = context.scrape(link);
+            var links = context.crawl(html);
+            var filteredLinks = context.filter(links, html.getUrl());
             linkQueue.addAll(filteredLinks);
-            var words = extractor.extract(html);
-            return wordFilter.filter(words);
+            var words = context.extract(html);
+            return context.filter(words);
         } catch (Exception e) {
             Main.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
             Main.debugLog.error("SiteTask - Failed to run program:", e);

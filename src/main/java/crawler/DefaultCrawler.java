@@ -9,12 +9,13 @@ import org.jsoup.select.Elements;
 import utils.Html;
 import utils.Link;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public class DefaultCrawler implements Crawler {
     @Override
-    public Set<Link> crawl(@NotNull Html html) {
+    public Collection<Link> crawl(@NotNull Html html) {
         Set<Link> list = new HashSet<>();
         Document doc = Jsoup.parse(html.toString(), html.getUrl().toString());
         Elements linksOnPage = doc.select("a[href]");

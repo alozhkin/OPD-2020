@@ -62,6 +62,7 @@ public class DefaultScraper implements Scraper {
         return false;
     }
 
+    @Override
     public void quit() {
         drivers.forEach(WebDriver::quit);
     }
