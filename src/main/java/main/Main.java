@@ -46,6 +46,7 @@ public class Main {
         try {
             for (Link domain : domains) {
                 var linkFilter = new DefaultLinkFilter();
+                linkFilter.addDomain();
 
                 var wordFilter = new DefaultWordFilter();
 

@@ -10,7 +10,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LinkFilterTest {
-    private LinkFilter linkFilter;
+    private DefaultLinkFilter linkFilter;
 
     @BeforeEach
     void init() {
@@ -181,14 +181,28 @@ public class LinkFilterTest {
         assertEquals(1, filtered.size());
     }
 
+//    @Test
+//    void shouldNotConsiderLinksWithWWWDifferent() {
+//        var filtered = linkFilter.filter(
+//                Set.of(
+//                        new Link("www.les-graveurs.de"),
+//                        new Link("les-graveurs.de")
+//                ),
+//                new Link("les-graveurs.de"));
+//        assertEquals(1, filtered.size());
+//    }
+
     @Test
-    void shouldNotConsiderLinksWithWWWDifferent() {
-        var filtered = linkFilter.filter(
-                Set.of(
-                        new Link("www.les-graveurs.de"),
-                        new Link("les-graveurs.de")
+    void shouldAddDefaultPagesToOccurred() {
+        linkFilter.addDomain();
+        var filtered = linkFilter.filter(Set.of(
+                new Link("example.com"),
+                new Link("example.com/index.php"),
+                new Link("example.com/index.html"),
+                new Link("example.com/index.aspx")
                 ),
-                new Link("les-graveurs.de"));
-        assertEquals(1, filtered.size());
+                new Link("example.com")
+        );
+        assertEquals(0, filtered.size());
     }
 }
