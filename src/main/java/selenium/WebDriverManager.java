@@ -133,13 +133,13 @@ public class WebDriverManager {
         return bySet;
     }
 
-    BySet scan(@NotNull Element html, @NotNull BySet set) {
-        set.addTagNames(html.tagName());
-            for (int i = 0; i < html.childrenSize(); i++) {
-                if (!html.tagName().equals("")) {
-                    set.addTagNames(html.tagName());
+    BySet scan(@NotNull Element htmlElement, @NotNull BySet set) {
+        set.addTagNames(htmlElement.tagName());
+            for (int i = 0; i < htmlElement.childrenSize(); i++) {
+                if (!htmlElement.tagName().equals("")) {
+                    set.addTagNames(htmlElement.tagName());
                 }
-                set.addAll(scan(html.child(i), set));
+                set.addAll(scan(htmlElement.child(i), set));
             }
         return set;
     }
