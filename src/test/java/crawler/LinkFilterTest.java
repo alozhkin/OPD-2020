@@ -181,16 +181,16 @@ public class LinkFilterTest {
         assertEquals(1, filtered.size());
     }
 
-//    @Test
-//    void shouldNotConsiderLinksWithWWWDifferent() {
-//        var filtered = linkFilter.filter(
-//                Set.of(
-//                        new Link("www.les-graveurs.de"),
-//                        new Link("les-graveurs.de")
-//                ),
-//                new Link("les-graveurs.de"));
-//        assertEquals(1, filtered.size());
-//    }
+    @Test
+    void shouldNotConsiderLinksWithWWWDifferent() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("www.les-graveurs.de"),
+                        new Link("les-graveurs.de")
+                ),
+                new Link("www.les-graveurs.de"));
+        assertEquals(1, filtered.size());
+    }
 
     @Test
     void shouldAddDefaultPagesToOccurred() {

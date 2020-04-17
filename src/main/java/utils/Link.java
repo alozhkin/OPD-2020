@@ -84,6 +84,22 @@ public class Link {
         return res;
     }
 
+    public Set<String> getSubdomains() {
+        var res = new HashSet<String>();
+        var host = getHost();
+            var hostSplitted = host.split("\\.");
+            var levelsNumber = hostSplitted.length;
+            // ignore top-level and second-level domain
+            for (int i = 0; i < levelsNumber - 2; i++) {
+                // ignore www
+                var subdomain = hostSplitted[i];
+                if (!subdomain.equals("www")) {
+                    res.add(subdomain);
+                }
+            }
+        return res;
+    }
+
     public String getWithoutQueryAndFragment() {
         var str = getScheme() + "://" + getHost();
         var port = getPort();

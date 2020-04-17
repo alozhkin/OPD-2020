@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private final Set<RelativeURL> occurredLinks;
+    private final Set<LinkIdentifiers> occurredLinks;
     private static Set<String> languages;
     private static Set<String> fileExtensions;
 
@@ -42,33 +42,37 @@ public class DefaultLinkFilter implements LinkFilter {
     }
 
     // for link occurrence check
-    private static class RelativeURL {
+    private static class LinkIdentifiers {
 
-        private String path;
-        private Set<Parameter> params;
+        private final String path;
+        private final Set<Parameter> params;
+        private final Set<String> subDomains;
 
-        public RelativeURL(String path) {
+        public LinkIdentifiers(String path) {
             this.path = path;
             params = new HashSet<>();
+            subDomains = new HashSet<>();
         }
 
-        public RelativeURL(String path, Set<Parameter> params) {
+        public LinkIdentifiers(String path, Set<Parameter> params, Set<String> subDomains) {
             this.path = path;
             this.params = params;
+            this.subDomains = subDomains;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            RelativeURL that = (RelativeURL) o;
+            LinkIdentifiers that = (LinkIdentifiers) o;
             return Objects.equals(path, that.path) &&
-                    Objects.equals(params, that.params);
+                    Objects.equals(params, that.params) &&
+                    Objects.equals(subDomains, that.subDomains);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(path, params);
+            return Objects.hash(path, params, subDomains);
         }
 
         @Override
@@ -76,14 +80,15 @@ public class DefaultLinkFilter implements LinkFilter {
             return "RelativeURL{" +
                     "path='" + path + '\'' +
                     ", params=" + params +
+                    ", subdomains=" + subDomains +
                     '}';
         }
     }
 
     public void addDomain() {
-        occurredLinks.add(new RelativeURL(""));
+        occurredLinks.add(new LinkIdentifiers(""));
         for (String fe : fileExtensions) {
-            occurredLinks.add(new RelativeURL("/index." + fe));
+            occurredLinks.add(new LinkIdentifiers("/index." + fe));
         }
     }
 
@@ -91,7 +96,7 @@ public class DefaultLinkFilter implements LinkFilter {
         Set<Link> res = new HashSet<>();
         for (Link link : links) {
             if (isLinkSuitable(link, domain)
-                    && isLinkNotOccurred(new RelativeURL(link.getPath(), getContentParams(link)))
+                    && isLinkNotOccurred(new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains()))
             ) {
                 res.add(link);
             }
@@ -163,10 +168,10 @@ public class DefaultLinkFilter implements LinkFilter {
         return res;
     }
 
-    private synchronized boolean isLinkNotOccurred(RelativeURL relativeURL) {
-        var contains = occurredLinks.contains(relativeURL);
+    private synchronized boolean isLinkNotOccurred(LinkIdentifiers linkIdentifiers) {
+        var contains = occurredLinks.contains(linkIdentifiers);
         if (!contains) {
-            occurredLinks.add(relativeURL);
+            occurredLinks.add(linkIdentifiers);
         }
         return !contains;
     }
