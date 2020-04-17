@@ -129,23 +129,18 @@ public class WebDriverManager {
     public BySet constructBySet() {
         Element html = Jsoup.parse(currentHtml.toString(), currentLink.toString()).body();
         BySet bySet = new BySet();
-        bySet.addTagNames(html.parent().tagName());
-        bySet = (scan(html, bySet));
+        bySet = scan(html, bySet);
         return bySet;
     }
 
     BySet scan(@NotNull Element html, @NotNull BySet set) {
         set.addTagNames(html.tagName());
-        for (int i = 0; i < html.childrenSize(); i++) {
-            if (!html.tagName().equals("")) {
-                set.addTagNames(html.tagName());
-            }
-        }
-        if (html.childrenSize() != 0) {
             for (int i = 0; i < html.childrenSize(); i++) {
+                if (!html.tagName().equals("")) {
+                    set.addTagNames(html.tagName());
+                }
                 set.addAll(scan(html.child(i), set));
             }
-        }
         return set;
     }
 

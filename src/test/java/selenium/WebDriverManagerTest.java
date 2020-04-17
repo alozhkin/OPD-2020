@@ -46,11 +46,21 @@ public class WebDriverManagerTest {
     void constructBySetTest() {
         BySet expectedBySet = new BySet().addTagNames(
                 "a", "pre", "b", "code", "h1", "i", "h2", "h3", "h4",
-                "script", "div", "p", "ul", "abbr", "li", "ol", "span", "body", "ul", "html", "br"); //br-иногда проподат??
+                "script", "div", "p", "ul", "abbr", "li", "ol", "span", "body", "ul", "br");
 
         Link link = new Link("https://jsoup.org");
         WebDriverManager manager = new WebDriverManager(link);
         BySet actualBySet = manager.constructBySet();
+        Assertions.assertEquals(expectedBySet, actualBySet);
+
+        expectedBySet = new BySet().addTagNames(
+                "a", "br", "p", "ol", "h5", "h4", "li", "h3", "h2", "h1", "ul", "em", "nav",
+                "div", "img", "footer", "canvas", "input", "header", "textarea", "body",
+                "button", "label", "span", "article", "form", "strong", "script");
+
+        link = new Link("https://albrecht-dill.de/");
+        manager = new WebDriverManager(link);
+        actualBySet = manager.constructBySet();
         Assertions.assertEquals(expectedBySet, actualBySet);
     }
 }
