@@ -38,6 +38,7 @@ public class SiteTask {
 
     public Collection<String> run() {
         try {
+            Main.debugLog.info("Site " + link.toString() + " task start");
             var html = scraper.scrape(link);
             var links = crawler.crawl(html);
             var filteredLinks = linkFilter.filter(links, html.getUrl());
@@ -49,7 +50,7 @@ public class SiteTask {
             Main.debugLog.error("SiteTask - Failed to run program:", e);
             return new ArrayList<>();
         } finally {
-            Main.debugLog.info("Site task completed");
+            Main.debugLog.info("Site " + link.toString() + " task completed");
             Main.completedTaskCount.incrementAndGet();
         }
     }

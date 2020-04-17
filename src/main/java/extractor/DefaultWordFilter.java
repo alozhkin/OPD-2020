@@ -22,7 +22,7 @@ public class DefaultWordFilter implements WordFilter {
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
-        Main.debugLog.info("Filtration task completed");
+        Main.debugLog.debug("Filtration task completed");
         return newSet;
     }
 
