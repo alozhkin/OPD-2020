@@ -36,7 +36,8 @@ public class DefaultScraper implements Scraper {
     public Html scrape(Link link) {
         WebDriver driver = driverThreadLocal.get();
         driver.get(link.toString());
-        var html = new Html(driver.getPageSource(), link);
+        var url = new Link(driver.getCurrentUrl());
+        var html = new Html(driver.getPageSource(), url);
         return hasRightLang(html) ? html : Html.emptyHtml();
     }
 
