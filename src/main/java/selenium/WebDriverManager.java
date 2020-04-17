@@ -1,8 +1,10 @@
 package selenium;
 
 import diff_match_patch.DiffMatchPatch;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -10,10 +12,7 @@ import utils.Html;
 import utils.Link;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -128,10 +127,21 @@ public class WebDriverManager {
     }
 
     public BySet constructBySet() {
+        Element html = Jsoup.parse(currentHtml.toString(), currentLink.toString()).body();
         BySet bySet = new BySet();
-        //есть идея читать html и парсить все элементы которые там есть и создавать из этого bySet)
-        //TODO
+        bySet = scan(html, bySet);
         return bySet;
+    }
+
+    BySet scan(@NotNull Element htmlElement, @NotNull BySet set) {
+        set.addTagNames(htmlElement.tagName());
+            for (int i = 0; i < htmlElement.childrenSize(); i++) {
+                if (!htmlElement.tagName().equals("")) {
+                    set.addTagNames(htmlElement.tagName());
+                }
+                set.addAll(scan(htmlElement.child(i), set));
+            }
+        return set;
     }
 
     public void quit() {
