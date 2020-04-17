@@ -205,4 +205,17 @@ public class LinkFilterTest {
         );
         assertEquals(0, filtered.size());
     }
+
+    @Test
+    void shouldIgnoreCertainPages() {
+        linkFilter.addDomain();
+        var filtered = linkFilter.filter(Set.of(
+                new Link("example.com/agb"),
+                new Link("example.com/news"),
+                new Link("example.com/blog")
+                ),
+                new Link("example.com")
+        );
+        assertEquals(0, filtered.size());
+    }
 }

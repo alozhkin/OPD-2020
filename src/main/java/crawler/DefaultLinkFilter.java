@@ -18,6 +18,7 @@ public class DefaultLinkFilter implements LinkFilter {
     private final Set<LinkIdentifiers> occurredLinks;
     private static Set<String> languages;
     private static Set<String> fileExtensions;
+    private static Set<String> ignoredLinks;
 
     //suggests that main page were visited
     public DefaultLinkFilter() {
@@ -37,6 +38,13 @@ public class DefaultLinkFilter implements LinkFilter {
         } catch (IOException e) {
             Main.consoleLog.error("DefaultLinkFilter - Failed to get file extensions from the file: {}", e.toString());
             Main.debugLog.error("DefaultLinkFilter - Failed to get file extensions from the file:", e);
+            fileExtensions = new HashSet<>();
+        }
+        try {
+            ignoredLinks = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/ignored_links.txt")));
+        } catch (IOException e) {
+            Main.consoleLog.error("DefaultLinkFilter - Failed to get ignored links from the file: {}", e.toString());
+            Main.debugLog.error("DefaultLinkFilter - Failed to get ignored links from the file:", e);
             fileExtensions = new HashSet<>();
         }
     }
@@ -111,6 +119,7 @@ public class DefaultLinkFilter implements LinkFilter {
                 && hasNoFragment(link)
                 && hasNoUserInfo(link)
                 && hasRightLang(link)
+                && hasUsefulInfo(link)
                 && isFileExtensionSuitable(link);
     }
 
@@ -134,6 +143,14 @@ public class DefaultLinkFilter implements LinkFilter {
             if (!firstSegment.isEmpty()) {
                 return System.getProperty("site.langs").contains(firstSegment) || !languages.contains(firstSegment);
             }
+        }
+        return true;
+    }
+
+    private boolean hasUsefulInfo(Link link) {
+        var paths = link.getPath().split("/");
+        for (String p : paths) {
+            if (ignoredLinks.contains(p)) return false;
         }
         return true;
     }
