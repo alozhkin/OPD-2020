@@ -32,38 +32,35 @@ public class Main {
         csvParser.parse("src/main/resources/websites_data_short.csv");
         List<Link> domains = csvParser.getLinks();
 
-        var scraper = new DefaultScraper();
-        var crawler = new DefaultCrawler();
-        var extractor = new DefaultExtractor();
+        var context = new Context(
+                new DefaultScraper(),
+                new DefaultCrawler(),
+                new DefaultExtractor()
+        );
+
         var database = Database.newInstance();
         var linkQueue = new LinkedBlockingDeque<Link>();
 
         var numberOfThreads = Integer.parseInt(System.getProperty("threads.number"));
         var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads);
         var cs = new ExecutorCompletionService<Collection<String>>(exec);
-        var dbExec = Executors.newSingleThreadExecutor();
+        var domainExec = Executors.newSingleThreadScheduledExecutor();
+        var dbExec = Executors.newSingleThreadScheduledExecutor();
 
         try {
             for (Link domain : domains) {
                 var linkFilter = new DefaultLinkFilter();
                 linkFilter.addDomain();
-
                 var wordFilter = new DefaultWordFilter();
+                context.setLinkFilter(linkFilter);
+                context.setWordFilter(wordFilter);
 
                 var allWords = new HashSet<String>();
-                cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, domain, linkQueue)::run);
-                submittedTasksCount.incrementAndGet();
-                // order is important
-                while (completedTaskCount.get() - submittedTasksCount.get() != 0 || linkQueue.size() != 0) {
-                    var link = linkQueue.poll(50, TimeUnit.MILLISECONDS);
-                    if (link != null) {
-                        cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, link, linkQueue)::run);
-                        submittedTasksCount.incrementAndGet();
-                    }
-                    var wordsFuture = cs.poll(50, TimeUnit.MILLISECONDS);
-                    if (wordsFuture != null) {
-                        allWords.addAll(wordsFuture.get());
-                    }
+                var t = domainExec.submit(() -> new DomainTask(context, linkQueue, cs, domain).findTo(allWords));
+                try {
+                    t.get(1, TimeUnit.MINUTES);
+                } catch (TimeoutException e) {
+                    consoleLog.error("Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
@@ -71,7 +68,7 @@ public class Main {
             Main.debugLog.info("Main task completed");
             exec.shutdown();
             dbExec.shutdown();
-            scraper.quit();
+            context.quit();
         }
     }
 }
