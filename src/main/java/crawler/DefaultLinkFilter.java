@@ -87,6 +87,7 @@ public class DefaultLinkFilter implements LinkFilter {
 
     public void addDomain() {
         occurredLinks.add(new LinkIdentifiers(""));
+        occurredLinks.add(new LinkIdentifiers("index"));
         for (String fe : fileExtensions) {
             occurredLinks.add(new LinkIdentifiers("/index." + fe));
         }
