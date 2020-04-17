@@ -1,6 +1,7 @@
 package scraper;
 
 import diff_match_patch.DiffMatchPatch;
+import main.Main;
 import org.jsoup.Jsoup;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
@@ -37,6 +38,10 @@ public class DefaultScraper implements Scraper {
         WebDriver driver = driverThreadLocal.get();
         driver.get(link.toString());
         var url = new Link(driver.getCurrentUrl());
+        if (!url.getWithoutProtocol().equals(link.getWithoutProtocol())) {
+            Main.debugLog.info(String.format("Redirect from %s to %s", link, url));
+            Main.consoleLog.info(String.format("Redirect from %s to %s", link, url));
+        }
         var html = new Html(driver.getPageSource(), url);
         return hasRightLang(html) ? html : Html.emptyHtml();
     }
