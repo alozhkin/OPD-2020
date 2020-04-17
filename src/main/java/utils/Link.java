@@ -84,11 +84,28 @@ public class Link {
 
     public String getWithoutQueryAndFragment() {
         var str = getScheme() + "://" + getHost();
-        if (getPort() != -1) {
-            str = str + ":" + getPort();
+        var port = getPort();
+        if (port != -1) {
+            str = str + ":" + port;
         }
-        if (!getPath().equals("")) {
-            str = str + getPath();
+        str += getPath();
+        return str;
+    }
+
+    public String getWithoutProtocol() {
+        var str = getHost();
+        var port = getPort();
+        if (port != -1) {
+            str = str + ":" + port;
+        }
+        str += getPath();
+        var query = getQuery();
+        if (query != null) {
+            str += query;
+        }
+        var fragment = getFragment();
+        if (fragment != null) {
+            str += fragment;
         }
         return str;
     }
