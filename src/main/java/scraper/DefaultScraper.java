@@ -16,8 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class DefaultScraper implements Scraper {
-    private static Set<WebDriver> drivers = ConcurrentHashMap.newKeySet();
-    private ThreadLocal<WebDriver> driverThreadLocal = ThreadLocal.withInitial(DefaultScraper::initDriver);
+    private static final Set<WebDriver> drivers = ConcurrentHashMap.newKeySet();
+    private final ThreadLocal<WebDriver> driverThreadLocal = ThreadLocal.withInitial(DefaultScraper::initDriver);
     private static final DiffMatchPatch diffMatchPatch = new DiffMatchPatch();
 
     private static WebDriver initDriver() {
@@ -42,7 +42,8 @@ public class DefaultScraper implements Scraper {
             Main.debugLog.info(String.format("Redirect from %s to %s", link, url));
             Main.consoleLog.info(String.format("Redirect from %s to %s", link, url));
         }
-        var html = new Html(driver.getPageSource(), url);
+        var pageSource = driver.getPageSource();
+        var html = new Html(pageSource, url);
         return hasRightLang(html) ? html : Html.emptyHtml();
     }
 
