@@ -23,8 +23,8 @@ public class DefaultLinkFilter implements LinkFilter {
     public DefaultLinkFilter() {
         occurredLinks = ConcurrentHashMap.newKeySet();
         occurredLinks.add(new RelativeURL(""));
-        occurredLinks.add(new RelativeURL("index.html"));
-        occurredLinks.add(new RelativeURL("index.php"));
+        occurredLinks.add(new RelativeURL("/index.html"));
+        occurredLinks.add(new RelativeURL("/index.php"));
     }
 
     static {
@@ -52,7 +52,7 @@ public class DefaultLinkFilter implements LinkFilter {
 
         public RelativeURL(String path) {
             this.path = path;
-            params = null;
+            params = new HashSet<>();
         }
 
         public RelativeURL(String path, Set<Parameter> params) {
