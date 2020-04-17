@@ -22,9 +22,6 @@ public class DefaultLinkFilter implements LinkFilter {
     //suggests that main page were visited
     public DefaultLinkFilter() {
         occurredLinks = ConcurrentHashMap.newKeySet();
-        occurredLinks.add(new RelativeURL(""));
-        occurredLinks.add(new RelativeURL("/index.html"));
-        occurredLinks.add(new RelativeURL("/index.php"));
     }
 
     static {
@@ -80,6 +77,13 @@ public class DefaultLinkFilter implements LinkFilter {
                     "path='" + path + '\'' +
                     ", params=" + params +
                     '}';
+        }
+    }
+
+    public void addDomain() {
+        occurredLinks.add(new RelativeURL(""));
+        for (String fe : fileExtensions) {
+            occurredLinks.add(new RelativeURL("/index." + fe));
         }
     }
 
