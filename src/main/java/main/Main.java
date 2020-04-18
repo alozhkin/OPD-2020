@@ -64,17 +64,16 @@ public class Main {
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (Exception e) {
-            debugLog.error("WHAAAAAAAAAAAAAT", e);
-            e.printStackTrace();
+            debugLog.error("Main - Failed", e);
         } finally {
             Main.debugLog.info("Main task completed");
-            exec.shutdownNow();
-            exec.awaitTermination(30, TimeUnit.SECONDS);
-            Main.debugLog.info("exec terminated");
             exec.shutdown();
-            dbExec.shutdown();
+            exec.awaitTermination(10, TimeUnit.SECONDS);
             domainExec.shutdown();
+            domainExec.awaitTermination(10, TimeUnit.SECONDS);
+            dbExec.shutdown();
             context.quit();
+            Main.debugLog.info("Resources was closed");
         }
     }
 }

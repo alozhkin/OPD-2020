@@ -13,9 +13,9 @@ public class SiteTask {
     private final Link link;
     private final BlockingQueue<Link> linkQueue;
 
-    public SiteTask(Context c,
-                    Link site,
-                    BlockingQueue<Link> q) {
+    SiteTask(Context c,
+             Link site,
+             BlockingQueue<Link> q) {
         context = c;
         link = site;
         linkQueue = q;
@@ -53,14 +53,15 @@ public class SiteTask {
                 Main.debugLog.info("Site " + link.toString() + " task interrupted");
                 return new ArrayList<>();
             }
+            Collection<String> filteredWords = context.filter(words);
             Main.debugLog.info("Site " + link.toString() + " task completed");
-            return context.filter(words);
+            return filteredWords;
         } catch (WebDriverException e) {
             if (e.getCause().getClass() == InterruptedIOException.class) {
                 Main.debugLog.info("Site " + link.toString() + " task interrupted");
             } else {
-                Main.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
-                Main.debugLog.error("SiteTask - Failed to run program:", e);
+                Main.consoleLog.error("SiteTask - Webdriver fail: {}", e.toString());
+                Main.debugLog.error("SiteTask - Webdriver fail:", e);
             }
         } catch (Exception e) {
             Main.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());

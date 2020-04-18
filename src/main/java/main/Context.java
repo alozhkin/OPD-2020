@@ -4,7 +4,6 @@ import crawler.Crawler;
 import crawler.LinkFilter;
 import extractor.Extractor;
 import extractor.WordFilter;
-import org.openqa.selenium.WebDriver;
 import scraper.Scraper;
 import utils.Html;
 import utils.Link;
@@ -12,27 +11,23 @@ import utils.Link;
 import java.util.Collection;
 
 public class Context {
-    private Scraper scraper;
-    private Crawler crawler;
+    private final Scraper scraper;
+    private final Crawler crawler;
     private LinkFilter linkFilter;
-    private Extractor extractor;
+    private final Extractor extractor;
     private WordFilter wordFilter;
 
-    public Context(Scraper s,
-                   Crawler c,
-                   Extractor e) {
-        scraper = s;
-        crawler = c;
-        linkFilter = null;
-        extractor = e;
-        wordFilter = null;
+    Context(Scraper s,
+            Crawler c,
+            Extractor e) {
+        this(s, c, e, null, null);
     }
 
-    public Context(Scraper s,
-                   Crawler c,
-                   Extractor e,
-                   LinkFilter lF,
-                   WordFilter wF) {
+    Context(Scraper s,
+            Crawler c,
+            Extractor e,
+            LinkFilter lF,
+            WordFilter wF) {
         scraper = s;
         crawler = c;
         linkFilter = lF;
@@ -40,11 +35,11 @@ public class Context {
         wordFilter = wF;
     }
 
-    public void setLinkFilter(LinkFilter linkFilter) {
+    void setLinkFilter(LinkFilter linkFilter) {
         this.linkFilter = linkFilter;
     }
 
-    public void setWordFilter(WordFilter wordFilter) {
+    void setWordFilter(WordFilter wordFilter) {
         this.wordFilter = wordFilter;
     }
 
@@ -68,8 +63,7 @@ public class Context {
         return wordFilter.filter(words);
     }
 
-    public void quit() {
+    void quit() {
         scraper.quit();
     }
-
 }
