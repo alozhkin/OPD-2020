@@ -24,38 +24,23 @@ public class SiteTask {
     public Collection<String> run() {
         try {
             Main.debugLog.info("SiteTask - Start " + link.toString());
-            if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
-                return new ArrayList<>();
-            }
+            checkIfInterrupted();
             var html = context.scrape(link);
-            if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
-                return new ArrayList<>();
-            }
+            checkIfInterrupted();
             var links = context.crawl(html);
-            if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
-                return new ArrayList<>();
-            }
+            checkIfInterrupted();
             var filteredLinks = context.filter(links, html.getUrl());
-            if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
-                return new ArrayList<>();
-            }
+            checkIfInterrupted();
             linkQueue.addAll(filteredLinks);
-            if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
-                return new ArrayList<>();
-            }
+            checkIfInterrupted();
             var words = context.extract(html);
-            if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
-                return new ArrayList<>();
-            }
+            checkIfInterrupted();
             Collection<String> filteredWords = context.filter(words);
+            checkIfInterrupted();
             Main.debugLog.info("SiteTask - Completed " + link.toString());
             return filteredWords;
+        } catch (InterruptedException e) {
+            Main.debugLog.info("SiteTask - Interrupted " + link.toString());
         } catch (WebDriverException e) {
             var cause = e.getCause();
             if (cause != null && cause.getClass() == InterruptedIOException.class) {
@@ -71,5 +56,11 @@ public class SiteTask {
             Main.debugLog.error("SiteTask - Failed to run program:", e);
         }
         return new ArrayList<>();
+    }
+
+    private void checkIfInterrupted() throws InterruptedException {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException();
+        }
     }
 }

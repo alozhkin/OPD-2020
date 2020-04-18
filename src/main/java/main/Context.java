@@ -17,22 +17,22 @@ public class Context {
     private final Extractor extractor;
     private WordFilter wordFilter;
 
-    Context(Scraper s,
-            Crawler c,
-            Extractor e) {
-        this(s, c, e, null, null);
+    Context(Scraper scraper,
+            Crawler crawler,
+            Extractor extractor) {
+        this(scraper, crawler, extractor, null, null);
     }
 
-    Context(Scraper s,
-            Crawler c,
-            Extractor e,
-            LinkFilter lF,
-            WordFilter wF) {
-        scraper = s;
-        crawler = c;
-        linkFilter = lF;
-        extractor = e;
-        wordFilter = wF;
+    Context(Scraper scraper,
+            Crawler crawler,
+            Extractor extractor,
+            LinkFilter linkFilter,
+            WordFilter wordFilter) {
+        this.scraper = scraper;
+        this.crawler = crawler;
+        this.linkFilter = linkFilter;
+        this.extractor = extractor;
+        this.wordFilter = wordFilter;
     }
 
     void setLinkFilter(LinkFilter linkFilter) {

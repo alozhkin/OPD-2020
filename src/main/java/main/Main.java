@@ -18,15 +18,19 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class Main {
+    // in seconds
+    private static final int DOMAIN_TIMEOUT = 240;
+    private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
+    private static final String OUTPUT_PATH = "export.csv";
 
     public static Logger debugLog = LoggerFactory.getLogger("FILE");
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
-    public static void main(String[] args) throws InterruptedException {
-        start("src/main/resources/websites_data_short.csv", "export.csv");
+    public static void main(String[] args) {
+        start(INPUT_PATH, OUTPUT_PATH);
     }
 
-    public static void start(String input, String output) throws InterruptedException {
+    public static void start(String input, String output) {
         debugLog.info("Main - START");
         ConfigurationUtils.configure();
 
@@ -58,26 +62,39 @@ public class Main {
                 var linkQueue = new LinkedBlockingDeque<Link>();
 
                 var allWords = new HashSet<String>();
-                var t = domainExec.submit(() -> new DomainTask(context, linkQueue, cs, domain).findTo(allWords));
+                var future = domainExec.submit(() -> new DomainTask(context, linkQueue, cs, domain).findTo(allWords));
                 try {
-                    t.get(240, TimeUnit.SECONDS);
+                    future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
-                    t.cancel(true);
+                    future.cancel(true);
                     debugLog.error("Main - Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            debugLog.error("Main - Interrupted", e);
         } catch (Exception e) {
             debugLog.error("Main - Failed", e);
         } finally {
             Main.debugLog.info("Main - Completed");
             exec.shutdown();
-            exec.awaitTermination(10, TimeUnit.SECONDS);
+            try {
+                exec.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                debugLog.error("Main - Interrupted", e);
+            }
             domainExec.shutdown();
-            domainExec.awaitTermination(10, TimeUnit.SECONDS);
+            try {
+                domainExec.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                debugLog.error("Main - Interrupted", e);
+            }
             dbExec.shutdown();
             context.quit();
-            Main.debugLog.info("Main - Resources was closed");
+            Main.debugLog.info("Main - Resources were closed");
         }
     }
 }

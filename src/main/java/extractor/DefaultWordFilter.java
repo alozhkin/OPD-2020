@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class DefaultWordFilter implements WordFilter {
 
-    private Collection<String> filteredWords = getFilterWords();
+    private final Collection<String> filteredWords = getFilterWords();
 
     @Override
     public Collection<String> filter(Collection<String> words) {

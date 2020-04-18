@@ -69,8 +69,7 @@ public class LinkFilterTest {
 
     @Test
     void shouldAcceptLinksWithRightFileExtensionQueryIncluded() {
-        var filtered = linkFilter.filter(Set.of(new Link("example.com/index.html?value=true")),
-                new Link("example.com"));
+        var filtered = linkFilter.filter(Set.of(new Link("example.com/index.htm?value=true")), new Link("example.com"));
         assertEquals(1, filtered.size());
     }
 
@@ -82,8 +81,7 @@ public class LinkFilterTest {
 
     @Test
     void shouldNotAcceptLinksWithWrongFileExtensionQueryIncluded() {
-        var filtered = linkFilter.filter(Set.of(new Link("example.com/index.java?value=true")),
-                new Link("example.com"));
+        var filtered = linkFilter.filter(Set.of(new Link("example.com/index.java?value=1")), new Link("example.com"));
         assertEquals(0, filtered.size());
     }
 
@@ -95,15 +93,17 @@ public class LinkFilterTest {
 
     @Test
     void shouldNotAcceptLinksWithUserInfo() {
-        var filtered = linkFilter.filter(Set.of(new Link("http://mailto:beate.nowak@zwick-edelstahl.de/impressm")),
-                new Link("example.com"));
+        var filtered = linkFilter.filter(
+                Set.of(new Link("http://mailto:beate.nowak@zwick-edelstahl.de/impressum")), new Link("example.com")
+        );
         assertEquals(0, filtered.size());
     }
 
     @Test
     void shouldNotBeConfusedWithDotsInPath() {
-        var filtered = linkFilter.filter(Set.of(new Link("http://www.jsoup.org/packages/jsoup-1.13.1.jar")),
-                new Link("jsoup.org"));
+        var filtered = linkFilter.filter(
+                Set.of(new Link("http://www.jsoup.org/packages/jsoup-1.13.1.jar")), new Link("jsoup.org")
+        );
         assertEquals(0, filtered.size());
     }
 
@@ -114,7 +114,8 @@ public class LinkFilterTest {
                         new Link("https://github.com/features#issue"),
                         new Link("https://github.com/features#hosting")
                 ),
-                new Link("github.com"));
+                new Link("github.com")
+        );
         assertEquals(0, filtered.size());
     }
 
@@ -125,7 +126,8 @@ public class LinkFilterTest {
                         new Link("https://github.com/features"),
                         new Link("https://github.com/features?value=1")
                 ),
-                new Link("github.com"));
+                new Link("github.com")
+        );
         assertEquals(1, filtered.size());
     }
 
@@ -136,7 +138,8 @@ public class LinkFilterTest {
                         new Link("https://github.com/features?value=2"),
                         new Link("https://github.com/features?value=1")
                 ),
-                new Link("github.com"));
+                new Link("github.com")
+        );
         assertEquals(1, filtered.size());
     }
 
@@ -147,7 +150,8 @@ public class LinkFilterTest {
                         new Link("https://www.alfa-tools.de/kontakt.php?content=datenschutz"),
                         new Link("https://www.alfa-tools.de/kontakt.php?content=montage")
                 ),
-                new Link("alfa-tools.de"));
+                new Link("alfa-tools.de")
+        );
         assertEquals(2, filtered.size());
     }
 
@@ -158,7 +162,8 @@ public class LinkFilterTest {
                         new Link("https://www.alfa-tools.de/kontakt.php?value=true&content=datenschutz"),
                         new Link("https://www.alfa-tools.de/kontakt.php?value=false&content=montage")
                 ),
-                new Link("alfa-tools.de"));
+                new Link("alfa-tools.de")
+        );
         assertEquals(2, filtered.size());
     }
 
@@ -169,14 +174,15 @@ public class LinkFilterTest {
                         new Link("https://www.les-graveurs.de"),
                         new Link("http://www.les-graveurs.de")
                 ),
-                new Link("les-graveurs.de"));
+                new Link("les-graveurs.de")
+        );
         assertEquals(1, filtered.size());
     }
 
     @Test
     void shouldUnderstandUmlautInUrl() {
-        var filtered = linkFilter.filter(Set.of(new Link("https://www.matratzen.de/Pflegehinweise_und_Gewährleistung")),
-                new Link("www.matratzen.de")
+        var filtered = linkFilter.filter(
+                Set.of(new Link("https://www.matratzen.de/Gewährleistung")), new Link("www.matratzen.de")
         );
         assertEquals(1, filtered.size());
     }
@@ -188,18 +194,20 @@ public class LinkFilterTest {
                         new Link("www.les-graveurs.de"),
                         new Link("les-graveurs.de")
                 ),
-                new Link("www.les-graveurs.de"));
+                new Link("www.les-graveurs.de")
+        );
         assertEquals(1, filtered.size());
     }
 
     @Test
     void shouldAddDefaultPagesToOccurred() {
         linkFilter.addDomain();
-        var filtered = linkFilter.filter(Set.of(
-                new Link("example.com"),
-                new Link("example.com/index.php"),
-                new Link("example.com/index.html"),
-                new Link("example.com/index.aspx")
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("example.com"),
+                        new Link("example.com/index.php"),
+                        new Link("example.com/index.html"),
+                        new Link("example.com/index.aspx")
                 ),
                 new Link("example.com")
         );
@@ -209,10 +217,11 @@ public class LinkFilterTest {
     @Test
     void shouldIgnoreCertainPages() {
         linkFilter.addDomain();
-        var filtered = linkFilter.filter(Set.of(
-                new Link("example.com/agb"),
-                new Link("example.com/news"),
-                new Link("example.com/blog")
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("example.com/agb"),
+                        new Link("example.com/news"),
+                        new Link("example.com/blog")
                 ),
                 new Link("example.com")
         );

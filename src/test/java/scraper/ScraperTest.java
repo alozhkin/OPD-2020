@@ -97,14 +97,18 @@ public class ScraperTest {
         var html = Html.fromFile(Path.of("src/test/resources/scraper_res/simple.html"));
         stubFor(
                 get(
-                        urlEqualTo("/redirect"))
-                        .willReturn(
-                                permanentRedirect("/redirect_to")));
+                        urlEqualTo("/redirect")
+                ).willReturn(
+                        permanentRedirect("/redirect_to")
+                )
+        );
         stubFor(
                 get(
-                        urlEqualTo("/redirect_to"))
-                        .willReturn(
-                                aResponse().withBody(html.toString())));
+                        urlEqualTo("/redirect_to")
+                ).willReturn(
+                        aResponse().withBody(html.toString())
+                )
+        );
         var resHtml = scraper.scrape(new Link("localhost:8080/redirect"));
         var words = new DefaultExtractor().extract(resHtml);
         assertEquals(Set.of("test"), words);

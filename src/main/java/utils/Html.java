@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -25,6 +24,10 @@ public class Html {
         this.html = html;
         this.url = url;
         this.lang = findLang(html);
+    }
+
+    public static Html emptyHtml() {
+        return EMPTY_HTML;
     }
 
     // tries to parse encoding, if it is not possible uses UTF-8
@@ -48,10 +51,18 @@ public class Html {
         }
     }
 
+    public String getLang() {
+        return lang;
+    }
+
+    public Link getUrl() {
+        return url;
+    }
+
     // returns first charset of all in last meta tag with charset attr
     // cannot define if meta tag is incorrect and would not be parsed by browser.
-    public static String getCharset(String html) {
-        var  tags = getTagsFromHtml(html, "meta");
+    private static String getCharset(String html) {
+        var tags = getTagsFromHtml(html, "meta");
         if (tags.size() != 0) {
             for (String tag : tags) {
                 var charset = getAttrFromHtmlElement(tag, "charset");
@@ -97,25 +108,12 @@ public class Html {
     private static String getAttrFromHtmlElement(String el, String attr) {
         String attrStrPattern = String.format("%s\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?", attr);
         Pattern attrPattern = Pattern.compile(attrStrPattern);
-        String value = null;
-        Matcher langMatcher = attrPattern.matcher(el);
-        if (langMatcher.find()) {
-            var htmlAttr = langMatcher.group();
-            value = htmlAttr.substring(htmlAttr.indexOf("=") + 1).replace("\\s", "").replace("\"", "");
+        Matcher attrMatcher = attrPattern.matcher(el);
+        if (attrMatcher.find()) {
+            var htmlAttr = attrMatcher.group();
+            return htmlAttr.substring(htmlAttr.indexOf("=") + 1).replace("\\s", "").replace("\"", "");
         }
-        return value;
-    }
-
-    public String getLang() {
-        return lang;
-    }
-
-    public Link getUrl() {
-        return url;
-    }
-
-    public static Html emptyHtml() {
-        return EMPTY_HTML;
+        return null;
     }
 
     @Override

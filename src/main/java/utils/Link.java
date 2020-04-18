@@ -62,11 +62,6 @@ public class Link {
         return new Link("");
     }
 
-    public int length() {
-        if (uri == null) return 0;
-        return uri.toString().length();
-    }
-
     public Set<Parameter> getParams() {
         var res = new HashSet<Parameter>();
         var query = getQuery();

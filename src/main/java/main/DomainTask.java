@@ -41,7 +41,9 @@ public class DomainTask {
             }
         } catch (ExecutionException e) {
             Main.debugLog.error("Domain Task - Failed on site " + domain, e);
-        } catch (InterruptedException ignored) {}
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        }
         Main.debugLog.info("Domain Task - Stop executing site " + domain);
         for (Future<Collection<String>> f : futures) {
             f.cancel(true);
