@@ -24,6 +24,7 @@ public class Main {
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
     public static void main(String[] args) throws InterruptedException {
+        debugLog.info("Main - START");
         ConfigurationUtils.configure();
 
         var csvParser = new CSVParser();
