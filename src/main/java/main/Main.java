@@ -19,13 +19,11 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Main {
-    public static AtomicLong submittedTasksCount = new AtomicLong(0);
-    public static AtomicLong completedTaskCount = new AtomicLong(0);
 
     public static Logger debugLog = LoggerFactory.getLogger("FILE");
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         ConfigurationUtils.configure();
 
         var csvParser = new CSVParser();
@@ -39,7 +37,6 @@ public class Main {
         );
 
         var database = Database.newInstance();
-        var linkQueue = new LinkedBlockingDeque<Link>();
 
         var numberOfThreads = Integer.parseInt(System.getProperty("threads.number"));
         var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads);
@@ -54,20 +51,29 @@ public class Main {
                 var wordFilter = new DefaultWordFilter();
                 context.setLinkFilter(linkFilter);
                 context.setWordFilter(wordFilter);
+                var linkQueue = new LinkedBlockingDeque<Link>();
 
                 var allWords = new HashSet<String>();
                 var t = domainExec.submit(() -> new DomainTask(context, linkQueue, cs, domain).findTo(allWords));
                 try {
-                    t.get(1, TimeUnit.MINUTES);
+                    t.get(240, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
-                    consoleLog.error("Waiting too long for scraping site " + domain);
+                    t.cancel(true);
+                    debugLog.error("Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
+        } catch (Exception e) {
+            debugLog.error("WHAAAAAAAAAAAAAT", e);
+            e.printStackTrace();
         } finally {
             Main.debugLog.info("Main task completed");
+            exec.shutdownNow();
+            exec.awaitTermination(30, TimeUnit.SECONDS);
+            Main.debugLog.info("exec terminated");
             exec.shutdown();
             dbExec.shutdown();
+            domainExec.shutdown();
             context.quit();
         }
     }
