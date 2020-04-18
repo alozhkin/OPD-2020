@@ -58,6 +58,8 @@ public class DefaultScraper implements Scraper {
             for (String siteLang : siteLangs.split(",")) {
                 if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
             }
+        } else {
+            return System.getProperty("ignore.html.without.lang").equals("false");
         }
         return false;
     }

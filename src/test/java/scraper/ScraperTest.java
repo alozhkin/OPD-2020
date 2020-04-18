@@ -6,6 +6,7 @@ import config.ConfigurationUtils;
 import extractor.DefaultExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import utils.Html;
 import utils.Link;
 
@@ -73,6 +74,20 @@ public class ScraperTest {
     @Test
     void shouldNotIgnoreHtmlOnRightLanguage() {
         var html = scraper.scrape(Link.createFileLink(Paths.get("src/test/resources/scraper_res/right_language.html")));
+        assertNotEquals(Html.emptyHtml(), html);
+    }
+
+    @Test
+    @EnabledIfSystemProperty(named = "ignore.html.without.lang", matches = "true")
+    void shouldIgnoreHtmlWithoutLanguage() {
+        var html = scraper.scrape(Link.createFileLink(Paths.get("src/test/resources/scraper_res/without_lang.html")));
+        assertEquals(Html.emptyHtml(), html);
+    }
+
+    @Test
+    @EnabledIfSystemProperty(named = "ignore.html.without.lang", matches = "false")
+    void shouldNotIgnoreHtmlWithoutLanguage() {
+        var html = scraper.scrape(Link.createFileLink(Paths.get("src/test/resources/scraper_res/without_lang.html")));
         assertNotEquals(Html.emptyHtml(), html);
     }
 

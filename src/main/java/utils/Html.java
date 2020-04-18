@@ -16,7 +16,7 @@ public class Html {
 
     private final String html;
     private final Link url;
-    private String lang;
+    private final String lang;
 
     public Html(String html, @NotNull Link url) {
         this.html = html;
