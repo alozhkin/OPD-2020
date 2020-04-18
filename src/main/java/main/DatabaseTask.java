@@ -20,6 +20,7 @@ public class DatabaseTask {
 
     boolean run() {
         try {
+            Main.debugLog.info("Database task start");
             return database.putWords(words.stream()
                     // TODO: Put website_id instead of domain.hashCode()
                     .map(word -> new Word(domain.toString().hashCode(), word))
