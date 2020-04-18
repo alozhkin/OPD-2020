@@ -13,6 +13,7 @@ import utils.Link;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class DefaultScraper implements Scraper {
@@ -27,6 +28,7 @@ public class DefaultScraper implements Scraper {
         java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
         var driver = new ChromeDriver(options);
+        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
         drivers.add(driver);
         return driver;
     }
