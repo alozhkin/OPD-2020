@@ -24,7 +24,7 @@ public class DomainTask {
     }
 
     void findTo(Collection<String> allWords) {
-        Main.debugLog.info("Domain Task - start executing site " + domain);
+        Main.debugLog.info("Domain Task - Start executing site " + domain);
         Set<Future<Collection<String>>> futures = new HashSet<>();
         futures.add(cs.submit(new SiteTask(context, domain, linkQueue)::run));
         try {
@@ -42,7 +42,7 @@ public class DomainTask {
         } catch (ExecutionException e) {
             Main.debugLog.error("Domain Task - Failed on site " + domain, e);
         } catch (InterruptedException ignored) {}
-        Main.debugLog.info("Domain Task - stop executing site " + domain);
+        Main.debugLog.info("Domain Task - Stop executing site " + domain);
         for (Future<Collection<String>> f : futures) {
             f.cancel(true);
         }
