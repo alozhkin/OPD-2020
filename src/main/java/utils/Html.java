@@ -63,10 +63,23 @@ public class Html {
 
     // use first html tag
     private static String findLang(String html) {
-        var tags = getTagsFromHtml(html, "html");
-        if (tags.size() == 0) return null;
-        var tag = tags.get(0);
-        return getAttrFromHtmlElement(tag, "lang");
+        var htmlTags = getTagsFromHtml(html, "html");
+        if (htmlTags.size() != 0) {
+            var tag = htmlTags.get(0);
+            var lang = getAttrFromHtmlElement(tag, "lang");
+            if (lang != null) return lang;
+        }
+        var metaTags = getTagsFromHtml(html, "meta");
+        for (String tag : metaTags) {
+            String attrStrPattern = "language";
+            Pattern attrPattern = Pattern.compile(attrStrPattern);
+            Matcher langMatcher = attrPattern.matcher(tag);
+            if (langMatcher.find()) {
+                return getAttrFromHtmlElement(tag, "content");
+            }
+
+        }
+        return null;
     }
 
     private static List<String> getTagsFromHtml(String html, String tag) {
