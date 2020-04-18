@@ -22,4 +22,25 @@ public class HtmlTest {
         var lang = html.getLang();
         assertEquals("de-DE", lang);
     }
+
+    @Test
+    void shouldReadLangAttrFromMetaTag() throws IOException {
+        var html = Html.fromFile(Paths.get("src/test/resources/scraper_res/meta_tag_lang.html"));
+        var lang = html.getLang();
+        assertEquals("de", lang);
+    }
+
+    @Test
+    void shouldReadLangAttrFromMetaTag2() throws IOException {
+        var html = Html.fromFile(Paths.get("src/test/resources/scraper_res/meta_tag_lang2.html"));
+        var lang = html.getLang();
+        assertEquals("de", lang);
+    }
+
+    @Test
+    void shouldReadLangAttrFromMetaTag3() throws IOException {
+        var html = Html.fromFile(Paths.get("src/test/resources/scraper_res/meta_tag_lang3.html"));
+        var lang = html.getLang();
+        assertEquals("de", lang);
+    }
 }
