@@ -6,6 +6,7 @@ agb
 impressum
 datenschutz
 katalog
+karriere
 responsibility
 imprint
 data-protection
