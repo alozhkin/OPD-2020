@@ -49,50 +49,6 @@ public class DefaultLinkFilter implements LinkFilter {
         }
     }
 
-    // for link occurrence check
-    private static class LinkIdentifiers {
-
-        private final String path;
-        private final Set<Parameter> params;
-        private final Set<String> subDomains;
-
-        public LinkIdentifiers(String path) {
-            this.path = path;
-            params = new HashSet<>();
-            subDomains = new HashSet<>();
-        }
-
-        public LinkIdentifiers(String path, Set<Parameter> params, Set<String> subDomains) {
-            this.path = path;
-            this.params = params;
-            this.subDomains = subDomains;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            LinkIdentifiers that = (LinkIdentifiers) o;
-            return Objects.equals(path, that.path) &&
-                    Objects.equals(params, that.params) &&
-                    Objects.equals(subDomains, that.subDomains);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(path, params, subDomains);
-        }
-
-        @Override
-        public String toString() {
-            return "RelativeURL{" +
-                    "path='" + path + '\'' +
-                    ", params=" + params +
-                    ", subdomains=" + subDomains +
-                    '}';
-        }
-    }
-
     public void addDomain() {
         occurredLinks.add(new LinkIdentifiers(""));
         occurredLinks.add(new LinkIdentifiers("index"));
@@ -104,9 +60,8 @@ public class DefaultLinkFilter implements LinkFilter {
     public Collection<Link> filter(@NotNull Collection<Link> links, Link domain) {
         Set<Link> res = new HashSet<>();
         for (Link link : links) {
-            if (isLinkSuitable(link, domain)
-                    && isLinkNotOccurred(new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains()))
-            ) {
+            var linkIdentifiers = new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains());
+            if (isLinkSuitable(link, domain) && isLinkNotOccurred(linkIdentifiers)) {
                 res.add(link);
             }
         }
@@ -138,8 +93,8 @@ public class DefaultLinkFilter implements LinkFilter {
     private boolean hasRightLang(Link link) {
         var path = link.getPath();
         if (!path.equals("")) {
-            var t = path.substring(1);
-            var firstSegment = t.substring(0, indexOfSlash(t));
+            var pathWithoutSlash = path.substring(1);
+            var firstSegment = pathWithoutSlash.substring(0, indexOfSlash(pathWithoutSlash));
             if (!firstSegment.isEmpty()) {
                 return System.getProperty("site.langs").contains(firstSegment) || !languages.contains(firstSegment);
             }
@@ -171,6 +126,14 @@ public class DefaultLinkFilter implements LinkFilter {
         return true;
     }
 
+    private synchronized boolean isLinkNotOccurred(LinkIdentifiers linkIdentifiers) {
+        var contains = occurredLinks.contains(linkIdentifiers);
+        if (!contains) {
+            occurredLinks.add(linkIdentifiers);
+        }
+        return !contains;
+    }
+
     private Set<Parameter> getContentParams(Link link) {
         var params = link.getParams();
         var res = new HashSet<Parameter>();
@@ -186,16 +149,52 @@ public class DefaultLinkFilter implements LinkFilter {
         return res;
     }
 
-    private synchronized boolean isLinkNotOccurred(LinkIdentifiers linkIdentifiers) {
-        var contains = occurredLinks.contains(linkIdentifiers);
-        if (!contains) {
-            occurredLinks.add(linkIdentifiers);
-        }
-        return !contains;
-    }
-
     private int indexOfSlash(String str) {
         var indexOf = str.indexOf('/');
         return indexOf != -1 ? indexOf : str.length();
+    }
+
+    // for link occurrence check
+    private static class LinkIdentifiers {
+
+        private final String path;
+        private final Set<Parameter> params;
+        private final Set<String> subDomains;
+
+        public LinkIdentifiers(String path) {
+            this.path = path;
+            this.params = new HashSet<>();
+            this.subDomains = new HashSet<>();
+        }
+
+        public LinkIdentifiers(String path, Set<Parameter> params, Set<String> subDomains) {
+            this.path = path;
+            this.params = params;
+            this.subDomains = subDomains;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LinkIdentifiers that = (LinkIdentifiers) o;
+            return Objects.equals(path, that.path) &&
+                    Objects.equals(params, that.params) &&
+                    Objects.equals(subDomains, that.subDomains);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(path, params, subDomains);
+        }
+
+        @Override
+        public String toString() {
+            return "RelativeURL{" +
+                    "path='" + path + '\'' +
+                    ", params=" + params +
+                    ", subdomains=" + subDomains +
+                    '}';
+        }
     }
 }

@@ -1,9 +1,10 @@
 package utils;
+
 import java.util.Objects;
 
 public class Parameter {
-    private String name;
-    private String value;
+    private final String name;
+    private final String value;
 
     public Parameter(String name, String value) {
         this.name = name;

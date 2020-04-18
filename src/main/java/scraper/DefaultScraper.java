@@ -49,10 +49,15 @@ public class DefaultScraper implements Scraper {
         return hasRightLang(html) ? html : Html.emptyHtml();
     }
 
+    @Override
+    public void quit() {
+        drivers.forEach(WebDriver::quit);
+    }
+
     public Collection<String> getNewWords(Html html1, Html html2) {
-        var a = Jsoup.parse(html1.toString()).text();
-        var b = Jsoup.parse(html2.toString()).text();
-        return diffMatchPatch.getNewWords(" " + a + " ", " " + b + " ");
+        String htmlStr1 = Jsoup.parse(html1.toString()).text();
+        String htmlStr2 = Jsoup.parse(html2.toString()).text();
+        return diffMatchPatch.getNewWords(" " + htmlStr1 + " ", " " + htmlStr2 + " ");
     }
 
     private boolean hasRightLang(Html html) {
@@ -66,10 +71,5 @@ public class DefaultScraper implements Scraper {
             return System.getProperty("ignore.html.without.lang").equals("false");
         }
         return false;
-    }
-
-    @Override
-    public void quit() {
-        drivers.forEach(WebDriver::quit);
     }
 }
