@@ -23,11 +23,15 @@ public class Main {
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
     public static void main(String[] args) throws InterruptedException {
+        start("src/main/resources/websites_data_short.csv", "export.csv");
+    }
+
+    public static void start(String input, String output) throws InterruptedException {
         debugLog.info("Main - START");
         ConfigurationUtils.configure();
 
         var csvParser = new CSVParser();
-        csvParser.parse("src/main/resources/websites_data_short.csv");
+        csvParser.parse(input);
         List<Link> domains = csvParser.getLinks();
 
         var context = new Context(
