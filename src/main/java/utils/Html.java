@@ -7,6 +7,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,33 +51,34 @@ public class Html {
     // returns first charset of all in last meta tag with charset attr
     // cannot define if meta tag is incorrect and would not be parsed by browser.
     public static String getCharset(String html) {
-        String tag = getTagFromHtml(html, "meta");
-        String lang = null;
-        if (tag != null) {
-            lang = getAttrFromHtmlElement(tag, "charset");
+        var  tags = getTagsFromHtml(html, "meta");
+        if (tags.size() != 0) {
+            for (String tag : tags) {
+                var charset = getAttrFromHtmlElement(tag, "charset");
+                if (charset != null) return charset;
+            }
         }
-        return lang;
+        return null;
     }
 
+    // use first html tag
     private static String findLang(String html) {
-        String tag = getTagFromHtml(html, "html");
-        String lang = null;
-        if (tag != null) {
-            lang = getAttrFromHtmlElement(tag, "lang");
-        }
-        return lang;
+        var tags = getTagsFromHtml(html, "html");
+        if (tags.size() == 0) return null;
+        var tag = tags.get(0);
+        return getAttrFromHtmlElement(tag, "lang");
     }
 
-    private static String getTagFromHtml(String html, String tag) {
+    private static List<String> getTagsFromHtml(String html, String tag) {
         String htmlTagStrPattern = String.format("<\\s*%s[^><]*>"
                 + "|<\\s*%s[^>]*>[^><]*<\\s*/\\s*%s\\s*>", tag, tag, tag);
         Pattern htmlTagPattern = Pattern.compile(htmlTagStrPattern);
         Matcher htmlTagMatcher = htmlTagPattern.matcher(html);
-        if (htmlTagMatcher.find()) {
-            return htmlTagMatcher.group();
-        } else {
-            return null;
+        var res = new ArrayList<String>();
+        while (htmlTagMatcher.find()) {
+            res.add(htmlTagMatcher.group());
         }
+        return res;
     }
 
     private static String getAttrFromHtmlElement(String el, String attr) {
