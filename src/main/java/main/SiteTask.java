@@ -23,42 +23,45 @@ public class SiteTask {
 
     public Collection<String> run() {
         try {
-            Main.debugLog.info("Site " + link.toString() + " task start");
+            Main.debugLog.info("SiteTask - Start " + link.toString());
             if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("Site " + link.toString() + " task interrupted");
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
                 return new ArrayList<>();
             }
             var html = context.scrape(link);
             if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("Site " + link.toString() + " task interrupted");
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
                 return new ArrayList<>();
             }
             var links = context.crawl(html);
             if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("Site " + link.toString() + " task interrupted");
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
                 return new ArrayList<>();
             }
             var filteredLinks = context.filter(links, html.getUrl());
             if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("Site " + link.toString() + " task interrupted");
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
                 return new ArrayList<>();
             }
             linkQueue.addAll(filteredLinks);
             if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("Site " + link.toString() + " task interrupted");
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
                 return new ArrayList<>();
             }
             var words = context.extract(html);
             if (Thread.currentThread().isInterrupted()) {
-                Main.debugLog.info("Site " + link.toString() + " task interrupted");
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
                 return new ArrayList<>();
             }
             Collection<String> filteredWords = context.filter(words);
-            Main.debugLog.info("Site " + link.toString() + " task completed");
+            Main.debugLog.info("SiteTask - Completed " + link.toString());
             return filteredWords;
         } catch (WebDriverException e) {
-            if (e.getCause().getClass() == InterruptedIOException.class) {
-                Main.debugLog.info("Site " + link.toString() + " task interrupted");
+            var cause = e.getCause();
+            if (cause != null && cause.getClass() == InterruptedIOException.class) {
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
+            } else if (e.getClass() == org.openqa.selenium.TimeoutException.class) {
+                Main.debugLog.error("SiteTask - Loading timeout is over " + link.toString());
             } else {
                 Main.consoleLog.error("SiteTask - Webdriver fail: {}", e.toString());
                 Main.debugLog.error("SiteTask - Webdriver fail:", e);

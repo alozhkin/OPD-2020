@@ -59,21 +59,21 @@ public class Main {
                     t.get(240, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
                     t.cancel(true);
-                    debugLog.error("Waiting too long for scraping site " + domain);
+                    debugLog.error("Main - Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (Exception e) {
             debugLog.error("Main - Failed", e);
         } finally {
-            Main.debugLog.info("Main task completed");
+            Main.debugLog.info("Main - Completed");
             exec.shutdown();
             exec.awaitTermination(10, TimeUnit.SECONDS);
             domainExec.shutdown();
             domainExec.awaitTermination(10, TimeUnit.SECONDS);
             dbExec.shutdown();
             context.quit();
-            Main.debugLog.info("Resources was closed");
+            Main.debugLog.info("Main - Resources was closed");
         }
     }
 }
