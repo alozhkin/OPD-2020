@@ -1,8 +1,10 @@
 package selenium;
 
 import diff_match_patch.DiffMatchPatch;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -29,10 +31,6 @@ public class WebDriverManager {
     }
 
     public WebDriverManager(Link link) {
-        init(link);
-    }
-
-    public void init(Link link) {
         driver = initDriver();
         if (link != null) {
             connect(link);
@@ -82,11 +80,15 @@ public class WebDriverManager {
         return getNewWords(html1, html2);
     }
 
+    public Collection<String> getDynamicContentWithClicking() {
+        return getDynamicContentWithClicking(constructBySet());
+    }
+
     public Collection<String> getDynamicContentWithClicking(BySet bySet) {
         Collection<String> result = new ArrayList<>();
         List<WebElement> elements = new ArrayList<>();
         int i = 0;
-        int border = 1000; // Не окончательное решение. Скорее всего предел нужно определять исходя из страницы.
+        int border = 1000;
         while (i < border) {
             for (By by : bySet) {
                 elements.addAll(driver.findElements(by));
@@ -129,8 +131,37 @@ public class WebDriverManager {
 
     public BySet constructBySet() {
         BySet bySet = new BySet();
-        //есть идея читать html и парсить все элементы которые там есть и создавать из этого bySet)
-        //TODO
+        Element htmlElement = Jsoup.parse(currentHtml.toString(), currentLink.toString()).body();
+        bySet = filter(scan(htmlElement, bySet));
+        return bySet;
+    }
+
+    BySet scan(@NotNull Element htmlElement, @NotNull BySet set) {
+        set.addTagNames(htmlElement.tagName());
+        for (int i = 0; i < htmlElement.childrenSize(); i++) {
+            if (!htmlElement.tagName().equals("")) {
+                set.addTagNames(htmlElement.tagName());
+            }
+        }
+        if (htmlElement.childrenSize() != 0) {
+            for (int i = 0; i < htmlElement.childrenSize(); i++) {
+                set.addAll(scan(htmlElement.child(i), set));
+            }
+        }
+        return set;
+    }
+
+    BySet filter(BySet bySet) {
+        By[] unnecessary = new By[]{
+                By.tagName("body"),
+                By.tagName("html"),
+                //TODO: We need to find and add another unnecessary tags
+        };
+        for (By unBy : unnecessary) {
+            while (bySet.contains(unBy)) {
+                bySet.remove(unBy);
+            }
+        }
         return bySet;
     }
 
