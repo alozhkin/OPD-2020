@@ -130,9 +130,9 @@ public class WebDriverManager {
     }
 
     public BySet constructBySet() {
+        Element html = Jsoup.parse(currentHtml.toString(), currentLink.toString()).body();
         BySet bySet = new BySet();
-        Element htmlElement = Jsoup.parse(currentHtml.toString(), currentLink.toString()).body();
-        bySet = filter(scan(htmlElement, bySet));
+        bySet = scan(html, bySet);
         return bySet;
     }
 
@@ -142,28 +142,12 @@ public class WebDriverManager {
             if (!htmlElement.tagName().equals("")) {
                 set.addTagNames(htmlElement.tagName());
             }
-        }
-        if (htmlElement.childrenSize() != 0) {
-            for (int i = 0; i < htmlElement.childrenSize(); i++) {
-                set.addAll(scan(htmlElement.child(i), set));
-            }
+            set.addAll(scan(htmlElement.child(i), set));
         }
         return set;
     }
 
-    BySet filter(BySet bySet) {
-        By[] unnecessary = new By[]{
-                By.tagName("body"),
-                By.tagName("html"),
-                //TODO: We need to find and add another unnecessary tags
-        };
-        for (By unBy : unnecessary) {
-            while (bySet.contains(unBy)) {
-                bySet.remove(unBy);
-            }
-        }
-        return bySet;
-    }
+
 
     public void quit() {
         driver.quit();
