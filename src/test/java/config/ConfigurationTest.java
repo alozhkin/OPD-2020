@@ -1,5 +1,5 @@
-import config.ConfigurationFailException;
-import config.ConfigurationUtils;
+package config;
+
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedWriter;

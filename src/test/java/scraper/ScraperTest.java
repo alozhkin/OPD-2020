@@ -1,8 +1,9 @@
+package scraper;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import config.ConfigurationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import scraper.DefaultScraper;
 import utils.Html;
 import utils.Link;
 
@@ -64,5 +65,13 @@ public class ScraperTest {
     void shouldIgnoreHtmlOnWrongLanguage() {
         var html = scraper.scrape(Link.getFileLink(Paths.get("src/test/resources/scraper_res/wrong_language.html")));
         assertEquals(Html.emptyHtml(), html);
+    }
+
+    @Test
+    void shouldNotIgnoreHtmlOnNotValidButRightLanguage() {
+        var html = scraper.scrape(
+                Link.getFileLink(Paths.get("src/test/resources/scraper_res/not_valid_but_right_language.html"))
+        );
+        assertTrue(html.toString().length() != 0);
     }
 }

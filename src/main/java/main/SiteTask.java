@@ -40,14 +40,16 @@ public class SiteTask {
         try {
             var html = scraper.scrape(link);
             var links = crawler.crawl(html);
-            var filteredLinks = linkFilter.filter(links, link.toString());
+            var filteredLinks = linkFilter.filter(links, link);
             linkQueue.addAll(filteredLinks);
             var words = extractor.extract(html);
             return wordFilter.filter(words);
         } catch (Exception e) {
-            e.printStackTrace();
+            Main.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
+            Main.debugLog.error("SiteTask - Failed to run program:", e);
             return new ArrayList<>();
         } finally {
+            Main.debugLog.info("Site task completed");
             Main.completedTaskCount.incrementAndGet();
         }
     }

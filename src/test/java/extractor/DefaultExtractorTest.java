@@ -11,7 +11,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DefaultExtractorTest {
-    private Html h = Html.fromFile(Paths.get("src/test/resources/html_for_test.txt"));
+    private Html h = Html.fromFile(Paths.get("src/test/resources/html_for_test.html"));
     DefaultExtractorTest() throws IOException {
     }
 

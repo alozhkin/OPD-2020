@@ -5,7 +5,6 @@ import org.jsoup.Jsoup;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import utils.Html;
 import utils.Link;
@@ -24,7 +23,9 @@ public class DefaultScraper implements Scraper {
         var options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu");
         System.setProperty("webdriver.chrome.silentOutput", "true");
-        java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
+        java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.openqa.selenium.remote").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.openqa.selenium.remote.ProtocolHandshake").setLevel(Level.OFF);
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
         var driver = new ChromeDriver(options);
         drivers.add(driver);
@@ -47,7 +48,11 @@ public class DefaultScraper implements Scraper {
 
     private boolean hasRightLang(Html html) {
         var siteLangs = System.getProperty("site.langs");
-        return siteLangs.contains(Jsoup.parse(html.toString()).selectFirst("html").attr("lang"));
+        var htmlLang = html.getLang();
+        for (String siteLang : siteLangs.split(",")) {
+            if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
+        }
+        return false;
     }
 
     public void quit() {

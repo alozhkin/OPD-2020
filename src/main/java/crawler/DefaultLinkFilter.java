@@ -1,5 +1,6 @@
 package crawler;
 
+import main.Main;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
 
@@ -12,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private Set<Link> occurredLinks = ConcurrentHashMap.newKeySet();
+    private final Set<String> occurredLinks = ConcurrentHashMap.newKeySet();
     private static Set<String> languages;
     private static Set<String> fileExtensions;
 
@@ -20,28 +21,32 @@ public class DefaultLinkFilter implements LinkFilter {
         try {
             languages = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/languages.txt")));
         } catch (IOException e) {
-            e.printStackTrace();
+            Main.consoleLog.error("DefaultLinkFilter - Failed to get languages from the file: {}", e.toString());
+            Main.debugLog.error("DefaultLinkFilter - Failed to get languages from the file:", e);
             languages = new HashSet<>();
         }
         try {
             fileExtensions = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/file_extensions.txt")));
         } catch (IOException e) {
-            e.printStackTrace();
+            Main.consoleLog.error("DefaultLinkFilter - Failed to get file extensions from the file: {}", e.toString());
+            Main.debugLog.error("DefaultLinkFilter - Failed to get file extensions from the file:", e);
             fileExtensions = new HashSet<>();
         }
     }
 
-    public Collection<Link> filter(@NotNull Collection<Link> links, String domain) {
+    public Collection<Link> filter(@NotNull Collection<Link> links, Link domain) {
+        Main.debugLog.debug("Link filtration task started");
         Set<Link> result = new HashSet<>();
         for (Link link : links) {
             if (isLinkSuitable(link, domain) && isNotOccurred(link)) {
                 result.add(link);
             }
         }
+        Main.debugLog.debug("Link filtration task completed");
         return result;
     }
 
-    private boolean isLinkSuitable(Link link, String domain) {
+    private boolean isLinkSuitable(Link link, Link domain) {
         return isOnSameDomain(link, domain)
                 && hasNoFragment(link)
                 && hasNoUserInfo(link)
@@ -49,8 +54,8 @@ public class DefaultLinkFilter implements LinkFilter {
                 && isFileExtensionSuitable(link);
     }
 
-    private boolean isOnSameDomain(Link link, String domain) {
-        return link.getHost().contains(domain);
+    private boolean isOnSameDomain(Link link, Link domain) {
+        return link.getHost().contains(domain.getHost());
     }
 
     private boolean hasNoFragment(Link link) {
@@ -78,20 +83,22 @@ public class DefaultLinkFilter implements LinkFilter {
         if (path != null) {
             var lastIndex = path.lastIndexOf('/');
             var lastSegment = path.substring(lastIndex);
-            // lastSegmentSplitted[0] -- name
-            // lastSegmentSplitted[1] -- file extension, if  exists
+            // last array part is file extension if array has size > 1
             var lastSegmentSplitted = lastSegment.split("\\.");
-            if (lastSegmentSplitted.length == 2) {
-                return fileExtensions.contains(lastSegmentSplitted[1]);
+            if (lastSegmentSplitted.length == 1) {
+                return true;
+            } else {
+                return fileExtensions.contains(lastSegmentSplitted[lastSegmentSplitted.length - 1]);
             }
         }
         return true;
     }
 
     private synchronized boolean isNotOccurred(Link link) {
-        var contains = occurredLinks.contains(link);
+        String url = link.getWithoutQueryAndFragment();
+        var contains = occurredLinks.contains(url);
         if (!contains) {
-            occurredLinks.add(link);
+            occurredLinks.add(url);
         }
         return !contains;
     }

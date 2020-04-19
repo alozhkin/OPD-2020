@@ -6,9 +6,6 @@ import crawler.DefaultLinkFilter;
 import database.Database;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
 import scraper.DefaultScraper;
 import utils.CSVParser;
 import utils.Link;
@@ -16,7 +13,6 @@ import utils.Link;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
@@ -29,7 +25,7 @@ public class Main {
     public static Logger debugLog = LoggerFactory.getLogger("FILE");
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
-    public static void main1(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         ConfigurationUtils.configure();
 
         var csvParser = new CSVParser();
@@ -72,21 +68,5 @@ public class Main {
             dbExec.shutdown();
             scraper.quit();
         }
-    }
-
-    @Argument()
-    private static String input;
-
-    public static void main(String[] args) {
-        Main main = new Main();
-        CmdLineParser cmdLineParser = new CmdLineParser(main);
-        try {
-            cmdLineParser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            cmdLineParser.printUsage(System.err);
-            return;
-        }
-        System.out.println(input);
     }
 }
