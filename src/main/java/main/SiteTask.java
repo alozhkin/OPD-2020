@@ -29,13 +29,13 @@ public class SiteTask {
             checkIfInterrupted();
             var links = context.crawl(html);
             checkIfInterrupted();
-            var filteredLinks = context.filter(links, html.getUrl());
+            var filteredLinks = context.filterLinks(links, html.getUrl());
             checkIfInterrupted();
             linkQueue.addAll(filteredLinks);
             checkIfInterrupted();
             var words = context.extract(html);
             checkIfInterrupted();
-            Collection<String> filteredWords = context.filter(words);
+            Collection<String> filteredWords = context.filterWords(words);
             checkIfInterrupted();
             Main.debugLog.info("SiteTask - Completed " + link.toString());
             return filteredWords;
