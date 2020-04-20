@@ -73,4 +73,10 @@ public class LinkTest {
         var url = "http://example/ttt?name=you#content";
         assertEquals("http://example/ttt", new Link(url).getWithoutQueryAndFragment());
     }
+
+    @Test
+    void shouldWorkWithQueryWithoutEqualsSign() {
+        var url = "https://jsoup.org/apidocs/index.html?org/jsoup/select/Elements.html";
+        assertDoesNotThrow(new Link(url)::getParams);
+    }
 }
