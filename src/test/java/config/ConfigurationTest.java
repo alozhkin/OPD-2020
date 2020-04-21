@@ -8,6 +8,6 @@ public class ConfigurationTest {
 
     @Test
     public void nonExistingPropertyFilesShouldThrowException() {
-        assertThrows(ConfigurationFailException.class, () -> ConfigurationUtils.loadProperties("dummy_name"));
+        assertThrows(ConfigurationFailException.class, () -> ConfigurationUtils.parsePropertiesFromFiles("dummy_name"));
     }
 }

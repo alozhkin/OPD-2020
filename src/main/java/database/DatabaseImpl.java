@@ -30,7 +30,7 @@ class DatabaseImpl implements Database {
 
     DatabaseImpl() {
         try {
-            url = ConfigurationUtils.parseDatabaseUrl();
+            url = System.getProperty("database.url");
             initDatabase();
         } catch (ClassNotFoundException e) {
             LoggerUtils.consoleLog.error("DatabaseImpl - Failed to initialize database: {}", e.toString());
