@@ -24,15 +24,11 @@ public class WebDriverManagerTest {
 
     @BeforeEach
     void initMock() {
-        // инициализируем и запускаем WireMockServer
         wireMockServer = new WireMockServer();
         wireMockServer.start();
-
-        // в функции stubFor указываем тип запроса, url
         WireMock.stubFor(
                 get(
                         urlEqualTo("/first_button"))
-                        // в функции willReturn конфигурируем ответ (отправляем немного html)
                         .willReturn(
                                 aResponse().withBody("<div id=\"worked\">Worked</div>")));
     }
