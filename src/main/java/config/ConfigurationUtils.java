@@ -1,18 +1,19 @@
 package config;
 
+import logger.LoggerUtils;
+
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class ConfigurationUtils {
     public static void configure() {
-        Properties properties = ConfigurationUtils.loadProperties("src/main/config/global.properties",
-                "src/main/config/local.properties");
+        Properties properties = ConfigurationUtils.loadProperties("properties/global.properties",
+                "properties/local.properties");
 
         for (String key : properties.stringPropertyNames()) {
             String value = properties.getProperty(key);
@@ -31,10 +32,11 @@ public class ConfigurationUtils {
         var res = new Properties();
         try {
             for (String path : propertiesPaths) {
-                res.load(new FileInputStream(path));
+                var resource = ClassLoader.getSystemResourceAsStream(path);
+                if (resource == null) throw new ConfigurationFailException("Configuration files are not found");
+                res.load(resource);
+                resource.close();
             }
-        } catch (FileNotFoundException e) {
-            throw new ConfigurationFailException("Configuration files are not found", e);
         } catch (IOException e) {
             throw new ConfigurationFailException("Configuration files are not loaded", e);
         }
@@ -46,7 +48,24 @@ public class ConfigurationUtils {
     }
 
     public static String parseDatabaseUrl() {
-        Properties properties = loadProperties("src/main/config/database.properties");
+        Properties properties = loadProperties("properties/database.properties");
         return properties.getProperty("url");
+    }
+
+    public static void parseResourceToCollection(String fileName, Collection<String> collection, Class c) {
+        var resource = ClassLoader.getSystemResourceAsStream(fileName);
+        if (resource != null) {
+            parseResource(resource, fileName, collection, c);
+        } else {
+            LoggerUtils.logFileNotFound(fileName, c);
+        }
+    }
+
+    private static void parseResource(InputStream resource, String fileName, Collection<String> collection, Class c) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(resource))) {
+            collection.addAll(br.lines().collect(Collectors.toSet()));
+        } catch (IOException e) {
+            LoggerUtils.logFileReadingFail(fileName, c);
+        }
     }
 }

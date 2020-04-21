@@ -28,7 +28,7 @@ public class DatabaseTest {
 
     @Test
     void putWebsitesFromCSV() {
-        assertTrue(database.putWebsitesFromCSV("src/main/resources/websites_data.csv"));
+        assertTrue(database.putWebsitesFromCSV("websites_data.csv"));
     }
 
     @Test
