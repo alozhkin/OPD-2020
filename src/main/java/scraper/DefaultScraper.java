@@ -25,7 +25,9 @@ public class DefaultScraper implements Scraper {
         var options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu");
         System.setProperty("webdriver.chrome.silentOutput", "true");
-        java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
+        java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.openqa.selenium.remote").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.openqa.selenium.remote.ProtocolHandshake").setLevel(Level.OFF);
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
         var driver = new ChromeDriver(options);
         driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
