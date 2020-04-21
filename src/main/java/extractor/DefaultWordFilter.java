@@ -1,7 +1,7 @@
 package extractor;
 
 import config.ConfigurationUtils;
-import main.Main;
+import logger.LoggerUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,11 +15,11 @@ public class DefaultWordFilter implements WordFilter {
 
     @Override
     public Collection<String> filter(Collection<String> words) {
-        Main.debugLog.debug("Filtration task started");
+        LoggerUtils.debugLog.debug("Filtration task started");
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
-        Main.debugLog.debug("Filtration task completed");
+        LoggerUtils.debugLog.debug("Filtration task completed");
         return newSet;
     }
 
