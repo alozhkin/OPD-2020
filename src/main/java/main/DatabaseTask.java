@@ -2,6 +2,7 @@ package main;
 
 import database.Database;
 import database.models.Word;
+import logger.LoggerUtils;
 import utils.Link;
 
 import java.util.Collection;
@@ -20,17 +21,17 @@ public class DatabaseTask {
 
     boolean run() {
         try {
-            Main.debugLog.info("Database task start");
+            LoggerUtils.debugLog.info("Database task start");
             return database.putWords(words.stream()
                     // TODO: Put website_id instead of domain.hashCode()
                     .map(word -> new Word(domain.toString().hashCode(), word))
                     .collect(Collectors.toSet()));
         } catch (Exception e) {
-            Main.consoleLog.error("DatabaseTask - Failed to put words into database: {}", e.toString());
-            Main.debugLog.error("DatabaseTask - Failed to put words into database:", e);
+            LoggerUtils.consoleLog.error("DatabaseTask - Failed to put words into database: {}", e.toString());
+            LoggerUtils.debugLog.error("DatabaseTask - Failed to put words into database:", e);
             return false;
         } finally {
-            Main.debugLog.info("Database task completed");
+            LoggerUtils.debugLog.info("Database task completed");
         }
     }
 }

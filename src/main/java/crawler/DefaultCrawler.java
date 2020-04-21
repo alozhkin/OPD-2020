@@ -1,6 +1,6 @@
 package crawler;
 
-import main.Main;
+import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,7 +26,7 @@ public class DefaultCrawler implements Crawler {
                 list.add(url);
             }
         }
-        Main.debugLog.debug("Crawling task completed");
+        LoggerUtils.debugLog.debug("Crawling task completed");
         return list;
     }
 }

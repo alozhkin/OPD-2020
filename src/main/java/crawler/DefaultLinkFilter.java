@@ -1,7 +1,7 @@
 package crawler;
 
 import config.ConfigurationUtils;
-import main.Main;
+import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
 import utils.Parameter;
@@ -45,7 +45,7 @@ public class DefaultLinkFilter implements LinkFilter {
                 res.add(link);
             }
         }
-        Main.debugLog.debug("Link filtration task completed");
+        LoggerUtils.debugLog.debug("Link filtration task completed");
         return res;
     }
 
