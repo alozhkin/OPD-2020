@@ -3,19 +3,27 @@ package crawler;
 import main.Main;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
+import utils.Parameter;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private final Set<String> occurredLinks = ConcurrentHashMap.newKeySet();
+    private final Set<LinkIdentifiers> occurredLinks;
     private static Set<String> languages;
     private static Set<String> fileExtensions;
+    private static Set<String> ignoredLinks;
+
+    //suggests that main page were visited
+    public DefaultLinkFilter() {
+        occurredLinks = ConcurrentHashMap.newKeySet();
+    }
 
     static {
         try {
@@ -32,18 +40,33 @@ public class DefaultLinkFilter implements LinkFilter {
             Main.debugLog.error("DefaultLinkFilter - Failed to get file extensions from the file:", e);
             fileExtensions = new HashSet<>();
         }
+        try {
+            ignoredLinks = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/ignored_links.txt")));
+        } catch (IOException e) {
+            Main.consoleLog.error("DefaultLinkFilter - Failed to get ignored links from the file: {}", e.toString());
+            Main.debugLog.error("DefaultLinkFilter - Failed to get ignored links from the file:", e);
+            fileExtensions = new HashSet<>();
+        }
+    }
+
+    public void addDomain() {
+        occurredLinks.add(new LinkIdentifiers(""));
+        occurredLinks.add(new LinkIdentifiers("index"));
+        for (String fe : fileExtensions) {
+            occurredLinks.add(new LinkIdentifiers("/index." + fe));
+        }
     }
 
     public Collection<Link> filter(@NotNull Collection<Link> links, Link domain) {
-        Main.debugLog.debug("Link filtration task started");
-        Set<Link> result = new HashSet<>();
+        Set<Link> res = new HashSet<>();
         for (Link link : links) {
-            if (isLinkSuitable(link, domain) && isNotOccurred(link)) {
-                result.add(link);
+            var linkIdentifiers = new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains());
+            if (isLinkSuitable(link, domain) && isLinkNotOccurred(linkIdentifiers)) {
+                res.add(link);
             }
         }
         Main.debugLog.debug("Link filtration task completed");
-        return result;
+        return res;
     }
 
     private boolean isLinkSuitable(Link link, Link domain) {
@@ -51,6 +74,7 @@ public class DefaultLinkFilter implements LinkFilter {
                 && hasNoFragment(link)
                 && hasNoUserInfo(link)
                 && hasRightLang(link)
+                && hasUsefulInfo(link)
                 && isFileExtensionSuitable(link);
     }
 
@@ -68,9 +92,9 @@ public class DefaultLinkFilter implements LinkFilter {
 
     private boolean hasRightLang(Link link) {
         var path = link.getPath();
-        if (path != null) {
-            var t = path.substring(1);
-            var firstSegment = t.substring(0, indexOfSlash(t));
+        if (!path.equals("")) {
+            var pathWithoutSlash = path.substring(1);
+            var firstSegment = pathWithoutSlash.substring(0, indexOfSlash(pathWithoutSlash));
             if (!firstSegment.isEmpty()) {
                 return System.getProperty("site.langs").contains(firstSegment) || !languages.contains(firstSegment);
             }
@@ -78,9 +102,17 @@ public class DefaultLinkFilter implements LinkFilter {
         return true;
     }
 
+    private boolean hasUsefulInfo(Link link) {
+        var paths = link.getPath().split("/");
+        for (String p : paths) {
+            if (ignoredLinks.contains(p)) return false;
+        }
+        return true;
+    }
+
     private boolean isFileExtensionSuitable(Link link) {
         var path = link.getPath();
-        if (path != null) {
+        if (!path.equals("")) {
             var lastIndex = path.lastIndexOf('/');
             var lastSegment = path.substring(lastIndex);
             // last array part is file extension if array has size > 1
@@ -94,17 +126,75 @@ public class DefaultLinkFilter implements LinkFilter {
         return true;
     }
 
-    private synchronized boolean isNotOccurred(Link link) {
-        String url = link.getWithoutQueryAndFragment();
-        var contains = occurredLinks.contains(url);
+    private synchronized boolean isLinkNotOccurred(LinkIdentifiers linkIdentifiers) {
+        var contains = occurredLinks.contains(linkIdentifiers);
         if (!contains) {
-            occurredLinks.add(url);
+            occurredLinks.add(linkIdentifiers);
         }
         return !contains;
+    }
+
+    private Set<Parameter> getContentParams(Link link) {
+        var params = link.getParams();
+        var res = new HashSet<Parameter>();
+        for (Parameter param : params) {
+            var name = param.getName().toLowerCase();
+            if (name.contains("id")
+                    || name.equals("content")
+                    || name.equals("page")
+                    || name.equals("objectpath")) {
+                res.add(param);
+            }
+        }
+        return res;
     }
 
     private int indexOfSlash(String str) {
         var indexOf = str.indexOf('/');
         return indexOf != -1 ? indexOf : str.length();
+    }
+
+    // for link occurrence check
+    private static class LinkIdentifiers {
+
+        private final String path;
+        private final Set<Parameter> params;
+        private final Set<String> subDomains;
+
+        public LinkIdentifiers(String path) {
+            this.path = path;
+            this.params = new HashSet<>();
+            this.subDomains = new HashSet<>();
+        }
+
+        public LinkIdentifiers(String path, Set<Parameter> params, Set<String> subDomains) {
+            this.path = path;
+            this.params = params;
+            this.subDomains = subDomains;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LinkIdentifiers that = (LinkIdentifiers) o;
+            return Objects.equals(path, that.path) &&
+                    Objects.equals(params, that.params) &&
+                    Objects.equals(subDomains, that.subDomains);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(path, params, subDomains);
+        }
+
+        @Override
+        public String toString() {
+            return "RelativeURL{" +
+                    "path='" + path + '\'' +
+                    ", params=" + params +
+                    ", subdomains=" + subDomains +
+                    '}';
+        }
     }
 }

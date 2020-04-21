@@ -3,7 +3,9 @@ package utils;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Link {
     private URI uri;
@@ -27,14 +29,6 @@ public class Link {
         this.uri = uri;
     }
 
-    public static Link getFileLink(Path path) {
-        try {
-            return new Link(path.toUri());
-        } catch (Exception e) {
-            return new Link("");
-        }
-    }
-
     private static String fix(String url) {
         if (url.isEmpty()) return url;
         var urlFixed1 = fixProtocol(url);
@@ -56,22 +50,75 @@ public class Link {
         return url;
     }
 
-    public static Link getEmptyLink() {
+    public static Link createFileLink(Path path) {
+        try {
+            return new Link(path.toUri());
+        } catch (Exception e) {
+            return new Link("");
+        }
+    }
+
+    public static Link createEmptyLink() {
         return new Link("");
     }
 
-    public int length() {
-        if (uri == null) return 0;
-        return uri.toString().length();
+    public Set<Parameter> getParams() {
+        var res = new HashSet<Parameter>();
+        var query = getQuery();
+        if (query != null) {
+            var querySplitted = query.split("&");
+            for (String parameter : querySplitted) {
+                var paramSplitted = parameter.split("=");
+                if (paramSplitted.length == 2) {
+                    var name = paramSplitted[0];
+                    var value = paramSplitted[1];
+                    res.add(new Parameter(name, value));
+                }
+            }
+        }
+        return res;
+    }
+
+    public Set<String> getSubdomains() {
+        var res = new HashSet<String>();
+        var host = getHost();
+            var hostSplitted = host.split("\\.");
+            var levelsNumber = hostSplitted.length;
+            // ignore top-level and second-level domain
+            for (int i = 0; i < levelsNumber - 2; i++) {
+                // ignore www
+                var subdomain = hostSplitted[i];
+                if (!subdomain.equals("www")) {
+                    res.add(subdomain);
+                }
+            }
+        return res;
     }
 
     public String getWithoutQueryAndFragment() {
         var str = getScheme() + "://" + getHost();
-        if (getPort() != -1) {
-            str = str + ":" + getPort();
+        var port = getPort();
+        if (port != -1) {
+            str = str + ":" + port;
         }
-        if (getPath() != null) {
-            str = str + getPath();
+        str += getPath();
+        return str;
+    }
+
+    public String getWithoutProtocol() {
+        var str = getHost();
+        var port = getPort();
+        if (port != -1) {
+            str = str + ":" + port;
+        }
+        str += getPath();
+        var query = getQuery();
+        if (query != null) {
+            str += query;
+        }
+        var fragment = getFragment();
+        if (fragment != null) {
+            str += fragment;
         }
         return str;
     }
@@ -112,9 +159,8 @@ public class Link {
     }
 
     public String getPath() {
-        if (uri == null) return null;
-        String path = uri.getPath();
-        return path.equals("") ? null : path;
+        if (uri == null) return "";
+        return uri.getPath();
     }
 
     public String getQuery() {

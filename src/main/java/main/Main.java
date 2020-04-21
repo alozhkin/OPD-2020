@@ -6,6 +6,8 @@ import crawler.DefaultLinkFilter;
 import database.Database;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scraper.DefaultScraper;
 import utils.CSVParser;
 import utils.Link;
@@ -14,59 +16,85 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Main {
-    public static AtomicLong submittedTasksCount = new AtomicLong(0);
-    public static AtomicLong completedTaskCount = new AtomicLong(0);
+    // in seconds
+    private static final int DOMAIN_TIMEOUT = 240;
+    private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
+    private static final String OUTPUT_PATH = "export.csv";
 
     public static Logger debugLog = LoggerFactory.getLogger("FILE");
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) {
+        start(INPUT_PATH, OUTPUT_PATH);
+    }
+
+    public static void start(String input, String output) {
+        debugLog.info("Main - START");
         ConfigurationUtils.configure();
 
         var csvParser = new CSVParser();
-        csvParser.parse("src/main/resources/websites_data_short.csv");
+        csvParser.parse(input);
         List<Link> domains = csvParser.getLinks();
 
-        var scraper = new DefaultScraper();
-        var crawler = new DefaultCrawler();
-        var linkFilter = new DefaultLinkFilter();
-        var extractor = new DefaultExtractor();
-        var wordFilter = new DefaultWordFilter();
-        var database = Database.newInstance();
-        var linkQueue = new LinkedBlockingDeque<Link>();
+        var context = new Context(
+                new DefaultScraper(),
+                new DefaultCrawler(),
+                new DefaultExtractor()
+        );
 
-        var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(6);
+        var database = Database.newInstance();
+
+        var numberOfThreads = Integer.parseInt(System.getProperty("threads.number"));
+        var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads);
         var cs = new ExecutorCompletionService<Collection<String>>(exec);
-        var dbExec = Executors.newSingleThreadExecutor();
+        var domainExec = Executors.newSingleThreadScheduledExecutor();
+        var dbExec = Executors.newSingleThreadScheduledExecutor();
 
         try {
             for (Link domain : domains) {
+                var linkFilter = new DefaultLinkFilter();
+                linkFilter.addDomain();
+                var wordFilter = new DefaultWordFilter();
+                context.setLinkFilter(linkFilter);
+                context.setWordFilter(wordFilter);
+                var linkQueue = new LinkedBlockingDeque<Link>();
+
                 var allWords = new HashSet<String>();
-                cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, domain, linkQueue)::run);
-                submittedTasksCount.incrementAndGet();
-                // order is important
-                while (completedTaskCount.get() - submittedTasksCount.get() != 0 || linkQueue.size() != 0) {
-                    var link = linkQueue.poll(50, TimeUnit.MILLISECONDS);
-                    if (link != null) {
-                        cs.submit(new SiteTask(scraper, crawler, linkFilter, extractor, wordFilter, link, linkQueue)::run);
-                        submittedTasksCount.incrementAndGet();
-                    }
-                    var wordsFuture = cs.poll(50, TimeUnit.MILLISECONDS);
-                    if (wordsFuture != null) {
-                        allWords.addAll(wordsFuture.get());
-                    }
+                var future = domainExec.submit(() -> new DomainTask(context, linkQueue, cs, domain).findTo(allWords));
+                try {
+                    future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    future.cancel(true);
+                    debugLog.error("Main - Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            debugLog.error("Main - Interrupted", e);
+        } catch (Exception e) {
+            debugLog.error("Main - Failed", e);
         } finally {
+            Main.debugLog.info("Main - Completed");
             exec.shutdown();
+            try {
+                exec.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                debugLog.error("Main - Interrupted", e);
+            }
+            domainExec.shutdown();
+            try {
+                domainExec.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                debugLog.error("Main - Interrupted", e);
+            }
             dbExec.shutdown();
-            scraper.quit();
+            context.quit();
+            Main.debugLog.info("Main - Resources were closed");
         }
     }
 }

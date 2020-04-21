@@ -29,7 +29,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="FILE" level="debug" additivity="false">
+    <logger name="FILE" level="info" additivity="false">
         <appender-ref ref="FILE-ROLLING"/>
     </logger>
 

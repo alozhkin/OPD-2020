@@ -1,27 +1,33 @@
 package utils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Html {
-    private static Html EMPTY_HTML = new Html("", new Link(""));
+    private static final Html EMPTY_HTML = new Html("", new Link(""));
 
-    private String html;
-    private Link url;
-    private String lang;
+    private final String html;
+    private final Link url;
+    private final String lang;
 
     public Html(String html, @NotNull Link url) {
         this.html = html;
         this.url = url;
+        this.lang = findLang(html);
+    }
+
+    public static Html emptyHtml() {
+        return EMPTY_HTML;
     }
 
     // tries to parse encoding, if it is not possible uses UTF-8
@@ -45,43 +51,69 @@ public class Html {
         }
     }
 
-    // returns first charset of all in last meta tag with charset attr
-    // cannot define if meta tag is incorrect and would not be parsed by browser.
-    private static String getCharset(String html) {
-        // <meta attr=value(/)>
-        String metaTagStrPattern = "<\\s*meta\\s+[\\w\\s=\\-\";/]*/?\\s*>"
-                // <meta attr=value></meta>
-                + "|<\\s*meta\\s+[\\w\\s=\\-\";/]*>.*<\\s*/\\s*meta\\s*>";
-        Pattern metaTagPattern = Pattern.compile(metaTagStrPattern);
-        Matcher metaTagMatcher = metaTagPattern.matcher(html);
-        // charset = ...
-        String charsetStrPattern = "charset\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?";
-        Pattern charsetPattern = Pattern.compile(charsetStrPattern);
-        String charset = null;
-        while (metaTagMatcher.find()) {
-            var metaTag = metaTagMatcher.group();
-            Matcher charsetMatcher = charsetPattern.matcher(metaTag);
-            if (charsetMatcher.find()) {
-                var charsetAttr = charsetMatcher.group();
-                charset = charsetAttr.substring(charsetAttr.indexOf("=") + 1).replace("\\s", "").replace("\"", "");
-            }
-        }
-        return charset;
+    public String getLang() {
+        return lang;
     }
 
     public Link getUrl() {
         return url;
     }
 
-    public String getLang() {
-        if (lang == null) {
-            lang = Jsoup.parse(this.html, url.toString()).selectFirst("html").attr("lang");
+    // returns first charset of all in last meta tag with charset attr
+    // cannot define if meta tag is incorrect and would not be parsed by browser.
+    private static String getCharset(String html) {
+        var tags = getTagsFromHtml(html, "meta");
+        if (tags.size() != 0) {
+            for (String tag : tags) {
+                var charset = getAttrFromHtmlElement(tag, "charset");
+                if (charset != null) return charset;
+            }
         }
-        return lang;
+        return null;
     }
 
-    public static Html emptyHtml() {
-        return EMPTY_HTML;
+    // use first html tag
+    private static String findLang(String html) {
+        var htmlTags = getTagsFromHtml(html, "html");
+        if (htmlTags.size() != 0) {
+            var tag = htmlTags.get(0);
+            var lang = getAttrFromHtmlElement(tag, "lang");
+            if (lang != null) return lang;
+        }
+        var metaTags = getTagsFromHtml(html, "meta");
+        for (String tag : metaTags) {
+            String attrStrPattern = "language";
+            Pattern attrPattern = Pattern.compile(attrStrPattern);
+            Matcher langMatcher = attrPattern.matcher(tag);
+            if (langMatcher.find()) {
+                return getAttrFromHtmlElement(tag, "content");
+            }
+
+        }
+        return null;
+    }
+
+    private static List<String> getTagsFromHtml(String html, String tag) {
+        String htmlTagStrPattern = String.format("<\\s*%s[^><]*>"
+                + "|<\\s*%s[^>]*>[^><]*<\\s*/\\s*%s\\s*>", tag, tag, tag);
+        Pattern htmlTagPattern = Pattern.compile(htmlTagStrPattern);
+        Matcher htmlTagMatcher = htmlTagPattern.matcher(html);
+        var res = new ArrayList<String>();
+        while (htmlTagMatcher.find()) {
+            res.add(htmlTagMatcher.group());
+        }
+        return res;
+    }
+
+    private static String getAttrFromHtmlElement(String el, String attr) {
+        String attrStrPattern = String.format("%s\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?", attr);
+        Pattern attrPattern = Pattern.compile(attrStrPattern);
+        Matcher attrMatcher = attrPattern.matcher(el);
+        if (attrMatcher.find()) {
+            var htmlAttr = attrMatcher.group();
+            return htmlAttr.substring(htmlAttr.indexOf("=") + 1).replace("\\s", "").replace("\"", "");
+        }
+        return null;
     }
 
     @Override

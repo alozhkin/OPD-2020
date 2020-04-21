@@ -103,6 +103,8 @@ public class WebDriverManager {
                 element.click();
                 result.addAll(getNewWords(currentHtml, parseHtml()));
             } catch (ElementNotInteractableException | StaleElementReferenceException ignored) {
+                //Ignored, because we can't know which tag would be interactable.
+                //We just want to find some interactable elements and we just skip the other.
             }
         }
         return result;

@@ -1,56 +1,66 @@
 package main;
 
-import crawler.Crawler;
-import crawler.LinkFilter;
-import extractor.Extractor;
-import extractor.WordFilter;
-import scraper.Scraper;
+import org.openqa.selenium.WebDriverException;
 import utils.Link;
 
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 
 public class SiteTask {
-    private Scraper scraper;
-    private Crawler crawler;
-    private LinkFilter linkFilter;
-    private Extractor extractor;
-    private WordFilter wordFilter;
-    private Link link;
-    private BlockingQueue<Link> linkQueue;
+    private final Context context;
+    private final Link link;
+    private final BlockingQueue<Link> linkQueue;
 
-    public SiteTask(Scraper s,
-                    Crawler c,
-                    LinkFilter lF,
-                    Extractor e,
-                    WordFilter wF,
-                    Link l,
-                    BlockingQueue<Link> q) {
-        scraper = s;
-        crawler = c;
-        linkFilter = lF;
-        extractor = e;
-        wordFilter = wF;
-        link = l;
+    SiteTask(Context c,
+             Link site,
+             BlockingQueue<Link> q) {
+        context = c;
+        link = site;
         linkQueue = q;
     }
 
     public Collection<String> run() {
         try {
-            var html = scraper.scrape(link);
-            var links = crawler.crawl(html);
-            var filteredLinks = linkFilter.filter(links, link);
+            Main.debugLog.info("SiteTask - Start " + link.toString());
+            checkIfInterrupted();
+            var html = context.scrape(link);
+            checkIfInterrupted();
+            var links = context.crawl(html);
+            checkIfInterrupted();
+            var filteredLinks = context.filterLinks(links, html.getUrl());
+            checkIfInterrupted();
             linkQueue.addAll(filteredLinks);
-            var words = extractor.extract(html);
-            return wordFilter.filter(words);
+            checkIfInterrupted();
+            var words = context.extract(html);
+            checkIfInterrupted();
+            Collection<String> filteredWords = context.filterWords(words);
+            checkIfInterrupted();
+            Main.debugLog.info("SiteTask - Completed " + link.toString());
+            return filteredWords;
+        } catch (InterruptedException e) {
+            Main.debugLog.info("SiteTask - Interrupted " + link.toString());
+        } catch (WebDriverException e) {
+            var cause = e.getCause();
+            if (cause != null && cause.getClass() == InterruptedIOException.class) {
+                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
+            } else if (e.getClass() == org.openqa.selenium.TimeoutException.class) {
+                Main.debugLog.error("SiteTask - Loading timeout is over " + link.toString());
+            } else {
+                Main.consoleLog.error("SiteTask - Webdriver fail: {}", e.toString());
+                Main.debugLog.error("SiteTask - Webdriver fail:", e);
+            }
         } catch (Exception e) {
             Main.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
             Main.debugLog.error("SiteTask - Failed to run program:", e);
-            return new ArrayList<>();
-        } finally {
-            Main.debugLog.info("Site task completed");
-            Main.completedTaskCount.incrementAndGet();
+        }
+        return new ArrayList<>();
+    }
+
+    private void checkIfInterrupted() throws InterruptedException {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException();
         }
     }
 }

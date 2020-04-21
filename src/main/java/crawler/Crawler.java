@@ -3,8 +3,9 @@ package crawler;
 import utils.Html;
 import utils.Link;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface Crawler {
-    Set<Link> crawl(Html html);
+    Collection<Link> crawl(Html html);
 }

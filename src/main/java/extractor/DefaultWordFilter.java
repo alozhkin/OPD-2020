@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class DefaultWordFilter implements WordFilter {
 
-    private Collection<String> filteredWords = getFilterWords();
+    private final Collection<String> filteredWords = getFilterWords();
 
     @Override
     public Collection<String> filter(Collection<String> words) {
@@ -22,7 +22,7 @@ public class DefaultWordFilter implements WordFilter {
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
-        Main.debugLog.info("Filtration task completed");
+        Main.debugLog.debug("Filtration task completed");
         return newSet;
     }
 
