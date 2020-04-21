@@ -12,6 +12,7 @@ import scraper.DefaultScraper;
 import utils.CSVParser;
 import utils.Link;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.concurrent.*;
 public class Main {
     // in seconds
     private static final int DOMAIN_TIMEOUT = 240;
-    private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
+    private static final String INPUT_PATH = "websites_data_short.csv";
     private static final String OUTPUT_PATH = "export.csv";
 
     public static Logger debugLog = LoggerFactory.getLogger("FILE");
