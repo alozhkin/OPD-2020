@@ -1,7 +1,9 @@
 package database;
 
+import config.ConfigurationUtils;
 import database.models.Website;
 import database.models.Word;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Link;
@@ -21,6 +23,11 @@ public class DatabaseTest {
 
     private Database database;
 
+    @BeforeAll
+    public static void configure() {
+        ConfigurationUtils.configure();
+    }
+
     @BeforeEach
     public void initDb() {
         database = Database.newInstance();
@@ -28,7 +35,7 @@ public class DatabaseTest {
 
     @Test
     void putWebsitesFromCSV() {
-        assertTrue(database.putWebsitesFromCSV("websites_data.csv"));
+        assertTrue(database.putWebsitesFromCSV("src/main/resources/websites_data.csv"));
     }
 
     @Test
