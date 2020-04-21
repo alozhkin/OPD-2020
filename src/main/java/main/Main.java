@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 public class Main {
     // in seconds
     private static final int DOMAIN_TIMEOUT = 240;
-    private static final String INPUT_PATH = "websites_data_short.csv";
+    private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
     private static final String OUTPUT_PATH = "export.csv";
 
     public static void main(String[] args) {
