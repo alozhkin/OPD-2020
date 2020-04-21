@@ -9,6 +9,7 @@ import extractor.DefaultWordFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scraper.DefaultScraper;
+import ui.ConsoleUI;
 import utils.CSVParser;
 import utils.Link;
 
@@ -16,6 +17,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.*;
+
+import static ui.ConsoleUI.pb;
 
 public class Main {
     // in seconds
@@ -37,6 +40,7 @@ public class Main {
         var csvParser = new CSVParser();
         csvParser.parse(input);
         List<Link> domains = csvParser.getLinks();
+        pb.maxHint(domains.size());
 
         var context = new Context(
                 new DefaultScraper(),
@@ -70,6 +74,7 @@ public class Main {
                     debugLog.error("Main - Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
+                pb.step();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -77,6 +82,7 @@ public class Main {
         } catch (Exception e) {
             debugLog.error("Main - Failed", e);
         } finally {
+            database.exportDataToCSV(output);
             Main.debugLog.info("Main - Completed");
             exec.shutdown();
             try {
