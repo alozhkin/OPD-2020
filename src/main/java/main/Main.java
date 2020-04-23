@@ -23,17 +23,19 @@ public class Main {
     private static final String OUTPUT_PATH = "export.csv";
 
     public static void main(String[] args) {
-        start(INPUT_PATH, OUTPUT_PATH);
+        ConfigurationUtils.configure();
+        LoggerUtils.debugLog.info("Main - START");
+        scrapeFromFile(INPUT_PATH, OUTPUT_PATH);
     }
 
-    public static void start(String input, String output) {
-        LoggerUtils.debugLog.info("Main - START");
-        ConfigurationUtils.configure();
-
+    public static void scrapeFromFile(String input, String output) {
         var csvParser = new CSVParser();
         csvParser.parse(input);
         List<Link> domains = csvParser.getLinks();
+        scrapeDomains(domains);
+    }
 
+    public static void scrapeDomains(Collection<Link> domains) {
         var context = new Context(
                 new DefaultScraper(),
                 new DefaultCrawler(),
