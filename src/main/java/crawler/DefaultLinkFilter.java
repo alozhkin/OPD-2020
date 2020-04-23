@@ -1,5 +1,6 @@
 package crawler;
 
+import config.ConfigurationFailException;
 import config.ConfigurationUtils;
 import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
@@ -13,22 +14,27 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private final Set<LinkIdentifiers> occurredLinks;
     private static final Set<String> languages = new HashSet<>();
     private static final Set<String> fileExtensions = new HashSet<>();
     private static final Set<String> ignoredLinks = new HashSet<>();
 
+    private final Set<LinkIdentifiers> occurredLinks;
+
     static {
         ConfigurationUtils.parseResourceToCollection("languages.txt", languages, DefaultLinkFilter.class);
         ConfigurationUtils.parseResourceToCollection("file_extensions.txt", fileExtensions, DefaultLinkFilter.class);
+
         ConfigurationUtils.parseResourceToCollection("ignored_links.txt", ignoredLinks, DefaultLinkFilter.class);
     }
 
-    //suggests that main page were visited
     public DefaultLinkFilter() {
+        if (fileExtensions.isEmpty()) {
+            throw new ConfigurationFailException("DefaultLinkFilter - Allowed file extensions are not found");
+        }
         occurredLinks = ConcurrentHashMap.newKeySet();
     }
 
+    //suggests that main page were visited
     public void addDomain() {
         occurredLinks.add(new LinkIdentifiers(""));
         occurredLinks.add(new LinkIdentifiers("index"));

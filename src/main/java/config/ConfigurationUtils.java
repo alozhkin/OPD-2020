@@ -9,17 +9,26 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class ConfigurationUtils {
+    private static final String GLOBAL_PROPERTIES_FILE_PATH = "properties/global.properties";
+    private static final String LOCAL_PROPERTIES_FILE_PATH = "properties/local.properties";
+    private static final String DATABASE_PROPERTIES_FILE_PATH = "properties/database.properties";
+
     public static void configure() {
         loadProperties();
         setConsoleEncoding();
     }
 
     public static void parseResourceToCollection(String fileName, Collection<String> collection, Class<?> c) {
-        var resource = ClassLoader.getSystemResourceAsStream(fileName);
-        if (resource != null) {
-            parseResource(resource, fileName, collection, c);
-        } else {
+        try (InputStream resource = ClassLoader.getSystemResourceAsStream(fileName)) {
+            if (resource != null) {
+                parseResource(resource, fileName, collection, c);
+            } else {
+                LoggerUtils.logFileNotFound(fileName, c);
+            }
+        } catch (FileNotFoundException e) {
             LoggerUtils.logFileNotFound(fileName, c);
+        } catch (IOException e) {
+            LoggerUtils.logFileReadingFail(fileName, c);
         }
     }
 
@@ -32,16 +41,16 @@ public class ConfigurationUtils {
     }
 
     private static void loadProperties() {
-        Properties necessaryProperties =
-                ConfigurationUtils.parseNecessaryPropertiesFromFiles("properties/global.properties");
+        Properties necessaryProperties = ConfigurationUtils
+                .parseNecessaryPropertiesFromFiles(GLOBAL_PROPERTIES_FILE_PATH);
 
         if (necessaryProperties.isEmpty()) {
-            throw new ConfigurationFailException("Configuration file properties/global.properties is not found");
+            throw new ConfigurationFailException("Configuration file " + GLOBAL_PROPERTIES_FILE_PATH + " is not found");
         }
 
         Properties optionalProperties = ConfigurationUtils.parseOptionalPropertiesFromFiles(
-                "properties/local.properties",
-                "properties/database.properties"
+                LOCAL_PROPERTIES_FILE_PATH,
+                DATABASE_PROPERTIES_FILE_PATH
         );
 
         Properties properties = new Properties();
@@ -74,21 +83,21 @@ public class ConfigurationUtils {
     // last properties files override first
     private static Properties parseOptionalPropertiesFromFiles(String... propertiesPaths) {
         var properties = new Properties();
-            for (String path : propertiesPaths) {
-                try {
-                    properties.putAll(parsePropertiesFromFile(path));
-                } catch (IOException ignored) {}
-            }
+        for (String path : propertiesPaths) {
+            try {
+                properties.putAll(parsePropertiesFromFile(path));
+            } catch (IOException ignored) {}
+        }
         return properties;
     }
 
     private static Properties parsePropertiesFromFile(String propertiesPath) throws IOException {
-        var res = new Properties();
-        var resource = ClassLoader.getSystemResourceAsStream(propertiesPath);
-        if (resource == null) return null;
-        res.load(resource);
-        resource.close();
-        return res;
+        try (InputStream resource = ClassLoader.getSystemResourceAsStream(propertiesPath)) {
+            var res = new Properties();
+            if (resource == null) return null;
+            res.load(resource);
+            return res;
+        }
     }
 
     private static void setConsoleEncoding() {
