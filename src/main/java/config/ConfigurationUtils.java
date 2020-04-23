@@ -1,52 +1,106 @@
 package config;
 
-import org.openqa.selenium.chrome.ChromeOptions;
+import logger.LoggerUtils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class ConfigurationUtils {
+    private static final String GLOBAL_PROPERTIES_FILE_PATH = "properties/global.properties";
+    private static final String LOCAL_PROPERTIES_FILE_PATH = "properties/local.properties";
+    private static final String DATABASE_PROPERTIES_FILE_PATH = "properties/database.properties";
+
     public static void configure() {
-        Properties properties = ConfigurationUtils.loadProperties("src/main/config/global.properties",
-                "src/main/config/local.properties");
+        loadProperties();
+        setConsoleEncoding();
+    }
+
+    public static void parseResourceToCollection(String fileName, Collection<String> collection, Class<?> c) {
+        try (InputStream resource = ClassLoader.getSystemResourceAsStream(fileName)) {
+            if (resource != null) {
+                parseResource(resource, fileName, collection, c);
+            } else {
+                LoggerUtils.logFileNotFound(fileName, c);
+            }
+        } catch (FileNotFoundException e) {
+            LoggerUtils.logFileNotFound(fileName, c);
+        } catch (IOException e) {
+            LoggerUtils.logFileReadingFail(fileName, c);
+        }
+    }
+
+    private static void parseResource(InputStream res, String fileName, Collection<String> collection, Class<?> c) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(res))) {
+            collection.addAll(br.lines().collect(Collectors.toSet()));
+        } catch (IOException e) {
+            LoggerUtils.logFileReadingFail(fileName, c);
+        }
+    }
+
+    private static void loadProperties() {
+        Properties necessaryProperties = ConfigurationUtils
+                .parseNecessaryPropertiesFromFiles(GLOBAL_PROPERTIES_FILE_PATH);
+
+        if (necessaryProperties.isEmpty()) {
+            throw new ConfigurationFailException("Configuration file " + GLOBAL_PROPERTIES_FILE_PATH + " is not found");
+        }
+
+        Properties optionalProperties = ConfigurationUtils.parseOptionalPropertiesFromFiles(
+                LOCAL_PROPERTIES_FILE_PATH,
+                DATABASE_PROPERTIES_FILE_PATH
+        );
+
+        Properties properties = new Properties();
+        properties.putAll(necessaryProperties);
+        properties.putAll(optionalProperties);
 
         for (String key : properties.stringPropertyNames()) {
             String value = properties.getProperty(key);
             System.setProperty(key, value);
         }
-
-        String chromePath = properties.getProperty("chrome.path");
-        ChromeOptions options = new ChromeOptions();
-        options.setBinary(chromePath);
-
-        ConfigurationUtils.setConsoleEncoding();
     }
 
     // last properties files override first
-    public static Properties loadProperties(String... propertiesPaths) {
-        var res = new Properties();
+    private static Properties parseNecessaryPropertiesFromFiles(String... propertiesPaths) {
+        var properties = new Properties();
         try {
             for (String path : propertiesPaths) {
-                res.load(new FileInputStream(path));
+                var res = parsePropertiesFromFile(path);
+                if (res == null) {
+                    throw new ConfigurationFailException("Configuration files are not found");
+                }
+                properties.putAll(res);
             }
-        } catch (FileNotFoundException e) {
-            throw new ConfigurationFailException("Configuration files are not found", e);
         } catch (IOException e) {
             throw new ConfigurationFailException("Configuration files are not loaded", e);
         }
-        return res;
+        return properties;
     }
 
-    public static void setConsoleEncoding() {
+    // last properties files override first
+    private static Properties parseOptionalPropertiesFromFiles(String... propertiesPaths) {
+        var properties = new Properties();
+        for (String path : propertiesPaths) {
+            try {
+                properties.putAll(parsePropertiesFromFile(path));
+            } catch (IOException ignored) {}
+        }
+        return properties;
+    }
+
+    private static Properties parsePropertiesFromFile(String propertiesPath) throws IOException {
+        try (InputStream resource = ClassLoader.getSystemResourceAsStream(propertiesPath)) {
+            var res = new Properties();
+            if (resource == null) return null;
+            res.load(resource);
+            return res;
+        }
+    }
+
+    private static void setConsoleEncoding() {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
-    }
-
-    public static String parseDatabaseUrl() {
-        Properties properties = loadProperties("src/main/config/database.properties");
-        return properties.getProperty("url");
     }
 }

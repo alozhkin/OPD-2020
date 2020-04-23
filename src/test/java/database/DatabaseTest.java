@@ -1,7 +1,9 @@
 package database;
 
+import config.ConfigurationUtils;
 import database.models.Website;
 import database.models.Word;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Link;
@@ -20,6 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DatabaseTest {
 
     private Database database;
+
+    @BeforeAll
+    public static void configure() {
+        ConfigurationUtils.configure();
+    }
 
     @BeforeEach
     public void initDb() {

@@ -6,8 +6,7 @@ import crawler.DefaultLinkFilter;
 import database.Database;
 import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import logger.LoggerUtils;
 import scraper.DefaultScraper;
 import utils.CSVParser;
 import utils.Link;
@@ -23,15 +22,12 @@ public class Main {
     private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
     private static final String OUTPUT_PATH = "export.csv";
 
-    public static Logger debugLog = LoggerFactory.getLogger("FILE");
-    public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
-
     public static void main(String[] args) {
         start(INPUT_PATH, OUTPUT_PATH);
     }
 
     public static void start(String input, String output) {
-        debugLog.info("Main - START");
+        LoggerUtils.debugLog.info("Main - START");
         ConfigurationUtils.configure();
 
         var csvParser = new CSVParser();
@@ -67,34 +63,34 @@ public class Main {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
                     future.cancel(true);
-                    debugLog.error("Main - Waiting too long for scraping site " + domain);
+                    LoggerUtils.debugLog.error("Main - Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            debugLog.error("Main - Interrupted", e);
+            LoggerUtils.debugLog.error("Main - Interrupted", e);
         } catch (Exception e) {
-            debugLog.error("Main - Failed", e);
+            LoggerUtils.debugLog.error("Main - Failed", e);
         } finally {
-            Main.debugLog.info("Main - Completed");
+            LoggerUtils.debugLog.info("Main - Completed");
             exec.shutdown();
             try {
                 exec.awaitTermination(10, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                debugLog.error("Main - Interrupted", e);
+                LoggerUtils.debugLog.error("Main - Interrupted", e);
             }
             domainExec.shutdown();
             try {
                 domainExec.awaitTermination(10, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                debugLog.error("Main - Interrupted", e);
+                LoggerUtils.debugLog.error("Main - Interrupted", e);
             }
             dbExec.shutdown();
             context.quit();
-            Main.debugLog.info("Main - Resources were closed");
+            LoggerUtils.debugLog.info("Main - Resources were closed");
         }
     }
 }

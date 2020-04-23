@@ -1,11 +1,8 @@
 package extractor;
 
-import main.Main;
+import config.ConfigurationUtils;
+import logger.LoggerUtils;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,18 +15,17 @@ public class DefaultWordFilter implements WordFilter {
 
     @Override
     public Collection<String> filter(Collection<String> words) {
-        Main.debugLog.debug("Filtration task started");
+        LoggerUtils.debugLog.debug("Filtration task started");
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
-        Main.debugLog.debug("Filtration task completed");
+        LoggerUtils.debugLog.debug("Filtration task completed");
         return newSet;
     }
 
     // Фильтр ненужных слов
     public void unnecessaryWordsFilter(Collection<String> setOfWords) {
         setOfWords.removeAll(filteredWords);
-        Main.debugLog.debug("Unnecessary words have been removed");
     }
 
     //Удаление пустого элемента
@@ -49,7 +45,6 @@ public class DefaultWordFilter implements WordFilter {
         for (String setObj : setOfWords) {
             newSet.add(removingPunctuation(setObj));
         }
-        Main.debugLog.debug("Punctuation has been removed");
         return newSet;
     }
 
@@ -67,23 +62,15 @@ public class DefaultWordFilter implements WordFilter {
 
     private Collection<String> getFilterWords() {
         List<String> filteredWords = new ArrayList<>();
-        List<String> listOfPaths = new ArrayList<>();
-        listOfPaths.add("src/main/resources/list_of_words_for_filtration/english_words.txt");
-        listOfPaths.add("src/main/resources/list_of_words_for_filtration/russian_words.txt");
-        listOfPaths.add("src/main/resources/list_of_words_for_filtration/german_words.txt");
-        try {
-            for (String path : listOfPaths) {
-               filteredWords.addAll(Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8));
-            }
-        } catch (IOException e) {
-            //e.toString() will print only what exception has been thrown
-            //for example, java.lang.ArithmeticException: / by zero
-            Main.consoleLog.error("DefaultWordFilter - Failed to parse file with filter words: {}",e.toString());
-            //will write to the file exception with stacktrace
-            //for example, java.lang.ArithmeticException: / by zero
-            //              at Test.main(Test.java:9)
-            Main.debugLog.error("DefaultWordFilter - Failed to parse file with filter words:", e);
-        }
+        ConfigurationUtils.parseResourceToCollection(
+                "list_of_words_for_filtration/english_words.txt", filteredWords, getClass()
+        );
+        ConfigurationUtils.parseResourceToCollection(
+                "list_of_words_for_filtration/russian_words.txt", filteredWords, getClass()
+        );
+        ConfigurationUtils.parseResourceToCollection(
+                "list_of_words_for_filtration/german_words.txt", filteredWords, getClass()
+        );
         return filteredWords;
     }
 }

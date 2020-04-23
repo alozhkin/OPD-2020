@@ -1,13 +1,12 @@
 package crawler;
 
-import main.Main;
+import config.ConfigurationFailException;
+import config.ConfigurationUtils;
+import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
 import utils.Parameter;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -15,40 +14,27 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultLinkFilter implements LinkFilter {
-    private final Set<LinkIdentifiers> occurredLinks;
-    private static Set<String> languages;
-    private static Set<String> fileExtensions;
-    private static Set<String> ignoredLinks;
+    private static final Set<String> languages = new HashSet<>();
+    private static final Set<String> fileExtensions = new HashSet<>();
+    private static final Set<String> ignoredLinks = new HashSet<>();
 
-    //suggests that main page were visited
+    private final Set<LinkIdentifiers> occurredLinks;
+
+    static {
+        ConfigurationUtils.parseResourceToCollection("languages.txt", languages, DefaultLinkFilter.class);
+        ConfigurationUtils.parseResourceToCollection("file_extensions.txt", fileExtensions, DefaultLinkFilter.class);
+
+        ConfigurationUtils.parseResourceToCollection("ignored_links.txt", ignoredLinks, DefaultLinkFilter.class);
+    }
+
     public DefaultLinkFilter() {
+        if (fileExtensions.isEmpty()) {
+            throw new ConfigurationFailException("DefaultLinkFilter - Allowed file extensions are not found");
+        }
         occurredLinks = ConcurrentHashMap.newKeySet();
     }
 
-    static {
-        try {
-            languages = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/languages.txt")));
-        } catch (IOException e) {
-            Main.consoleLog.error("DefaultLinkFilter - Failed to get languages from the file: {}", e.toString());
-            Main.debugLog.error("DefaultLinkFilter - Failed to get languages from the file:", e);
-            languages = new HashSet<>();
-        }
-        try {
-            fileExtensions = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/file_extensions.txt")));
-        } catch (IOException e) {
-            Main.consoleLog.error("DefaultLinkFilter - Failed to get file extensions from the file: {}", e.toString());
-            Main.debugLog.error("DefaultLinkFilter - Failed to get file extensions from the file:", e);
-            fileExtensions = new HashSet<>();
-        }
-        try {
-            ignoredLinks = new HashSet<>(Files.readAllLines(Paths.get("src/main/resources/ignored_links.txt")));
-        } catch (IOException e) {
-            Main.consoleLog.error("DefaultLinkFilter - Failed to get ignored links from the file: {}", e.toString());
-            Main.debugLog.error("DefaultLinkFilter - Failed to get ignored links from the file:", e);
-            fileExtensions = new HashSet<>();
-        }
-    }
-
+    //suggests that main page were visited
     public void addDomain() {
         occurredLinks.add(new LinkIdentifiers(""));
         occurredLinks.add(new LinkIdentifiers("index"));
@@ -65,7 +51,7 @@ public class DefaultLinkFilter implements LinkFilter {
                 res.add(link);
             }
         }
-        Main.debugLog.debug("Link filtration task completed");
+        LoggerUtils.debugLog.debug("Link filtration task completed");
         return res;
     }
 
