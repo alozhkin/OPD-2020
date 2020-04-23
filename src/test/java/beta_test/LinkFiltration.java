@@ -18,6 +18,7 @@ public class LinkFiltration {
     @Test
     void getAllLinksFromSite() {
         var factory = new LinkFiltrationTestContextFactory();
+        // we don't need words extraction, filtration and database in link filtration tests, so we ignore it
         var spider = new Spider(factory, Database.createDummy());
         spider.scrapeDomains(Set.of(new Link("jsoup.org")));
         var context = (LinkFiltrationTestContext) factory.getContexts().get(0);

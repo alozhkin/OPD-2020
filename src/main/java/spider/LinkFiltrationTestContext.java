@@ -41,11 +41,13 @@ public class LinkFiltrationTestContext implements Context {
         return filtered;
     }
 
+    // we don't need words extraction in link filtration tests, so we ignore it
     @Override
     public Collection<String> extract(Html html) {
         return new ArrayList<>();
     }
 
+    // we don't need words filtration in link filtration tests, so we ignore it
     @Override
     public Collection<String> filterWords(Collection<String> words) {
         return new ArrayList<>();
