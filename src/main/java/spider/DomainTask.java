@@ -1,4 +1,4 @@
-package main;
+package spider;
 
 import logger.LoggerUtils;
 import utils.Link;
@@ -44,10 +44,12 @@ public class DomainTask {
             LoggerUtils.debugLog.error("Domain Task - Failed on site " + domain, e);
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();
-        }
-        LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
-        for (Future<Collection<String>> f : futures) {
-            f.cancel(true);
+        } finally {
+            for (Future<Collection<String>> f : futures) {
+                f.cancel(true);
+            }
+            context.quit();
+            LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
         }
     }
 }
