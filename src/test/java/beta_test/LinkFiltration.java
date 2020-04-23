@@ -1,8 +1,8 @@
-package link_filtration;
+package beta_test;
 
 import config.ConfigurationUtils;
 import database.Database;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import spider.*;
 import utils.Link;
@@ -10,8 +10,8 @@ import utils.Link;
 import java.util.Set;
 
 public class LinkFiltration {
-    @BeforeEach
-    void configure() {
+    @BeforeAll
+    static void configure() {
         ConfigurationUtils.configure();
     }
 
