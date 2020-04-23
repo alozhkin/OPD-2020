@@ -71,8 +71,9 @@ public class ConfigurationUtils {
                 var res = parsePropertiesFromFile(path);
                 if (res == null) {
                     throw new ConfigurationFailException("Configuration files are not found");
+                } else {
+                    properties.putAll(res);
                 }
-                properties.putAll(res);
             }
         } catch (IOException e) {
             throw new ConfigurationFailException("Configuration files are not loaded", e);
@@ -85,8 +86,15 @@ public class ConfigurationUtils {
         var properties = new Properties();
         for (String path : propertiesPaths) {
             try {
-                properties.putAll(parsePropertiesFromFile(path));
-            } catch (IOException ignored) {}
+                var res = parsePropertiesFromFile(path);
+                if (res == null) {
+                    LoggerUtils.logFileNotFound(path, ConfigurationUtils.class);
+                } else {
+                    properties.putAll(parsePropertiesFromFile(path));
+                }
+            } catch (IOException e) {
+                LoggerUtils.logFileReadingFail(path, ConfigurationUtils.class);
+            }
         }
         return properties;
     }
