@@ -1,4 +1,4 @@
-package main;
+package spider;
 
 import crawler.Crawler;
 import crawler.LinkFilter;
@@ -10,20 +10,14 @@ import utils.Link;
 
 import java.util.Collection;
 
-public class Context {
+public class DefaultContext implements Context {
     private final Scraper scraper;
     private final Crawler crawler;
-    private LinkFilter linkFilter;
+    private final LinkFilter linkFilter;
     private final Extractor extractor;
-    private WordFilter wordFilter;
+    private final WordFilter wordFilter;
 
-    Context(Scraper scraper,
-            Crawler crawler,
-            Extractor extractor) {
-        this(scraper, crawler, extractor, null, null);
-    }
-
-    Context(Scraper scraper,
+    DefaultContext(Scraper scraper,
             Crawler crawler,
             Extractor extractor,
             LinkFilter linkFilter,
@@ -35,35 +29,33 @@ public class Context {
         this.wordFilter = wordFilter;
     }
 
-    void setLinkFilter(LinkFilter linkFilter) {
-        this.linkFilter = linkFilter;
-    }
-
-    void setWordFilter(WordFilter wordFilter) {
-        this.wordFilter = wordFilter;
-    }
-
-    Html scrape(Link site) {
+    @Override
+    public Html scrape(Link site) {
         return scraper.scrape(site);
     }
 
-    Collection<Link> crawl(Html html) {
+    @Override
+    public Collection<Link> crawl(Html html) {
         return crawler.crawl(html);
     }
 
-    Collection<Link> filterLinks(Collection<Link> links, Link domain) {
+    @Override
+    public Collection<Link> filterLinks(Collection<Link> links, Link domain) {
         return linkFilter.filter(links, domain);
     }
 
-    Collection<String> extract(Html html) {
+    @Override
+    public Collection<String> extract(Html html) {
         return extractor.extract(html);
     }
 
-    Collection<String> filterWords(Collection<String> words) {
+    @Override
+    public Collection<String> filterWords(Collection<String> words) {
         return wordFilter.filter(words);
     }
 
-    void quit() {
+    @Override
+    public void quit() {
         scraper.quit();
     }
 }

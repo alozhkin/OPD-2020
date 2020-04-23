@@ -1,4 +1,4 @@
-package main;
+package spider;
 
 import database.Database;
 import database.models.Word;
