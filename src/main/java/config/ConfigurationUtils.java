@@ -9,9 +9,12 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class ConfigurationUtils {
+    // required properties. Would throw exception if absent
     private static final String GLOBAL_PROPERTIES_FILE_PATH = "properties/global.properties";
+    // optional properties. Would log fail if absent
     private static final String LOCAL_PROPERTIES_FILE_PATH = "properties/local.properties";
     private static final String DATABASE_PROPERTIES_FILE_PATH = "properties/database.properties";
+
 
     public static void configure() {
         loadProperties();
@@ -42,7 +45,7 @@ public class ConfigurationUtils {
 
     private static void loadProperties() {
         Properties necessaryProperties = ConfigurationUtils
-                .parseNecessaryPropertiesFromFiles(GLOBAL_PROPERTIES_FILE_PATH);
+                .parseRequiredPropertiesFromFiles(GLOBAL_PROPERTIES_FILE_PATH);
 
         if (necessaryProperties.isEmpty()) {
             throw new ConfigurationFailException("Configuration file " + GLOBAL_PROPERTIES_FILE_PATH + " is not found");
@@ -64,7 +67,7 @@ public class ConfigurationUtils {
     }
 
     // last properties files override first
-    private static Properties parseNecessaryPropertiesFromFiles(String... propertiesPaths) {
+    private static Properties parseRequiredPropertiesFromFiles(String... propertiesPaths) {
         var properties = new Properties();
         try {
             for (String path : propertiesPaths) {
