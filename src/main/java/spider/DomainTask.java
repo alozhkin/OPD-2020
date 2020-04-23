@@ -29,7 +29,7 @@ public class DomainTask {
         Set<Future<Collection<String>>> futures = new HashSet<>();
         futures.add(cs.submit(new SiteTask(context, domain, linkQueue)::run));
         try {
-            while (!Thread.currentThread().isInterrupted() && futures.size() != 0) {
+            while (!Thread.currentThread().isInterrupted() && (futures.size() != 0 || linkQueue.size() != 0)) {
                 var link = linkQueue.poll(50, TimeUnit.MILLISECONDS);
                 if (link != null) {
                     futures.add(cs.submit(new SiteTask(context, link, linkQueue)::run));
