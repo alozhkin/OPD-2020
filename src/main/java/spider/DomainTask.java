@@ -1,4 +1,4 @@
-package main;
+package spider;
 
 import logger.LoggerUtils;
 import utils.Link;
@@ -29,7 +29,7 @@ public class DomainTask {
         Set<Future<Collection<String>>> futures = new HashSet<>();
         futures.add(cs.submit(new SiteTask(context, domain, linkQueue)::run));
         try {
-            while (!Thread.currentThread().isInterrupted() && futures.size() != 0) {
+            while (!Thread.currentThread().isInterrupted() && (futures.size() != 0 || linkQueue.size() != 0)) {
                 var link = linkQueue.poll(50, TimeUnit.MILLISECONDS);
                 if (link != null) {
                     futures.add(cs.submit(new SiteTask(context, link, linkQueue)::run));
@@ -44,10 +44,12 @@ public class DomainTask {
             LoggerUtils.debugLog.error("Domain Task - Failed on site " + domain, e);
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();
-        }
-        LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
-        for (Future<Collection<String>> f : futures) {
-            f.cancel(true);
+        } finally {
+            for (Future<Collection<String>> f : futures) {
+                f.cancel(true);
+            }
+            context.quit();
+            LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
         }
     }
 }

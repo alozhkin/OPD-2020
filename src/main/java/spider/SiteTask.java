@@ -1,4 +1,4 @@
-package main;
+package spider;
 
 import logger.LoggerUtils;
 import org.openqa.selenium.WebDriverException;
