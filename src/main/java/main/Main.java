@@ -11,6 +11,9 @@ public class Main {
     private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
     private static final String OUTPUT_PATH = "export.csv";
 
+    // prevents class instantiation
+    private Main() {}
+
     public static void main(String[] args) {
         ConfigurationUtils.configure();
         LoggerUtils.debugLog.info("Main - START");
