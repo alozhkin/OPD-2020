@@ -15,6 +15,8 @@ public class ConfigurationUtils {
     private static final String LOCAL_PROPERTIES_FILE_PATH = "properties/local.properties";
     private static final String DATABASE_PROPERTIES_FILE_PATH = "properties/database.properties";
 
+    // prevents class instantiation
+    private ConfigurationUtils() {}
 
     public static void configure() {
         loadProperties();
