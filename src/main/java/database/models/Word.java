@@ -1,6 +1,6 @@
 package database.models;
 
-import java.util.Objects;
+import java.util.*;
 
 public class Word {
 
@@ -51,5 +51,13 @@ public class Word {
                 ", websiteId=" + websiteId +
                 ", word='" + word + '\'' +
                 '}';
+    }
+
+    public static class Factory {
+        private static int id = -1;
+
+        public static Word getWord(int websiteId, String word) {
+            return new Word(++id, websiteId, word);
+        }
     }
 }
