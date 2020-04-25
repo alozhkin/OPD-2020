@@ -63,7 +63,12 @@ public class ConfigurationUtils {
         properties.putAll(optionalProperties);
 
         for (String key : properties.stringPropertyNames()) {
-            String value = properties.getProperty(key);
+            String value;
+            if (isDriverProperty(key)) {
+                value = getDriverValueByOS(key, properties);
+            } else {
+                value = properties.getProperty(key);
+            }
             System.setProperty(key, value);
         }
     }
@@ -115,5 +120,13 @@ public class ConfigurationUtils {
 
     private static void setConsoleEncoding() {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+    }
+
+    private static String getDriverValueByOS(String key, Properties properties) {
+        return properties.getProperty(key) + "_" + OSValidator.getSystem();
+    }
+
+    private static boolean isDriverProperty(String key) {
+        return key.equals("webdriver.chrome.driver");
     }
 }
