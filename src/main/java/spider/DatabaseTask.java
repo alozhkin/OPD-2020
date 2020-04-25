@@ -22,10 +22,11 @@ public class DatabaseTask {
     boolean run() {
         try {
             LoggerUtils.debugLog.info("Database task start");
-            return database.putWords(words.stream()
-                    // TODO: Put website_id instead of domain.hashCode()
-                    .map(word -> new Word(domain.toString().hashCode(), word))
-                    .collect(Collectors.toSet()));
+            return database.putWords(
+                    words.stream()
+                            .map(word -> Word.Factory.getWord(Link.Factory.getDomainId(domain), word))
+                            .collect(Collectors.toSet())
+            );
         } catch (Exception e) {
             LoggerUtils.consoleLog.error("DatabaseTask - Failed to put words into database: {}", e.toString());
             LoggerUtils.debugLog.error("DatabaseTask - Failed to put words into database:", e);

@@ -3,6 +3,7 @@ package utils;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -190,5 +191,19 @@ public class Link {
     @Override
     public int hashCode() {
         return Objects.hash(uri);
+    }
+
+    public static class Factory {
+        private static int id = -1;
+        private static final HashMap<Link, Integer> domains = new HashMap<>();
+
+        public static int getDomainId(Link domain) {
+            if (domains.containsKey(domain)) {
+                return domains.get(domain);
+            } else {
+                domains.put(domain, ++id);
+                return id;
+            }
+        }
     }
 }
