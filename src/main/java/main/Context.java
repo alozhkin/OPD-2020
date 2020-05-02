@@ -51,7 +51,7 @@ public class Context {
         return crawler.crawl(html);
     }
 
-    Collection<Link> filter(Collection<Link> links, Link domain) {
+    Collection<Link> filterLinks(Collection<Link> links, Link domain) {
         return linkFilter.filter(links, domain);
     }
 
@@ -59,7 +59,7 @@ public class Context {
         return extractor.extract(html);
     }
 
-    Collection<String> filter(Collection<String> words) {
+    Collection<String> filterWords(Collection<String> words) {
         return wordFilter.filter(words);
     }
 
