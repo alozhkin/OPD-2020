@@ -1,6 +1,5 @@
 package database;
 
-import config.ConfigurationUtils;
 import database.models.Website;
 import database.models.Word;
 import database.utils.DatabaseUtil;
@@ -71,6 +70,11 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean putWords(Collection<Word> words) {
+        if (words.isEmpty()) {
+            LoggerUtils.consoleLog.error("DatabaseImpl - An empty list of words came to the database");
+            LoggerUtils.debugLog.error("DatabaseImpl -An empty list of words came to the database");
+            return false;
+        }
         try (Connection connection = getConnection()) {
             try (PreparedStatement preparedStatement = DatabaseUtil.getWordsPreparedStatement(words, connection)) {
                 preparedStatement.executeUpdate();

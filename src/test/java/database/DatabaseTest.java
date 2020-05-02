@@ -70,28 +70,28 @@ public class DatabaseTest {
 
     @Test
     public void testInsertWord() {
-        assertTrue(database.putWord(new Word(1, "abarbeitung")));
-        assertTrue(database.putWord(new Word(2, "abbaubaren")));
-        assertTrue(database.putWord(new Word(1, "abbestellung")));
-        assertTrue(database.putWord(new Word(3, "abbestellung")));
-        assertTrue(database.putWord(new Word(4, "abbestellung")));
-
-        assertTrue(database.putWord(new Word(1, "abarbeitung")));
-        assertTrue(database.putWord(new Word(2, "abbaubaren")));
-        assertTrue(database.putWord(new Word(1, "abbestellung")));
-        assertTrue(database.putWord(new Word(3, "abbestellung")));
-        assertTrue(database.putWord(new Word(4, "abbestellung")));
+        assertTrue(database.putWord(Word.newInstance(1, "abarbeitung")));
+        assertTrue(database.putWord(Word.newInstance(2, "abbaubaren")));
+        assertTrue(database.putWord(Word.newInstance(1, "abbestellung")));
+        assertTrue(database.putWord(Word.newInstance(3, "abbestellung")));
+        assertTrue(database.putWord(Word.newInstance(4, "abbestellung")));
+                                
+        assertTrue(database.putWord(Word.newInstance(1, "abarbeitung")));
+        assertTrue(database.putWord(Word.newInstance(2, "abbaubaren")));
+        assertTrue(database.putWord(Word.newInstance(1, "abbestellung")));
+        assertTrue(database.putWord(Word.newInstance(3, "abbestellung")));
+        assertTrue(database.putWord(Word.newInstance(4, "abbestellung")));
     }
 
     @Test
     public void testInsertWords() {
         ArrayList<Word> words = new ArrayList<>();
 
-        words.add(new Word(1, "abarbeitung"));
-        words.add(new Word(2, "abbaubaren"));
-        words.add(new Word(1, "abbestellung"));
-        words.add(new Word(3, "abarbeitungsdsd"));
-        words.add(new Word(4, "abarbeitungsdsd"));
+        words.add(Word.newInstance(1, "abarbeitung"));
+        words.add(Word.newInstance(2, "abbaubaren"));
+        words.add(Word.newInstance(1, "abbestellung"));
+        words.add(Word.newInstance(3, "abarbeitungsdsd"));
+        words.add(Word.newInstance(4, "abarbeitungsdsd"));
 
         assertTrue(database.putWords(words));
     }
@@ -111,13 +111,13 @@ public class DatabaseTest {
         assertTrue(database.clearWords());
         assertEquals(0, database.getWordsSize());
 
-        database.putWord(new Word(1, "test_word"));
+        database.putWord(Word.newInstance(1, "test_word"));
         assertEquals(1, database.getWordsSize());
 
-        database.putWord(new Word(2, "2test_word"));
-        database.putWord(new Word(3, "3test_word"));
-        database.putWord(new Word(4, "4test_word"));
-        database.putWord(new Word(4, "4test_word"));
+        database.putWord(Word.newInstance(2, "2test_word"));
+        database.putWord(Word.newInstance(3, "3test_word"));
+        database.putWord(Word.newInstance(4, "4test_word"));
+        database.putWord(Word.newInstance(4, "4test_word"));
 
         assertEquals(5, database.getWordsSize());
     }
@@ -142,10 +142,10 @@ public class DatabaseTest {
     public void testExportData() {
         assertTrue(database.clearWords());
 
-        Word word1 = new Word(1, "word1");
-        Word word2 = new Word(2, "word2");
-        Word word3 = new Word(3, "word3");
-        Word word5 = new Word(5, "word5");
+        Word word1 = Word.newInstance(1, "word1");
+        Word word2 = Word.newInstance(2, "word2");
+        Word word3 = Word.newInstance(3, "word3");
+        Word word5 = Word.newInstance(5, "word5");
 
         database.putWord(word1);
         database.putWord(word2);
@@ -201,10 +201,10 @@ public class DatabaseTest {
         database.putWebsite(site3);
         database.putWebsite(site5);
 
-        Word word1 = new Word(1, "word1");
-        Word word2 = new Word(2, "word2");
-        Word word3 = new Word(3, "word3");
-        Word word5 = new Word(5, "word5");
+        Word word1 = Word.newInstance(1, "word1");
+        Word word2 = Word.newInstance(2, "word2");
+        Word word3 = Word.newInstance(3, "word3");
+        Word word5 = Word.newInstance(5, "word5");
 
         database.putWord(word1);
         database.putWord(word2);
@@ -243,11 +243,11 @@ public class DatabaseTest {
         assertTrue(database.clearWords());
         int size = database.getWebsitesSize();
 
-        Word word1 = new Word(1, 1, "word1");
-        Word word2 = new Word(2, 2, "word2");
-        Word word31 = new Word(3, 3, "word31");
-        Word word32 = new Word(4, 3, "word32");
-        Word word5 = new Word(5, 5, "word5");
+        Word word1 = Word.newInstance(1, "word1");
+        Word word2 = Word.newInstance(2, "word2");
+        Word word31 = Word.newInstance(3, "word31");
+        Word word32 = Word.newInstance(3, "word32");
+        Word word5 = Word.newInstance(5, "word5");
 
         database.putWord(word1);
         database.putWord(word2);

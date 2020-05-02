@@ -1,17 +1,16 @@
 package database.models;
 
-import java.util.Objects;
+import java.util.*;
 
 public class Word {
 
+    private static int factoryId = 0;
     private final int id;
     private final int websiteId;
     private final String word;
 
-    public Word(int websiteId, String word) {
-        this.id = -1;
-        this.websiteId = websiteId;
-        this.word = word;
+    public static Word newInstance(int websiteId, String word) {
+        return new Word(++factoryId, websiteId, word);
     }
 
     public Word(int id, int websiteId, String word) {
