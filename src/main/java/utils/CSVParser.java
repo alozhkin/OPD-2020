@@ -27,6 +27,7 @@ public class CSVParser {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 

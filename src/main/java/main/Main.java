@@ -40,7 +40,7 @@ public class Main {
         var csvParser = new CSVParser();
         csvParser.parse(input);
         List<Link> domains = csvParser.getLinks();
-        pb.maxHint(domains.size());
+        pb.maxHint(domains.size() + 1);
 
         var context = new Context(
                 new DefaultScraper(),
@@ -83,6 +83,7 @@ public class Main {
             debugLog.error("Main - Failed", e);
         } finally {
             database.exportDataToCSV(output);
+            pb.step();
             Main.debugLog.info("Main - Completed");
             exec.shutdown();
             try {
