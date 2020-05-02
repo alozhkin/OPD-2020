@@ -4,6 +4,7 @@ import database.Database;
 import database.models.Word;
 import logger.LoggerUtils;
 import utils.Link;
+import utils.LinkFactory;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class DatabaseTask {
             LoggerUtils.debugLog.info("Database task start");
             return database.putWords(
                     words.stream()
-                            .map(word -> Word.Factory.getWord(Link.Factory.getDomainId(domain), word))
+                            .map(word -> Word.newInstance(LinkFactory.getDomainId(domain), word))
                             .collect(Collectors.toSet())
             );
         } catch (Exception e) {
