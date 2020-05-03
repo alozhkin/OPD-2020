@@ -25,6 +25,8 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
         jsonObject.addProperty("url", context.getSiteUrl().toString());
         jsonObject.addProperty("images", 0);
         jsonObject.addProperty("filters", "filter,easyprivacy,fanboy-annoyance");
+        jsonObject.addProperty("timeout", 20.0);
+        jsonObject.addProperty("resource_timeout", 16.0);
         jsonObject.addProperty("lua_source", luaScript);
         String credentials = context.getUsername() + ":" + context.getPassword();
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
