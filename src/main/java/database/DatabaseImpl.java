@@ -11,6 +11,7 @@ import utils.Link;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +42,12 @@ class DatabaseImpl implements Database {
     @Override
     public boolean putWebsitesFromCSV(String CSVFile) {
         CSVParser parser = new CSVParser();
-        parser.parse(CSVFile);
+        try {
+            parser.parse(CSVFile);
+        } catch (IOException e) {
+            Main.consoleLog.error("DatabaseImpl - Failed to put websites from database: {}", e.toString());
+            Main.debugLog.error("DatabaseImpl - Failed to put websites from database:", e);
+        }
         return putWebsites(parser.getWebsites());
     }
 

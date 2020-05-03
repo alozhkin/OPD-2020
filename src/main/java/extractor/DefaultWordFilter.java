@@ -47,7 +47,7 @@ public class DefaultWordFilter implements WordFilter {
         Collection<String> newSet = new HashSet<>();
 
         for (String setObj : setOfWords) {
-            newSet.add(removingPunctuation(setObj));
+            newSet.add(removingPunctuation(setObj).trim());
         }
         Main.debugLog.debug("Punctuation has been removed");
         return newSet;

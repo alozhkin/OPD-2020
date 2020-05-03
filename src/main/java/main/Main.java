@@ -13,6 +13,7 @@ import ui.ConsoleUI;
 import utils.CSVParser;
 import utils.Link;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -29,11 +30,11 @@ public class Main {
     public static Logger debugLog = LoggerFactory.getLogger("FILE");
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         start(INPUT_PATH, OUTPUT_PATH);
     }
 
-    public static void start(String input, String output) {
+    public static void start(String input, String output) throws IOException {
         debugLog.info("Main - START");
         ConfigurationUtils.configure();
 
@@ -86,6 +87,7 @@ public class Main {
             pb.step();
             Main.debugLog.info("Main - Completed");
             exec.shutdown();
+            pb.close();
             try {
                 exec.awaitTermination(10, TimeUnit.SECONDS);
             } catch (InterruptedException e) {

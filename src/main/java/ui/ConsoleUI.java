@@ -1,5 +1,6 @@
 package ui;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import main.Main;
@@ -23,7 +24,6 @@ public class ConsoleUI implements UI {
 
     public static void main(String[] args) {
         new ConsoleUI().start(args);
-        pb.close();
     }
 
     private void start(String[] args) {
@@ -34,7 +34,11 @@ public class ConsoleUI implements UI {
             consoleLog.error("CmdLineParser - Failed", e);
             return;
         }
-        Main.start(input, Objects.requireNonNullElse(output, PATH));
-        System.out.println("End.");
+        try {
+            Main.start(input, Objects.requireNonNullElse(output, PATH));
+        } catch (IOException e) {
+            consoleLog.error("Main.start - Failed", e);
+            return;
+        }
     }
 }
