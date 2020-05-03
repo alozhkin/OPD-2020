@@ -12,9 +12,9 @@ public class DomainTask {
     private final Scraper scraper;
     private final BlockingQueue<Link> linkQueue = new LinkedBlockingDeque<>();
 
-    DomainTask(Context context, Scraper scraper, Link domain) {
-        this.context = context;
+    DomainTask(Link domain, Context context, Scraper scraper) {
         this.domain = domain;
+        this.context = context;
         this.scraper = scraper;
     }
 
