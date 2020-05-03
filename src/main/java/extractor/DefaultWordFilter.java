@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.lang.Character.isDigit;
-
 public class DefaultWordFilter implements WordFilter {
 
     private final Collection<String> filteredWords = getFilterWords();
