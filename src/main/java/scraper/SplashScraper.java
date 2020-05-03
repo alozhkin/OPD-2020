@@ -11,6 +11,7 @@ import splash.SplashRequestFactory;
 import utils.Html;
 import utils.Link;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,7 +86,9 @@ public class SplashScraper implements Scraper {
                 // splash container restarting
                 // будет посылать запросы пока не надоест
                 if (response.code() == 503) {
-                    call.clone().enqueue(new SplashCallback(link, consumer));
+                    var newCall = call.clone();
+                    calls.add(newCall);
+                    newCall.enqueue(new SplashCallback(link, consumer));
                 } else if (response.code() == 504) {
                     LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + link);
                 } else if (response.code() == 200) {
