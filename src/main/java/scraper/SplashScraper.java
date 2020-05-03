@@ -73,22 +73,23 @@ public class SplashScraper implements Scraper {
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
             LoggerUtils.consoleLog.error("SplashScraper - Request failed " + call.request().url().toString(), e);
             calls.remove(call);
+            if (e.getClass().equals(EOFException.class)) {
+                retry(call);
+            }
         }
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
-            handleResponse(response, call, link, consumer);
+            handleResponse(response, call);
             calls.remove(call);
         }
 
-        private void handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
+        private void handleResponse(Response response, Call call) {
             try (response) {
                 // splash container restarting
                 // будет посылать запросы пока не надоест
                 if (response.code() == 503) {
-                    var newCall = call.clone();
-                    calls.add(newCall);
-                    newCall.enqueue(new SplashCallback(link, consumer));
+                    retry(call);
                 } else if (response.code() == 504) {
                     LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + link);
                 } else if (response.code() == 200) {
@@ -106,6 +107,12 @@ public class SplashScraper implements Scraper {
             } catch (IOException e) {
                 LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
             }
+        }
+
+        private void retry(Call call) {
+            var newCall = call.clone();
+            calls.add(newCall);
+            newCall.enqueue(new SplashCallback(link, consumer));
         }
     }
 }
