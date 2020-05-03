@@ -4,6 +4,7 @@ import logger.LoggerUtils;
 import scraper.Scraper;
 import utils.Link;
 
+import java.util.Set;
 import java.util.concurrent.*;
 
 public class DomainTask {
@@ -11,11 +12,13 @@ public class DomainTask {
     private final Link domain;
     private final Scraper scraper;
     private final BlockingQueue<Link> linkQueue = new LinkedBlockingDeque<>();
+    private final Set<String> resultWords;
 
-    DomainTask(Link domain, Context context, Scraper scraper) {
+    DomainTask(Link domain, Context context, Scraper scraper, Set<String> resultWords) {
         this.domain = domain;
         this.context = context;
         this.scraper = scraper;
+        this.resultWords = resultWords;
     }
 
     void scrapeDomain() {
@@ -48,7 +51,7 @@ public class DomainTask {
     private void scrapeNextLink() throws InterruptedException {
         var link = linkQueue.poll(500, TimeUnit.MILLISECONDS);
         if (link != null) {
-            scraper.scrape(link, new SiteTask(context, linkQueue)::run);
+            scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
         }
     }
 

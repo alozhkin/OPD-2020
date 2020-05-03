@@ -10,6 +10,7 @@ import utils.Link;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 
 public class Spider {
@@ -41,14 +42,15 @@ public class Spider {
                 var context = contextFactory.createContext();
                 var factory = new DefaultSplashRequestFactory();
                 var scraper = new SplashScraper(factory);
-                var future = domainExec.submit(() -> new DomainTask(domain, context, scraper).scrapeDomain());
+                Set<String> allWords = ConcurrentHashMap.newKeySet();
+                var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
                     future.cancel(true);
                     LoggerUtils.debugLog.error("Main - Waiting too long for scraping site " + domain);
                 }
-                dbExec.submit(new DatabaseTask(database, domain, new HashSet<>())::run);
+                dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
