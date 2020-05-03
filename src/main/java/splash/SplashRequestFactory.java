@@ -1,6 +1,6 @@
 package splash;
 
-import http_client.Request;
+import okhttp3.Request;
 import utils.Link;
 
 interface SplashRequestFactory {
