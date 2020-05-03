@@ -25,17 +25,17 @@ public class DefaultWordFilter implements WordFilter {
     }
 
     // Фильтр ненужных слов
-    public void unnecessaryWordsFilter(Collection<String> setOfWords) {
-        setOfWords.removeAll(filteredWords);
+    public void unnecessaryWordsFilter(Collection<String> words) {
+        words.removeAll(filteredWords);
     }
 
     //Удаление пустого элемента
-    public void deleteBlankLines(Collection<String> setOfWords) {
-        setOfWords.removeIf(String::isEmpty);
+    public void deleteBlankLines(Collection<String> words) {
+        words.removeIf(String::isEmpty);
     }
 
-    public Collection<String> wordsToLowerCase(Collection<String> setOfWords) {
-        return setOfWords.stream().map(String::toLowerCase)
+    public Collection<String> wordsToLowerCase(Collection<String> words) {
+        return words.stream().map(String::toLowerCase)
                 .collect(Collectors.toSet());
     }
 
@@ -46,10 +46,10 @@ public class DefaultWordFilter implements WordFilter {
     }
 
     //Фильтр знаков препинания
-    public Collection<String> punctuationMarkFilter(Collection<String> setOfWords) {
+    public Collection<String> punctuationMarkFilter(Collection<String> words) {
         Collection<String> newSet = new HashSet<>();
 
-        for (String setObj : setOfWords) {
+        for (String setObj : words) {
             newSet.add(removingPunctuation(setObj));
         }
         return newSet;
