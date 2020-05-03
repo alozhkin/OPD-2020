@@ -74,4 +74,28 @@ class DefaultWordFilterTest {
         Collection<String> newSet = new DefaultWordFilter().punctuationMarkFilter(wordSForFiltrationSet);
         assertEquals(newSet, expected);
     }
+
+    @Test
+    void numberFilteringTest() {
+        Collection<String> wordsForFiltrationSet = new HashSet<>();
+
+        wordsForFiltrationSet.add("ГаллОграмма");
+        wordsForFiltrationSet.add("в");
+        wordsForFiltrationSet.add("Музее");
+        wordsForFiltrationSet.add("к");
+        wordsForFiltrationSet.add("11");
+        wordsForFiltrationSet.add("сентября");
+
+        Collection<String> expected = new HashSet<>();
+
+        expected.add("ГаллОграмма");
+        expected.add("в");
+        expected.add("Музее");
+        expected.add("к");
+        expected.add("сентября");
+
+        Collection<String> newSet = new DefaultWordFilter().filterNumbers(wordsForFiltrationSet);
+
+        assertEquals(expected, newSet);
+    }
 }
