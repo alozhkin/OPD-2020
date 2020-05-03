@@ -42,9 +42,9 @@ public class DefaultWordFilter implements WordFilter {
     }
 
     //фильтр слов-чисел
-    public Collection<String> filterNumbers(Collection<String> setOfWords) {
-        return setOfWords.stream().filter(string -> string.chars().allMatch(chr->(!isDigit(chr))))
-                .collect(Collectors.toSet());
+    public Collection<String> filterNumbers(Collection<String> words) {
+        words.removeIf(x->x.matches("^\\d+$"));
+        return words;
     }
 
     //Фильтр знаков препинания
