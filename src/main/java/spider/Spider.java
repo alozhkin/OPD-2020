@@ -45,7 +45,7 @@ public class Spider {
             for (Link domain : domains) {
                 var context = contextFactory.createContext();
                 var factory = new SplashRequestFactory();
-                var future = domainExec.submit(() -> new DomainTask(context, domain, httpClient, factory).findTo());
+                var future = domainExec.submit(() -> new DomainTask(context, domain, httpClient, factory).scrapeDomain());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {

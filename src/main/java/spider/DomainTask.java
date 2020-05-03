@@ -18,7 +18,7 @@ public class DomainTask {
         this.scraper = scraper;
     }
 
-    void findTo() {
+    void scrapeDomain() {
         LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
         try {
             linkQueue.add(domain);
@@ -35,24 +35,24 @@ public class DomainTask {
     }
 
     // order is important
-    boolean areAllLinksScraped() {
+    private boolean areAllLinksScraped() {
         return scraper.scrapingSitesCount() != 0 || !linkQueue.isEmpty();
     }
 
-    void checkIfInterrupted() throws InterruptedException {
+    private void checkIfInterrupted() throws InterruptedException {
         if (Thread.currentThread().isInterrupted()) {
             throw new InterruptedException();
         }
     }
 
-    void scrapeNextLink() throws InterruptedException {
+    private void scrapeNextLink() throws InterruptedException {
         var link = linkQueue.poll(500, TimeUnit.MILLISECONDS);
         if (link != null) {
             scraper.scrape(link, new SiteTask(context, linkQueue)::run);
         }
     }
 
-    void handleInterruption() {
+    private void handleInterruption() {
         scraper.cancelAll();
     }
 }

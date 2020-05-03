@@ -19,7 +19,7 @@ public class SplashScraper implements Scraper {
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
 
     @Override
-    void scrape(Link link, Consumer<Html> consumer) {
+    public void scrape(Link link, Consumer<Html> consumer) {
 
     }
 
@@ -30,7 +30,7 @@ public class SplashScraper implements Scraper {
 
 
     @Override
-    void cancelAll() {
+    public void cancelAll() {
         calls.forEach(Call::cancel);
     }
 }
