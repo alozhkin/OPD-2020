@@ -6,7 +6,6 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import spider.SiteTask;
 import splash.HtmlRendererRequestFactory;
 import splash.SplashRequestContext;
 import utils.Html;
@@ -29,14 +28,53 @@ public class SplashScraper implements Scraper {
 
     @Override
     public void scrape(Link link, Consumer<Html> consumer) {
+        makeRequestToHtmlRenderer(link, consumer);
+    }
 
+    void makeRequestToHtmlRenderer(Link link, Consumer<Html> consumer) {
+        var request = rendererRequestFactory.getRequest(new SplashRequestContext.Builder(link).build());
+        var call = httpClient.newCall(request);
+        calls.add(call);
+        call.enqueue(new Callback() {
+            //todo fail support
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                System.out.println(call.request().url() + " " + e.toString());
+                calls.remove(call);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                handleResponse(response, call, link, consumer);
+                calls.remove(call);
+            }
+        });
+    }
+
+    void handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
+        try (response) {
+            //todo 503, 504 support
+            if (response.code() != 200) {
+                throw new IOException();
+            }
+            //todo redirect support
+            var responseBody = response.body();
+            if (responseBody == null) {
+                throw new IOException("Response body is absent");
+            }
+            var html = new Html(responseBody.string(), link);
+            if (!call.isCanceled()) {
+                consumer.accept(html);
+            }
+        } catch (IOException e) {
+            LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
+        }
     }
 
     @Override
     public int scrapingSitesCount() {
         return httpClient.dispatcher().runningCallsCount();
     }
-
 
     @Override
     public void cancelAll() {
