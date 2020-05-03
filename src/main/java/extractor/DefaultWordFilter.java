@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DefaultWordFilter implements WordFilter {
@@ -19,6 +20,7 @@ public class DefaultWordFilter implements WordFilter {
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
+        filterNumbers(newSet);
         LoggerUtils.debugLog.debug("Filtration task completed");
         return newSet;
     }
@@ -35,6 +37,12 @@ public class DefaultWordFilter implements WordFilter {
 
     public Collection<String> wordsToLowerCase(Collection<String> setOfWords) {
         return setOfWords.stream().map(String::toLowerCase)
+                .collect(Collectors.toSet());
+    }
+
+    //фильтр слов-чисел
+    public Collection<String> filterNumbers(Collection<String> setOfWords) {
+        return setOfWords.stream().filter(string -> string.chars().allMatch(Character::isDigit))
                 .collect(Collectors.toSet());
     }
 
