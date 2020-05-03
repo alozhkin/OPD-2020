@@ -2,7 +2,6 @@ package spider;
 
 import database.Database;
 import logger.LoggerUtils;
-import okhttp3.OkHttpClient;
 import scraper.SplashScraper;
 import splash.SplashRequestFactory;
 import utils.CSVParser;
@@ -18,11 +17,6 @@ public class Spider {
 
     private final ContextFactory contextFactory;
     private final Database database;
-    private final OkHttpClient httpClient = new OkHttpClient.Builder()
-            .readTimeout(5, TimeUnit.MINUTES)
-            .connectTimeout(5, TimeUnit.MINUTES)
-            .writeTimeout(5, TimeUnit.MINUTES)
-            .build();
 
     public Spider(ContextFactory contextFactory, Database database) {
         this.contextFactory = contextFactory;
@@ -46,7 +40,7 @@ public class Spider {
             for (Link domain : domains) {
                 var context = contextFactory.createContext();
                 var factory = new SplashRequestFactory();
-                var scraper = new SplashScraper(httpClient, factory);
+                var scraper = new SplashScraper(factory);
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper).scrapeDomain());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
@@ -63,7 +57,6 @@ public class Spider {
             LoggerUtils.debugLog.error("Main - Failed", e);
         } finally {
             LoggerUtils.debugLog.info("Main - Completed");
-            httpClient.dispatcher().executorService().shutdown();
             exec.shutdown();
             try {
                 exec.awaitTermination(10, TimeUnit.SECONDS);

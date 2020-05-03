@@ -17,6 +17,7 @@ public class SplashRequestFactory implements HtmlRendererRequestFactory {
                     "    splash:runjs(\"window.close()\")\n" +
                     "    return html\n";
 
+    //todo перестать отдавать OkHttp Request
     @Override
     public Request getRequest(SplashRequestContext context) {
         JsonObject jsonObject = new JsonObject();

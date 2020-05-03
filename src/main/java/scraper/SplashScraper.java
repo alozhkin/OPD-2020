@@ -14,15 +14,19 @@ import utils.Link;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class SplashScraper implements Scraper {
-    private final Set<Call> calls = ConcurrentHashMap.newKeySet();
-    private final OkHttpClient httpClient;
     private final HtmlRendererRequestFactory rendererRequestFactory;
+    private final Set<Call> calls = ConcurrentHashMap.newKeySet();
+    private final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .readTimeout(5, TimeUnit.MINUTES)
+            .connectTimeout(5, TimeUnit.MINUTES)
+            .writeTimeout(5, TimeUnit.MINUTES)
+            .build();
 
-    public SplashScraper(OkHttpClient httpClient, HtmlRendererRequestFactory rendererRequestFactory) {
-        this.httpClient = httpClient;
+    public SplashScraper(HtmlRendererRequestFactory rendererRequestFactory) {
         this.rendererRequestFactory = rendererRequestFactory;
     }
 
@@ -79,5 +83,10 @@ public class SplashScraper implements Scraper {
     @Override
     public void cancelAll() {
         calls.forEach(Call::cancel);
+    }
+
+    @Override
+    public void shutdown() {
+        httpClient.dispatcher().executorService().shutdown();
     }
 }
