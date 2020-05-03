@@ -3,7 +3,7 @@ package spider;
 import database.Database;
 import logger.LoggerUtils;
 import scraper.SplashScraper;
-import splash.SplashRequestFactory;
+import splash.DefaultSplashRequestFactory;
 import utils.CSVParser;
 import utils.Link;
 
@@ -39,7 +39,7 @@ public class Spider {
         try {
             for (Link domain : domains) {
                 var context = contextFactory.createContext();
-                var factory = new SplashRequestFactory();
+                var factory = new DefaultSplashRequestFactory();
                 var scraper = new SplashScraper(factory);
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper).scrapeDomain());
                 try {

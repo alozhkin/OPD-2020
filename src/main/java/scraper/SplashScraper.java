@@ -6,8 +6,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import splash.HtmlRendererRequestFactory;
-import splash.SplashRequestContext;
+import splash.SplashRequestFactory;
+import splash.DefaultSplashRequestContext;
 import utils.Html;
 import utils.Link;
 
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class SplashScraper implements Scraper {
-    private final HtmlRendererRequestFactory rendererRequestFactory;
+    private final SplashRequestFactory rendererRequestFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
     private final OkHttpClient httpClient = new OkHttpClient.Builder()
             .readTimeout(5, TimeUnit.MINUTES)
@@ -26,7 +26,7 @@ public class SplashScraper implements Scraper {
             .writeTimeout(5, TimeUnit.MINUTES)
             .build();
 
-    public SplashScraper(HtmlRendererRequestFactory rendererRequestFactory) {
+    public SplashScraper(SplashRequestFactory rendererRequestFactory) {
         this.rendererRequestFactory = rendererRequestFactory;
     }
 
@@ -36,7 +36,7 @@ public class SplashScraper implements Scraper {
     }
 
     void makeRequestToHtmlRenderer(Link link, Consumer<Html> consumer) {
-        var request = rendererRequestFactory.getRequest(new SplashRequestContext.Builder(link).build());
+        var request = rendererRequestFactory.getRequest(new DefaultSplashRequestContext.Builder(link).build());
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new Callback() {

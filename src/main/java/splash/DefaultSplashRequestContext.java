@@ -2,7 +2,7 @@ package splash;
 
 import utils.Link;
 
-public class SplashRequestContext {
+public class DefaultSplashRequestContext {
     private final Link siteUrl;
     private final Link splashUrl;
     private final String username;
@@ -33,12 +33,12 @@ public class SplashRequestContext {
             return this;
         }
 
-        public SplashRequestContext build() {
-            return new SplashRequestContext(siteUrl, splashUrl, username, password);
+        public DefaultSplashRequestContext build() {
+            return new DefaultSplashRequestContext(siteUrl, splashUrl, username, password);
         }
     }
 
-    private SplashRequestContext(Link siteUrl, Link splashUrl, String username, String password) {
+    private DefaultSplashRequestContext(Link siteUrl, Link splashUrl, String username, String password) {
         this.siteUrl = siteUrl;
         this.splashUrl = splashUrl;
         this.username = username;
