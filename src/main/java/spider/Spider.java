@@ -2,6 +2,8 @@ package spider;
 
 import database.Database;
 import logger.LoggerUtils;
+import okhttp3.OkHttpClient;
+import splash.DefaultSplashRequestFactory;
 import utils.CSVParser;
 import utils.Link;
 
@@ -15,6 +17,11 @@ public class Spider {
 
     private final ContextFactory contextFactory;
     private final Database database;
+    private final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .readTimeout(5, TimeUnit.MINUTES)
+            .connectTimeout(5, TimeUnit.MINUTES)
+            .writeTimeout(5, TimeUnit.MINUTES)
+            .build();
 
     public Spider(ContextFactory contextFactory, Database database) {
         this.contextFactory = contextFactory;
@@ -31,7 +38,6 @@ public class Spider {
     public void scrapeDomains(Collection<Link> domains) {
         var numberOfThreads = Integer.parseInt(System.getProperty("threads.number"));
         var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads);
-        var cs = new ExecutorCompletionService<Collection<String>>(exec);
         var domainExec = Executors.newSingleThreadScheduledExecutor();
         var dbExec = Executors.newSingleThreadScheduledExecutor();
 
@@ -39,15 +45,15 @@ public class Spider {
             for (Link domain : domains) {
                 var linkQueue = new LinkedBlockingDeque<Link>();
                 var context = contextFactory.createContext();
-                var allWords = new HashSet<String>();
-                var future = domainExec.submit(() -> new DomainTask(context, linkQueue, cs, domain).findTo(allWords));
+                var factory = new DefaultSplashRequestFactory();
+                var future = domainExec.submit(() -> new DomainTask(context, linkQueue, domain, httpClient, factory).findTo());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
                     future.cancel(true);
                     LoggerUtils.debugLog.error("Main - Waiting too long for scraping site " + domain);
                 }
-                dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
+                dbExec.submit(new DatabaseTask(database, domain, new HashSet<>())::run);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -56,6 +62,7 @@ public class Spider {
             LoggerUtils.debugLog.error("Main - Failed", e);
         } finally {
             LoggerUtils.debugLog.info("Main - Completed");
+            httpClient.dispatcher().executorService().shutdown();
             exec.shutdown();
             try {
                 exec.awaitTermination(10, TimeUnit.SECONDS);

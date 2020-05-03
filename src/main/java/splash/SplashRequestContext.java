@@ -10,7 +10,7 @@ public class SplashRequestContext {
 
     public static class Builder {
         private final Link siteUrl;
-        private Link splashUrl = new Link("localhost:8050");
+        private Link splashUrl = new Link("localhost:8050/run");
         private String username = "user";
         private String password = "userpass";
 
@@ -38,7 +38,7 @@ public class SplashRequestContext {
         }
     }
 
-    public SplashRequestContext(Link siteUrl, Link splashUrl, String username, String password) {
+    private SplashRequestContext(Link siteUrl, Link splashUrl, String username, String password) {
         this.siteUrl = siteUrl;
         this.splashUrl = splashUrl;
         this.username = username;

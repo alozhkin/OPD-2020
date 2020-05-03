@@ -2,7 +2,6 @@ package spider;
 
 import crawler.Crawler;
 import crawler.LinkFilter;
-import scraper.Scraper;
 import utils.Html;
 import utils.Link;
 
@@ -11,21 +10,14 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class LinkFiltrationTestContext implements Context {
-    private final Scraper scraper;
     private final Crawler crawler;
     private final LinkFilter linkFilter;
     private final Collection<Link> accepted = new HashSet<>();
     private final Collection<Link> all = new HashSet<>();
 
-    public LinkFiltrationTestContext(Scraper scraper, Crawler crawler, LinkFilter linkFilter) {
-        this.scraper = scraper;
+    public LinkFiltrationTestContext(Crawler crawler, LinkFilter linkFilter) {
         this.crawler = crawler;
         this.linkFilter = linkFilter;
-    }
-
-    @Override
-    public Html scrape(Link site) {
-        return scraper.scrape(site);
     }
 
     @Override
@@ -51,11 +43,6 @@ public class LinkFiltrationTestContext implements Context {
     @Override
     public Collection<String> filterWords(Collection<String> words) {
         return new ArrayList<>();
-    }
-
-    @Override
-    public void quit() {
-        scraper.quit();
     }
 
     public Collection<Link> getAccepted() {
