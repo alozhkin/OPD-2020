@@ -3,7 +3,7 @@ package spider;
 import database.Database;
 import logger.LoggerUtils;
 import okhttp3.OkHttpClient;
-import splash.DefaultSplashRequestFactory;
+import splash.SplashRequestFactory;
 import utils.CSVParser;
 import utils.Link;
 
@@ -45,7 +45,7 @@ public class Spider {
             for (Link domain : domains) {
                 var linkQueue = new LinkedBlockingDeque<Link>();
                 var context = contextFactory.createContext();
-                var factory = new DefaultSplashRequestFactory();
+                var factory = new SplashRequestFactory();
                 var future = domainExec.submit(() -> new DomainTask(context, linkQueue, domain, httpClient, factory).findTo());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);

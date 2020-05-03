@@ -4,7 +4,7 @@ import logger.LoggerUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import splash.SplashRequestContext;
-import splash.SplashRequestFactory;
+import splash.HtmlRendererRequestFactory;
 import utils.Html;
 import utils.Link;
 
@@ -18,30 +18,30 @@ public class DomainTask {
     private final BlockingQueue<Link> linkQueue;
     private final Link domain;
     private final OkHttpClient httpClient;
-    private final SplashRequestFactory splashRequestFactory;
+    private final HtmlRendererRequestFactory rendererRequestFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
+    private final Set<String> allWords = new HashSet<>();
     private Link currentLink;
-    private final Set<String> words = new HashSet<>();
 
     DomainTask(Context context,
                BlockingQueue<Link> linkQueue,
                Link domain,
                OkHttpClient httpClient,
-               SplashRequestFactory splashRequestFactory) {
+               HtmlRendererRequestFactory rendererRequestFactory) {
         this.context = context;
         this.linkQueue = linkQueue;
         this.domain = domain;
         this.httpClient = httpClient;
-        this.splashRequestFactory = splashRequestFactory;
+        this.rendererRequestFactory = rendererRequestFactory;
     }
 
     void findTo() {
         LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
         try {
             linkQueue.add(domain);
-            while (isDomainNotScraped()) {
+            while (areAllLinksScraped()) {
                 checkIfInterrupted();
-                handleNextLink();
+                scrapeNextLink();
             }
         } catch (InterruptedException e) {
             LoggerUtils.debugLog.error("Domain Task - Interrupted " + domain, e);
@@ -52,7 +52,7 @@ public class DomainTask {
     }
 
     // order is important
-    boolean isDomainNotScraped() {
+    boolean areAllLinksScraped() {
         return httpClient.dispatcher().runningCallsCount() != 0 || !linkQueue.isEmpty();
     }
 
@@ -62,16 +62,16 @@ public class DomainTask {
         }
     }
 
-    void handleNextLink() throws InterruptedException {
+    void scrapeNextLink() throws InterruptedException {
         var link = linkQueue.poll(500, TimeUnit.MILLISECONDS);
         if (link != null) {
             currentLink = link;
-            var request = splashRequestFactory.getRequest(new SplashRequestContext.Builder(link).build());
-            handleRequest(request);
+            makeRequestToHtmlRenderer();
         }
     }
 
-    void handleRequest(Request request) {
+    void makeRequestToHtmlRenderer() {
+        var request = rendererRequestFactory.getRequest(new SplashRequestContext.Builder(currentLink).build());
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new Callback() {
@@ -84,14 +84,13 @@ public class DomainTask {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
-                var siteTask = new SiteTask(context, currentLink, linkQueue);
-                handleResponse(response, siteTask, call);
+                handleResponse(response, call);
                 calls.remove(call);
             }
         });
     }
 
-    void handleResponse(Response response, SiteTask siteTask, Call call) {
+    void handleResponse(Response response, Call call) {
         try (response) {
             //todo 503, 504 support
             if (response.code() != 200) {
@@ -104,8 +103,9 @@ public class DomainTask {
             }
             var html = new Html(responseBody.string(), currentLink);
             if (!call.isCanceled()) {
-                var w = siteTask.run(html);
-                words.addAll(w);
+                var siteTask = new SiteTask(context, currentLink, linkQueue);
+                var words = siteTask.run(html);
+                allWords.addAll(words);
             }
         } catch (IOException e) {
             LoggerUtils.debugLog.error("Domain Task - Connection failed " + currentLink, e);
