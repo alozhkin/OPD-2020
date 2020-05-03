@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static java.lang.Character.isDigit;
 
 public class DefaultWordFilter implements WordFilter {
 
@@ -42,7 +43,7 @@ public class DefaultWordFilter implements WordFilter {
 
     //фильтр слов-чисел
     public Collection<String> filterNumbers(Collection<String> setOfWords) {
-        return setOfWords.stream().filter(string -> string.chars().allMatch(Character::isDigit))
+        return setOfWords.stream().filter(string -> string.chars().allMatch(chr->(!isDigit(chr))))
                 .collect(Collectors.toSet());
     }
 
