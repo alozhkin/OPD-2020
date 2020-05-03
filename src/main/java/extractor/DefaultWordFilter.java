@@ -41,7 +41,7 @@ public class DefaultWordFilter implements WordFilter {
 
     //фильтр слов-чисел
     public Collection<String> filterNumbers(Collection<String> words) {
-        words.removeIf(x->x.matches("^\\d+$"));
+        words.removeIf(x -> x.matches("^\\d+$"));
         return words;
     }
 
