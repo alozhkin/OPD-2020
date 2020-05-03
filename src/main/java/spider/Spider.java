@@ -8,7 +8,6 @@ import utils.CSVParser;
 import utils.Link;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -32,16 +31,15 @@ public class Spider {
     }
 
     public void scrapeDomains(Collection<Link> domains) {
-        var numberOfThreads = Integer.parseInt(System.getProperty("threads.number"));
-        var exec = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads);
         var domainExec = Executors.newSingleThreadScheduledExecutor();
         var dbExec = Executors.newSingleThreadScheduledExecutor();
+
+        var requestFactory = new DefaultSplashRequestFactory();
+        var scraper = new SplashScraper(requestFactory);
 
         try {
             for (Link domain : domains) {
                 var context = contextFactory.createContext();
-                var factory = new DefaultSplashRequestFactory();
-                var scraper = new SplashScraper(factory);
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 try {
@@ -59,13 +57,7 @@ public class Spider {
             LoggerUtils.debugLog.error("Main - Failed", e);
         } finally {
             LoggerUtils.debugLog.info("Main - Completed");
-            exec.shutdown();
-            try {
-                exec.awaitTermination(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                LoggerUtils.debugLog.error("Main - Interrupted", e);
-            }
+            //todo вспомнить почему здесь есть awaitTermination, а там нет.
             domainExec.shutdown();
             try {
                 domainExec.awaitTermination(10, TimeUnit.SECONDS);
@@ -74,6 +66,7 @@ public class Spider {
                 LoggerUtils.debugLog.error("Main - Interrupted", e);
             }
             dbExec.shutdown();
+            scraper.shutdown();
             LoggerUtils.debugLog.info("Main - Resources were closed");
         }
     }
