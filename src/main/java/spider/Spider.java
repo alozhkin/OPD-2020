@@ -43,10 +43,9 @@ public class Spider {
 
         try {
             for (Link domain : domains) {
-                var linkQueue = new LinkedBlockingDeque<Link>();
                 var context = contextFactory.createContext();
                 var factory = new SplashRequestFactory();
-                var future = domainExec.submit(() -> new DomainTask(context, linkQueue, domain, httpClient, factory).findTo());
+                var future = domainExec.submit(() -> new DomainTask(context, domain, httpClient, factory).findTo());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
