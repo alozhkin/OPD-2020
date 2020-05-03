@@ -6,8 +6,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import splash.SplashRequestFactory;
 import splash.DefaultSplashRequestContext;
+import splash.SplashRequestFactory;
 import utils.Html;
 import utils.Link;
 

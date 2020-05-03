@@ -8,8 +8,8 @@ import okhttp3.RequestBody;
 import java.util.Base64;
 
 public class DefaultSplashRequestFactory implements SplashRequestFactory {
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final String luaScript =
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final String luaScript =
                     "    splash.webgl_enabled = false\n" +
                     "    splash.media_source_enabled = false\n" +
                     "    splash:go(args.url)\n" +
@@ -18,6 +18,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
                     "    return html\n";
 
     //todo перестать отдавать OkHttp Request
+    //todo можно просто полностью кастюмизировать splash, но у меня нет на это времени сейчас
     @Override
     public Request getRequest(DefaultSplashRequestContext context) {
         JsonObject jsonObject = new JsonObject();
@@ -28,7 +29,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
         String credentials = context.getUsername() + ":" + context.getPassword();
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
         return new Request.Builder()
-                .url(context.getSplashUrl().toString())
+                .url(context.getSplashUrl().toString() + "/run")
                 .post(RequestBody.create(JSON, jsonObject.toString()))
                 .addHeader("Authorization", "Basic " + encodedCredentials)
                 .build();

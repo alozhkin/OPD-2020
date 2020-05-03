@@ -10,7 +10,7 @@ public class DefaultSplashRequestContext {
 
     public static class Builder {
         private final Link siteUrl;
-        private Link splashUrl = new Link("localhost:8050/run");
+        private Link splashUrl = new Link("localhost:8050");
         private String username = "user";
         private String password = "userpass";
 
