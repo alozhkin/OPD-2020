@@ -164,12 +164,10 @@ public class SplashScraper implements Scraper {
     private void retryOnce(Call call, Link link, Consumer<Html> consumer) {
         try {
             Thread.sleep(SPLASH_RESTART_TIME);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        var newCall = call.clone();
-        calls.add(newCall);
-        newCall.enqueue(new SplashCallback(link, consumer));
+            var newCall = call.clone();
+            calls.add(newCall);
+            newCall.enqueue(new SplashCallback(link, consumer));
+        } catch (InterruptedException ignored) {}
     }
 
     private static class SplashResponse {

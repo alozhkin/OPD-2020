@@ -30,8 +30,8 @@ public class DomainTask {
                 scrapeNextLink();
             }
         } catch (InterruptedException e) {
-            LoggerUtils.debugLog.error("Domain Task - Interrupted " + domain, e);
             handleInterruption();
+            LoggerUtils.debugLog.error("Domain Task - Interrupted " + domain);
         } finally {
             LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
         }
