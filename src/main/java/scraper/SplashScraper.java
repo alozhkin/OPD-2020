@@ -13,6 +13,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -27,8 +28,8 @@ public class SplashScraper implements Scraper {
             .build();
     private final AtomicBoolean isSplashRestarting = new AtomicBoolean(false);
     //in millies
-    private final int SPLASH_RESTART_TIME = 3000;
-    private final int SPLASH_IS_UNAVAILABLE_RETRIES = 3;
+    private final int SPLASH_RESTART_TIME = 6000;
+    private final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
         this.renderReqFactory = renderReqFactory;
@@ -37,17 +38,12 @@ public class SplashScraper implements Scraper {
     @Override
     public void scrape(Link link, Consumer<Html> consumer) {
         if (isSplashRestarting.get()) {
-            for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
-                if (pingSplash())  {
-                    makeRequestToHtmlRenderer(link, consumer);
-                    isSplashRestarting.set(false);
-                    return;
+            if (!tryToMakeRequest(link, consumer, SPLASH_RESTART_TIME)) {
+                for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
+                    if (tryToMakeRequest(link, consumer, 500)) return;
                 }
-                try {
-                    Thread.sleep(SPLASH_RESTART_TIME);
-                } catch (InterruptedException ignored) {}
+                throw new SplashIsNotRespondingException();
             }
-            throw new SplashIsNotRespondingException();
         } else {
             makeRequestToHtmlRenderer(link, consumer);
         }
@@ -65,7 +61,25 @@ public class SplashScraper implements Scraper {
 
     @Override
     public void shutdown() {
-        httpClient.dispatcher().executorService().shutdown();
+        calls.forEach(Call::cancel);
+        try {
+            httpClient.dispatcher().executorService().shutdown();
+        } catch (RejectedExecutionException e) {
+            LoggerUtils.debugLog.error("SplashScraper - Site scraping rejected due to shutdown", e);
+        }
+    }
+
+    private boolean tryToMakeRequest(Link link, Consumer<Html> consumer, int timeout) {
+        if (pingSplash())  {
+            makeRequestToHtmlRenderer(link, consumer);
+            isSplashRestarting.set(false);
+            return true;
+        } else {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException ignored) {}
+            return false;
+        }
     }
 
     private boolean pingSplash() {
@@ -73,6 +87,7 @@ public class SplashScraper implements Scraper {
         var call = httpClient.newCall(request);
         try {
             var code = call.execute().code();
+            System.out.println(code);
             return code == 200;
         } catch (IOException ignored) {}
         return false;
@@ -112,7 +127,7 @@ public class SplashScraper implements Scraper {
     }
 
     private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
-        LoggerUtils.consoleLog.error("SplashScraper - Request failed " + call.request().url().toString(), e);
+        LoggerUtils.consoleLog.error("SplashScraper - Request failed " + call.request().url().toString());
         calls.remove(call);
         if (e.getClass().equals(EOFException.class)) {
             retry(call, link, consumer);

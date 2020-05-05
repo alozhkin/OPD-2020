@@ -54,9 +54,13 @@ public class Spider {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LoggerUtils.debugLog.error("Spider - Interrupted", e);
-        } catch (SplashIsNotRespondingException e) {
-            LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
-            LoggerUtils.consoleLog.error(e.getMessage());
+        } catch (ExecutionException e) {
+            if (e.getCause().getClass().equals(SplashIsNotRespondingException.class)) {
+                LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
+                LoggerUtils.consoleLog.error(e.getMessage());
+            } else {
+                LoggerUtils.debugLog.error("Spider - Failed", e);
+            }
         } catch (Exception e) {
             LoggerUtils.debugLog.error("Spider - Failed", e);
         } finally {
