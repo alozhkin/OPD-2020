@@ -27,7 +27,7 @@ public class SplashScraper implements Scraper {
             .writeTimeout(5, TimeUnit.MINUTES)
             .build();
     private final AtomicBoolean isSplashRestarting = new AtomicBoolean(false);
-    //in millies
+    //in millis
     private final int SPLASH_RESTART_TIME = 6000;
     private final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
 
@@ -117,13 +117,31 @@ public class SplashScraper implements Scraper {
             if (responseBody == null) {
                 throw new IOException("Response body is absent");
             }
-            var html = new Html(responseBody.string(), link);
-            if (!call.isCanceled()) {
+            var url = new Link(response.request().url().toString());
+            if (!url.getWithoutProtocol().equals(link.getWithoutProtocol())) {
+                LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", link, url));
+                LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", link, url));
+            }
+            var html = new Html(responseBody.string(), url);
+            if (!call.isCanceled() && hasRightLang(html)) {
                 consumer.accept(html);
             }
         } catch (IOException e) {
             LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
         }
+    }
+
+    private boolean hasRightLang(Html html) {
+        var siteLangs = System.getProperty("site.langs");
+        var htmlLang = html.getLang();
+        if (htmlLang != null) {
+            for (String siteLang : siteLangs.split(",")) {
+                if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
+            }
+        } else {
+            return System.getProperty("ignore.html.without.lang").equals("false");
+        }
+        return false;
     }
 
     private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
