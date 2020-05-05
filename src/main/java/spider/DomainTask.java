@@ -4,6 +4,7 @@ import logger.LoggerUtils;
 import scraper.Scraper;
 import utils.Link;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -24,10 +25,12 @@ public class DomainTask {
     void scrapeDomain() {
         LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
         try {
-            linkQueue.add(domain);
+            scrapeFirstLink(domain);
             while (areAllLinksScraped()) {
                 checkIfInterrupted();
-                scrapeNextLink();
+                try {
+                    scrapeNextLink();
+                } catch (HtmlLanguageException ignored) {}
             }
         } catch (InterruptedException e) {
             handleInterruption();
@@ -45,6 +48,18 @@ public class DomainTask {
     private void checkIfInterrupted() throws InterruptedException {
         if (Thread.currentThread().isInterrupted()) {
             throw new InterruptedException();
+        }
+    }
+
+    private void scrapeFirstLink(Link link) {
+        try {
+            scraper.scrapeSync(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
+        } catch (IOException e) {
+            LoggerUtils.debugLog.error("DomainTask - Request failed " + link, e);
+            LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
+        } catch (HtmlLanguageException e) {
+            LoggerUtils.debugLog.error("DomainTask - Wrong html language " + link, e);
+            LoggerUtils.consoleLog.error("Wrong html language " + link);
         }
     }
 

@@ -49,6 +49,14 @@ public class Spider {
                 } catch (TimeoutException e) {
                     future.cancel(true);
                     LoggerUtils.debugLog.error("Spider - Waiting too long for scraping site " + domain);
+                    LoggerUtils.consoleLog.error("Waiting too long for scraping site " + domain);
+                } catch (HtmlLanguageException e) {
+                    if (e.getCause().getClass().equals(HtmlLanguageException.class)) {
+                        LoggerUtils.debugLog.error("Spider - Domain has wrong language " + domain);
+                        LoggerUtils.consoleLog.error("Site has wrong language " + domain);
+                    } else {
+                        throw e;
+                    }
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }

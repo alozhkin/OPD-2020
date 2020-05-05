@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import logger.LoggerUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import spider.HtmlLanguageException;
 import splash.DefaultSplashRequestContext;
 import splash.SplashIsNotRespondingException;
 import splash.SplashRequestFactory;
@@ -52,6 +53,20 @@ public class SplashScraper implements Scraper {
     }
 
     @Override
+    public void scrapeSync(Link link, Consumer<Html> consumer) throws IOException {
+        if (isSplashRestarting.get()) {
+            if (!tryToMakeSyncRequest(link, consumer, SPLASH_RESTART_TIME)) {
+                for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
+                    if (tryToMakeSyncRequest(link, consumer, SPLASH_RETRY_TIMEOUT)) return;
+                }
+                throw new SplashIsNotRespondingException();
+            }
+        } else {
+            makeSyncRequestToHtmlRenderer(link, consumer);
+        }
+    }
+
+    @Override
     public int scrapingSitesCount() {
         return httpClient.dispatcher().runningCallsCount();
     }
@@ -84,6 +99,19 @@ public class SplashScraper implements Scraper {
         }
     }
 
+    private boolean tryToMakeSyncRequest(Link link, Consumer<Html> consumer, int timeout) throws IOException {
+        if (pingSplash())  {
+            makeSyncRequestToHtmlRenderer(link, consumer);
+            isSplashRestarting.set(false);
+            return true;
+        } else {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException ignored) {}
+            return false;
+        }
+    }
+
     private boolean pingSplash() {
         var request = renderReqFactory.getPingRequest(new DefaultSplashRequestContext.Builder().build());
         var call = httpClient.newCall(request);
@@ -100,6 +128,13 @@ public class SplashScraper implements Scraper {
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new SplashCallbackRetry(link, consumer));
+    }
+
+    private void makeSyncRequestToHtmlRenderer(Link link, Consumer<Html> consumer) throws IOException {
+        var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
+        var call = httpClient.newCall(request);
+        var response = call.execute();
+        handleResponse(response, call, link, consumer);
     }
 
     private int handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
@@ -127,9 +162,12 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", link, url));
             }
             var html = new Html(splashResponse.getHtml(), url);
-            if (!call.isCanceled() && hasRightLang(html)) {
-                consumer.accept(html);
-            }
+            if (!call.isCanceled())
+                if (hasRightLang(html)) {
+                    consumer.accept(html);
+                } else {
+                    throw new HtmlLanguageException();
+                }
         } catch (IOException e) {
             LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
         }
@@ -149,12 +187,11 @@ public class SplashScraper implements Scraper {
     }
 
     private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
-        if (!e.getMessage().equals("Canceled")) {
-            LoggerUtils.consoleLog.error("SplashScraper - Request failed " + link);
-            LoggerUtils.consoleLog.error("SplashScraper - Request failed " + link + " " + e.getMessage());
-        }
         if (e.getClass().equals(EOFException.class)) {
             retry(call, link, consumer);
+        } else if (!e.getMessage().equals("Canceled")) {
+            LoggerUtils.debugLog.error("SplashScraper - Request failed " + link, e);
+            LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
         }
         calls.remove(call);
     }
@@ -208,7 +245,9 @@ public class SplashScraper implements Scraper {
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
-            handleResponse(response, call, link, consumer);
+            try {
+                handleResponse(response, call, link, consumer);
+            } catch (HtmlLanguageException ignored) {}
             calls.remove(call);
         }
     }
@@ -230,11 +269,13 @@ public class SplashScraper implements Scraper {
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
-            var code = handleResponse(response, call, link, consumer);
-            if (code == 503) {
-                isSplashRestarting.set(true);
-                retryOnce(call, link, consumer);
-            }
+            try {
+                var code = handleResponse(response, call, link, consumer);
+                if (code == 503) {
+                    isSplashRestarting.set(true);
+                    retryOnce(call, link, consumer);
+                }
+            } catch (HtmlLanguageException ignored) {}
             calls.remove(call);
         }
     }
