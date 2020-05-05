@@ -39,31 +39,25 @@ public class SplashScraper implements Scraper {
     }
 
     @Override
-    public void scrape(Link link, Consumer<Html> consumer) {
-        if (isSplashRestarting.get()) {
-            if (!tryToMakeRequest(link, consumer, SPLASH_RESTART_TIME)) {
-                for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
-                    if (tryToMakeRequest(link, consumer, SPLASH_RETRY_TIMEOUT)) return;
-                }
-                throw new SplashIsNotRespondingException();
-            }
-        } else {
-            makeRequestToHtmlRenderer(link, consumer);
+    public void scrapeAsync(Link link, Consumer<Html> htmlConsumer) {
+        CallHandler<Call> callHandler = call -> {
+            calls.add(call);
+            call.enqueue(new SplashCallbackRetry(link, htmlConsumer));
+        };
+        try {
+            scrape(link, callHandler);
+        } catch (IOException e) {
+            LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
         }
     }
 
     @Override
     public void scrapeSync(Link link, Consumer<Html> consumer) throws IOException {
-        if (isSplashRestarting.get()) {
-            if (!tryToMakeSyncRequest(link, consumer, SPLASH_RESTART_TIME)) {
-                for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
-                    if (tryToMakeSyncRequest(link, consumer, SPLASH_RETRY_TIMEOUT)) return;
-                }
-                throw new SplashIsNotRespondingException();
-            }
-        } else {
-            makeSyncRequestToHtmlRenderer(link, consumer);
-        }
+        CallHandler<Call> callHandler = call -> {
+            var response = call.execute();
+            handleResponse(response, call, link, consumer);
+        };
+        scrape(link, callHandler);
     }
 
     @Override
@@ -86,22 +80,22 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    private boolean tryToMakeRequest(Link link, Consumer<Html> consumer, int timeout) {
-        if (pingSplash())  {
-            makeRequestToHtmlRenderer(link, consumer);
-            isSplashRestarting.set(false);
-            return true;
+    private void scrape(Link link, CallHandler<Call> callHandler) throws IOException {
+        if (isSplashRestarting.get()) {
+            if (!tryToMakeRequest(link, callHandler, SPLASH_RESTART_TIME)) {
+                for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
+                    if (tryToMakeRequest(link, callHandler, SPLASH_RETRY_TIMEOUT)) return;
+                }
+                throw new SplashIsNotRespondingException();
+            }
         } else {
-            try {
-                Thread.sleep(timeout);
-            } catch (InterruptedException ignored) {}
-            return false;
+            makeRequestToHtmlRenderer(link, callHandler);
         }
     }
 
-    private boolean tryToMakeSyncRequest(Link link, Consumer<Html> consumer, int timeout) throws IOException {
+    private boolean tryToMakeRequest(Link link, CallHandler<Call> callHandler, int timeout) throws IOException {
         if (pingSplash())  {
-            makeSyncRequestToHtmlRenderer(link, consumer);
+            makeRequestToHtmlRenderer(link, callHandler);
             isSplashRestarting.set(false);
             return true;
         } else {
@@ -123,18 +117,10 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    private void makeRequestToHtmlRenderer(Link link, Consumer<Html> consumer) {
+    private void makeRequestToHtmlRenderer(Link link, CallHandler<Call> callHandler) throws IOException {
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
-        calls.add(call);
-        call.enqueue(new SplashCallbackRetry(link, consumer));
-    }
-
-    private void makeSyncRequestToHtmlRenderer(Link link, Consumer<Html> consumer) throws IOException {
-        var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
-        var call = httpClient.newCall(request);
-        var response = call.execute();
-        handleResponse(response, call, link, consumer);
+        callHandler.consume(call);
     }
 
     private int handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
@@ -278,5 +264,10 @@ public class SplashScraper implements Scraper {
             } catch (HtmlLanguageException ignored) {}
             calls.remove(call);
         }
+    }
+
+    @FunctionalInterface
+    private interface CallHandler<T> {
+        void consume(T t) throws IOException;
     }
 }

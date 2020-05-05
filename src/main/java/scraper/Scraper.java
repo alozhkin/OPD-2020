@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 
 public interface Scraper {
     void cancelAll();
-    void scrape(Link link, Consumer<Html> consumer);
+    void scrapeAsync(Link link, Consumer<Html> consumer);
     void scrapeSync(Link link, Consumer<Html> consumer) throws IOException;
     int scrapingSitesCount();
     void shutdown();
