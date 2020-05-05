@@ -15,7 +15,7 @@ import java.util.concurrent.*;
 
 public class Spider {
     // in seconds
-    private static final int DOMAIN_TIMEOUT = 240;
+    private static final int DOMAIN_TIMEOUT = 40;
 
     private final ContextFactory contextFactory;
     private final Database database;
