@@ -1,5 +1,6 @@
 package utils;
 
+import java.net.IDN;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
@@ -31,8 +32,8 @@ public class Link {
 
     private static String fix(String url) {
         if (url.isEmpty()) return url;
-        var urlFixed1 = fixProtocol(url);
-        return fixTrailingSlash(urlFixed1);
+        var urlFixed = fixProtocol(url);
+        return fixTrailingSlash(urlFixed);
     }
 
     private static String fixProtocol(String url) {
@@ -82,16 +83,16 @@ public class Link {
     public Set<String> getSubdomains() {
         var res = new HashSet<String>();
         var host = getHost();
-            var hostSplitted = host.split("\\.");
-            var levelsNumber = hostSplitted.length;
-            // ignore top-level and second-level domain
-            for (int i = 0; i < levelsNumber - 2; i++) {
-                // ignore www
-                var subdomain = hostSplitted[i];
-                if (!subdomain.equals("www")) {
-                    res.add(subdomain);
-                }
+        var hostSplitted = host.split("\\.");
+        var levelsNumber = hostSplitted.length;
+        // ignore top-level and second-level domain
+        for (int i = 0; i < levelsNumber - 2; i++) {
+            // ignore www
+            var subdomain = hostSplitted[i];
+            if (!subdomain.equals("www")) {
+                res.add(subdomain);
             }
+        }
         return res;
     }
 
@@ -150,7 +151,12 @@ public class Link {
 
     public String getHost() {
         if (uri == null) return null;
-        return uri.getHost();
+        var host = uri.getHost();
+        if (host == null) {
+            // URI class writes urls with umlaut into authority
+            return getAuthority();
+        }
+        return host;
     }
 
     public int getPort() {

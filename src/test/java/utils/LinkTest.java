@@ -2,8 +2,9 @@ package utils;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.net.IDN;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LinkTest {
 
@@ -78,5 +79,11 @@ public class LinkTest {
     void shouldWorkWithQueryWithoutEqualsSign() {
         var url = "https://jsoup.org/apidocs/index.html?org/jsoup/select/Elements.html";
         assertDoesNotThrow(new Link(url)::getParams);
+    }
+
+    @Test
+    void shouldParseUmlaut() {
+        var url = "www.erlebnisregion-schwäbischer-albtrauf.de";
+        assertEquals(url, new Link(url).getHost());
     }
 }
