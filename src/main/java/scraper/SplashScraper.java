@@ -56,13 +56,12 @@ public class SplashScraper implements Scraper {
     @Override
     public void scrapeSync(Link link, Consumer<Html> consumer) {
         Consumer<Call> callHandler = call -> {
-            Response response = null;
             try {
-                response = call.execute();
+                var response = call.execute();
+                handleResponse(response, call, link, consumer);
             } catch (IOException e) {
                 throw new ConnectionException(e);
             }
-            handleResponse(response, call, link, consumer);
         };
         scrape(link, callHandler);
     }
