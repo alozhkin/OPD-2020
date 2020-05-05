@@ -1,16 +1,11 @@
 package splash;
 
-package scraper;
-
 import com.github.tomakehurst.wiremock.WireMockServer;
 import config.ConfigurationUtils;
-import database.Database;
 import extractor.DefaultExtractor;
-import logger.LoggerUtils;
 import org.junit.jupiter.api.*;
 import scraper.Scraper;
 import scraper.SplashScraper;
-import spider.Spider;
 import utils.Html;
 import utils.Link;
 
@@ -24,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SplashTest {
     private WireMockServer wireMockServer;
-    private Scraper scraper = new SplashScraper();
+    private Scraper scraper = new SplashScraper(new DefaultSplashRequestFactory());
 
     void initMockServer() {
         wireMockServer = new WireMockServer();
@@ -37,21 +32,8 @@ public class SplashTest {
     }
 
     @Test
-    void runSplash() {
-        LoggerUtils.debugLog.info("SPLASH START");
-        var spider = new Spider(new SplashContextFactory(), Database.createDummy());
-        spider.scrapeDomains(Set.of(new Link("http://www.zwickedelstahl.de")));
-    }
-
-    @Test
     void scrapeOnePageWithSplash() {
-        System.out.println(scraper.scrape(new Link("http://www.zwickedelstahl.de")));
-    }
-
-    @Test
-    void scrapeOnePageWithChrome() {
-        var defaultScraper = new DefaultScraper();
-        defaultScraper.scrape(new Link("http://jsoup.org/apidocs/org/jsoup/Connection.Base.html"));
+        scraper.scrape(new Link("http://www.zwickedelstahl.de"), System.out::println);
     }
 
     @Test
@@ -72,9 +54,10 @@ public class SplashTest {
                         aResponse().withBody(html.toString())
                 )
         );
-        var resHtml = scraper.scrape(new Link("localhost:8080/redirect"));
-        var words = new DefaultExtractor().extract(resHtml);
-        assertEquals(Set.of("test"), words);
+        scraper.scrape(new Link("localhost:8080/redirect"), t -> {
+            var words = new DefaultExtractor().extract(t);
+            assertEquals(Set.of("test"), words);
+        });
     }
 
 
@@ -90,7 +73,7 @@ public class SplashTest {
         );
         stubFor(get(urlEqualTo("/pic.png"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(20000)));
-        scraper.scrape(new Link("http://localhost:8080/"));
+        scraper.scrape(new Link("http://localhost:8080/"), t -> {});
     }
 
     @Test
@@ -107,7 +90,7 @@ public class SplashTest {
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
         stubFor(get(urlEqualTo("/favicon.ico"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
-        System.out.println(scraper.scrape(new Link("http://localhost:8080/")));
+        scraper.scrape(new Link("http://localhost:8080/"), System.out::println);
     }
 
     @Test
@@ -122,7 +105,7 @@ public class SplashTest {
         );
         stubFor(get(urlEqualTo("/favicon.ico"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
-        scraper.scrape(new Link("http://localhost:8080/"));
+        scraper.scrape(new Link("http://localhost:8080/"), t -> {});
     }
 
     @Test
@@ -137,14 +120,7 @@ public class SplashTest {
         );
         stubFor(get(urlEqualTo("/e/analytics.js"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
-        scraper.scrape(new Link("http://localhost:8080/"));
-    }
-
-    @Test
-    public void dod() {
-        LoggerUtils.debugLog.info("SPLASH START");
-        var spider = new Spider(new TestContextFactory(), Database.createDummy());
-        spider.scrapeFromCSVFile("src/main/resources/websites_data.csv", "");
+        scraper.scrape(new Link("http://localhost:8080/"), t -> {});
     }
 }
 
