@@ -47,31 +47,31 @@ public class Spider {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
                     future.cancel(true);
-                    LoggerUtils.debugLog.error("Main - Waiting too long for scraping site " + domain);
+                    LoggerUtils.debugLog.error("Spider - Waiting too long for scraping site " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LoggerUtils.debugLog.error("Main - Interrupted", e);
+            LoggerUtils.debugLog.error("Spider - Interrupted", e);
         } catch (SplashIsNotRespondingException e) {
-            LoggerUtils.debugLog.error("Main - " + e.getMessage(), e);
+            LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
             LoggerUtils.consoleLog.error(e.getMessage());
         } catch (Exception e) {
-            LoggerUtils.debugLog.error("Main - Failed", e);
+            LoggerUtils.debugLog.error("Spider - Failed", e);
         } finally {
-            LoggerUtils.debugLog.info("Main - Completed");
+            LoggerUtils.debugLog.info("Spider - Completed");
             //todo вспомнить почему здесь есть awaitTermination, а там нет.
             domainExec.shutdown();
             try {
                 domainExec.awaitTermination(10, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                LoggerUtils.debugLog.error("Main - Interrupted", e);
+                LoggerUtils.debugLog.error("Spider - Interrupted", e);
             }
             dbExec.shutdown();
             scraper.shutdown();
-            LoggerUtils.debugLog.info("Main - Resources were closed");
+            LoggerUtils.debugLog.info("Spider - Resources were closed");
         }
     }
 }
