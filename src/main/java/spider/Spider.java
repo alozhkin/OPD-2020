@@ -6,10 +6,8 @@ import scraper.SplashScraper;
 import splash.DefaultSplashRequestFactory;
 import splash.SplashIsNotRespondingException;
 import utils.CSVParser;
-import utils.Html;
 import utils.Link;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -70,7 +68,7 @@ public class Spider {
                             throw new ConnectionException("Too many connect fails");
                         }
                     } else if (exClass.equals(HtmlLanguageException.class)) {
-                        LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain, e);
+                        LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
                         LoggerUtils.consoleLog.error("Wrong html language " + domain);
                     } else {
                         throw e;
