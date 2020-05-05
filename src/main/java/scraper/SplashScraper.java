@@ -1,5 +1,6 @@
 package scraper;
 
+import com.google.gson.Gson;
 import logger.LoggerUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -87,7 +88,6 @@ public class SplashScraper implements Scraper {
         var call = httpClient.newCall(request);
         try {
             var code = call.execute().code();
-            System.out.println(code);
             return code == 200;
         } catch (IOException ignored) {}
         return false;
@@ -117,9 +117,9 @@ public class SplashScraper implements Scraper {
             if (responseBody == null) {
                 throw new IOException("Response body is absent");
             }
-            var splashResponse = new SplashResponse(response);
+            var gson = new Gson();
+            var splashResponse = gson.fromJson(responseBody.string(), SplashResponse.class);
             var url = new Link(splashResponse.getUrl());
-            System.out.println(url);
             if (!url.getWithoutProtocol().equals(link.getWithoutProtocol())) {
                 LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", link, url));
                 LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", link, url));
@@ -175,7 +175,9 @@ public class SplashScraper implements Scraper {
         private String html;
         private String url;
 
-        public SplashResponse(Response response) {
+        public SplashResponse(String html, String url) {
+            this.html = html;
+            this.url = url;
         }
 
         public String getHtml() {
