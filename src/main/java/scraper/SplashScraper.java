@@ -109,6 +109,11 @@ public class SplashScraper implements Scraper {
     }
 
     private void retryOnce(Call call, Link link, Consumer<Html> consumer) {
+        try {
+            Thread.sleep(SPLASH_RESTART_TIME);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         var newCall = call.clone();
         calls.add(newCall);
         newCall.enqueue(new SplashCallback(link, consumer));
@@ -130,7 +135,11 @@ public class SplashScraper implements Scraper {
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
-            handleResponse(response, call, link, consumer);
+            var code = handleResponse(response, call, link, consumer);
+            if (code == 503) {
+                LoggerUtils.debugLog.error("Splash is not responding, 503 Service Unavailable");
+                LoggerUtils.consoleLog.error("Splash is not responding, 503 Service Unavailable");
+            }
             calls.remove(call);
         }
     }
