@@ -117,12 +117,14 @@ public class SplashScraper implements Scraper {
             if (responseBody == null) {
                 throw new IOException("Response body is absent");
             }
-            var url = new Link(response.request().url().toString());
+            var splashResponse = new SplashResponse(response);
+            var url = new Link(splashResponse.getUrl());
+            System.out.println(url);
             if (!url.getWithoutProtocol().equals(link.getWithoutProtocol())) {
                 LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", link, url));
                 LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", link, url));
             }
-            var html = new Html(responseBody.string(), url);
+            var html = new Html(splashResponse.getHtml(), url);
             if (!call.isCanceled() && hasRightLang(html)) {
                 consumer.accept(html);
             }
@@ -167,6 +169,22 @@ public class SplashScraper implements Scraper {
         var newCall = call.clone();
         calls.add(newCall);
         newCall.enqueue(new SplashCallback(link, consumer));
+    }
+
+    private class SplashResponse {
+        private String html;
+        private String url;
+
+        public SplashResponse(Response response) {
+        }
+
+        public String getHtml() {
+            return html;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 
     private class SplashCallback implements Callback {

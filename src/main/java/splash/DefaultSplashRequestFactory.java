@@ -9,13 +9,13 @@ import java.util.Base64;
 
 public class DefaultSplashRequestFactory implements SplashRequestFactory {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private static final String luaScript =
-                    "    splash.webgl_enabled = false\n" +
+    private static final String luaScript = "    splash.webgl_enabled = false\n" +
                     "    splash.media_source_enabled = false\n" +
                     "    splash:go(args.url)\n" +
                     "    local html = splash:html()\n" +
+                    "    local url = splash:url()\n" +
                     "    splash:runjs(\"window.close()\")\n" +
-                    "    return html\n";
+                    "    return {html=html, url=url}\n";
 
     //todo перестать отдавать OkHttp Request
     //todo можно просто полностью кастюмизировать splash, но у меня нет на это времени сейчас
