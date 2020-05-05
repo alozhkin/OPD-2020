@@ -67,7 +67,7 @@ public class SplashTest {
         stubFor(get(urlEqualTo("/"))
                 .willReturn(
                         aResponse().withBody(
-                                Html.fromFile(Paths.get("src/test/resources/ignore_pics.html")).toString()
+                                Html.fromFile(Paths.get("src/test/resources/scraper_res/ignore_pics.html")).toString()
                         ).withHeader("content-type", "text/html; charset=UTF-8")
                 )
         );
@@ -82,7 +82,7 @@ public class SplashTest {
         stubFor(get(urlEqualTo("/"))
                 .willReturn(
                         aResponse().withBody(
-                                Html.fromFile(Paths.get("src/test/resources/ignore_css.html")).toString()
+                                Html.fromFile(Paths.get("src/test/resources/scraper_res/ignore_css.html")).toString()
                         ).withHeader("content-type", "text/html; charset=UTF-8")
                 )
         );
@@ -99,7 +99,7 @@ public class SplashTest {
         stubFor(get(urlEqualTo("/"))
                 .willReturn(
                         aResponse().withBody(
-                                Html.fromFile(Paths.get("src/test/resources/ignore_css.html")).toString()
+                                Html.fromFile(Paths.get("src/test/resources/scraper_res/ignore_css.html")).toString()
                         ).withHeader("content-type", "text/html; charset=UTF-8")
                 )
         );
@@ -114,7 +114,7 @@ public class SplashTest {
         stubFor(get(urlEqualTo("/"))
                 .willReturn(
                         aResponse().withBody(
-                                Html.fromFile(Paths.get("src/test/resources/ignore_js.html")).toString()
+                                Html.fromFile(Paths.get("src/test/resources/scraper_res/ignore_js.html")).toString()
                         ).withHeader("content-type", "text/html; charset=UTF-8")
                 )
         );
