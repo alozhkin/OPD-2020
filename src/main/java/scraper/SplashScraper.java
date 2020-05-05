@@ -28,6 +28,7 @@ public class SplashScraper implements Scraper {
     private final AtomicBoolean isSplashRestarting = new AtomicBoolean(false);
     //in millies
     private final int SPLASH_RESTART_TIME = 3000;
+    private final int SPLASH_IS_UNAVAILABLE_RETRIES = 3;
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
         this.renderReqFactory = renderReqFactory;
@@ -36,8 +37,7 @@ public class SplashScraper implements Scraper {
     @Override
     public void scrape(Link link, Consumer<Html> consumer) {
         if (isSplashRestarting.get()) {
-            var retryNumber = 3;
-            for (int i = 0; i < retryNumber; i++) {
+            for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
                 if (pingSplash())  {
                     makeRequestToHtmlRenderer(link, consumer);
                     isSplashRestarting.set(false);
