@@ -4,6 +4,7 @@ import database.Database;
 import logger.LoggerUtils;
 import scraper.SplashScraper;
 import splash.DefaultSplashRequestFactory;
+import splash.SplashIsNotRespondingException;
 import utils.CSVParser;
 import utils.Link;
 
@@ -53,6 +54,9 @@ public class Spider {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LoggerUtils.debugLog.error("Main - Interrupted", e);
+        } catch (SplashIsNotRespondingException e) {
+            LoggerUtils.debugLog.error("Main - " + e.getMessage(), e);
+            LoggerUtils.consoleLog.error(e.getMessage());
         } catch (Exception e) {
             LoggerUtils.debugLog.error("Main - Failed", e);
         } finally {

@@ -36,4 +36,9 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
                 .addHeader("Authorization", "Basic " + encodedCredentials)
                 .build();
     }
+
+    @Override
+    public Request getPingRequest(DefaultSplashRequestContext context) {
+        return new Request.Builder().url(context.getSplashUrl() + "/_ping").build();
+    }
 }

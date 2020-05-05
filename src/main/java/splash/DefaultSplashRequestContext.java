@@ -9,13 +9,14 @@ public class DefaultSplashRequestContext {
     private final String password;
 
     public static class Builder {
-        private final Link siteUrl;
+        private Link siteUrl;
         private Link splashUrl = new Link("localhost:8050");
         private String username = "user";
         private String password = "userpass";
 
-        public Builder(Link siteUrl) {
+        public Builder setSiteUrl(Link siteUrl) {
             this.siteUrl = siteUrl;
+            return this;
         }
 
         public Builder setSplashUrl(Link splashUrl) {

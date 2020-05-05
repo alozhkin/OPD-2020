@@ -1,12 +1,10 @@
 package scraper;
 
 import logger.LoggerUtils;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
+import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import splash.DefaultSplashRequestContext;
+import splash.SplashIsNotRespondingException;
 import splash.SplashRequestFactory;
 import utils.Html;
 import utils.Link;
@@ -20,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class SplashScraper implements Scraper {
-    private final SplashRequestFactory rendererRequestFactory;
+    private final SplashRequestFactory renderReqFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
     private final OkHttpClient httpClient = new OkHttpClient.Builder()
             .readTimeout(5, TimeUnit.MINUTES)
@@ -31,19 +29,28 @@ public class SplashScraper implements Scraper {
     //in millies
     private final int SPLASH_RESTART_TIME = 3000;
 
-    public SplashScraper(SplashRequestFactory rendererRequestFactory) {
-        this.rendererRequestFactory = rendererRequestFactory;
+    public SplashScraper(SplashRequestFactory renderReqFactory) {
+        this.renderReqFactory = renderReqFactory;
     }
 
     @Override
     public void scrape(Link link, Consumer<Html> consumer) {
-        while (isSplashRestarting.get()) {
-            isSplashRestarting.set(false);
-            try {
-                Thread.sleep(SPLASH_RESTART_TIME);
-            } catch (InterruptedException ignored) {}
+        if (isSplashRestarting.get()) {
+            var retryNumber = 3;
+            for (int i = 0; i < retryNumber; i++) {
+                if (pingSplash())  {
+                    makeRequestToHtmlRenderer(link, consumer);
+                    isSplashRestarting.set(false);
+                    return;
+                }
+                try {
+                    Thread.sleep(SPLASH_RESTART_TIME);
+                } catch (InterruptedException ignored) {}
+            }
+            throw new SplashIsNotRespondingException();
+        } else {
+            makeRequestToHtmlRenderer(link, consumer);
         }
-        makeRequestToHtmlRenderer(link, consumer);
     }
 
     @Override
@@ -61,8 +68,18 @@ public class SplashScraper implements Scraper {
         httpClient.dispatcher().executorService().shutdown();
     }
 
+    private boolean pingSplash() {
+        var request = renderReqFactory.getPingRequest(new DefaultSplashRequestContext.Builder().build());
+        var call = httpClient.newCall(request);
+        try {
+            var code = call.execute().code();
+            return code == 200;
+        } catch (IOException ignored) {}
+        return false;
+    }
+
     private void makeRequestToHtmlRenderer(Link link, Consumer<Html> consumer) {
-        var request = rendererRequestFactory.getRequest(new DefaultSplashRequestContext.Builder(link).build());
+        var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new SplashCallbackRetry(link, consumer));
@@ -135,11 +152,7 @@ public class SplashScraper implements Scraper {
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
-            var code = handleResponse(response, call, link, consumer);
-            if (code == 503) {
-                LoggerUtils.debugLog.error("Splash is not responding, 503 Service Unavailable");
-                LoggerUtils.consoleLog.error("Splash is not responding, 503 Service Unavailable");
-            }
+            handleResponse(response, call, link, consumer);
             calls.remove(call);
         }
     }
