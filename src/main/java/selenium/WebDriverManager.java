@@ -1,8 +1,10 @@
 package selenium;
 
 import diff_match_patch.DiffMatchPatch;
+import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.openqa.selenium.*;
@@ -55,6 +57,17 @@ public class WebDriverManager {
     }
 
     public Html parseHtml() {
+        Connection connection = Jsoup.connect(currentLink.toString());
+        try {
+            Html parsedHtml = new Html(connection.get().toString(), currentLink);
+        } catch (IOException e) {
+            if (e instanceof HttpStatusException) {
+                HttpStatusException se = (HttpStatusException) e;
+                LoggerUtils.debugLog.info("HTTP status code = " + se.getStatusCode()
+                        + " ; URL - " + currentLink.toString() + " ; Exception : " + e);
+            } else e.printStackTrace();
+            return new Html("", new Link(""));
+        }
         return new Html(driver.getPageSource(), new Link(driver.getCurrentUrl()));
     }
 
@@ -110,11 +123,16 @@ public class WebDriverManager {
 
     public Html parseHtmlWithJsoup(Link link) {
         Connection connection = Jsoup.connect(link.getAbsoluteURL());
-        Html parsedHtml = new Html("", new Link(""));
+        Html parsedHtml;
         try {
             parsedHtml = new Html(connection.get().toString(), link);
         } catch (IOException e) {
-            e.printStackTrace();
+            if (e instanceof HttpStatusException) {
+                HttpStatusException se = (HttpStatusException) e;
+                LoggerUtils.debugLog.info("HTTP status code = " + se.getStatusCode()
+                        + " ; URL - " + link + " ; Exception : " + e);
+            } else e.printStackTrace();
+            return new Html("", new Link(""));
         }
         return parsedHtml;
     }

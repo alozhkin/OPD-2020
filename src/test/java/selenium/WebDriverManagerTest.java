@@ -38,9 +38,9 @@ public class WebDriverManagerTest {
         wireMockServer.shutdown();
     }
 
-    String getSitePath(String siteName){
+    String getSitePath(String siteName) {
         String projectPath = System.getProperty("project.path");
-        return "file://" + projectPath + "/src/test/resources/DriverTestRes/"+siteName;
+        return "file://" + projectPath + "/src/test/resources/DriverTestRes/" + siteName;
     }
 
     @Test
@@ -86,4 +86,14 @@ public class WebDriverManagerTest {
         Assertions.assertEquals(expectedBySet, actualBySet);
     }
 
+    @Test
+    void TestsConnectionErrors() {
+        Html emptyHtml = new Html("", new Link(""));
+        WebDriverManager webDriverManager = new WebDriverManager(new Link("https://key-seo.com/404"));
+        Assertions.assertEquals(emptyHtml, webDriverManager.parseHtml());
+        Assertions.assertEquals(emptyHtml, webDriverManager.parseHtmlWithJsoup());
+        webDriverManager.setCurrentLink(new Link("https://github.com/fsdtygdsfbz4er"));
+        Assertions.assertEquals(emptyHtml, webDriverManager.parseHtml());
+        Assertions.assertEquals(emptyHtml, webDriverManager.parseHtmlWithJsoup());
+    }
 }
