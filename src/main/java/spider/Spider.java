@@ -6,6 +6,7 @@ import scraper.SplashScraper;
 import splash.DefaultSplashRequestFactory;
 import splash.SplashIsNotRespondingException;
 import utils.CSVParser;
+import utils.Html;
 import utils.Link;
 
 import java.io.IOException;
@@ -17,11 +18,13 @@ import java.util.concurrent.*;
 public class Spider {
     // in seconds
     private static final int DOMAIN_TIMEOUT = 40;
+    // after that number of fails in a row program stops
+    private static final int CONNECT_FAILS = 50;
 
     private final ContextFactory contextFactory;
     private final Database database;
 
-    private int failsCount = 0;
+    private int connectFailsCount = 0;
 
     public Spider(ContextFactory contextFactory, Database database) {
         this.contextFactory = contextFactory;
@@ -49,16 +52,29 @@ public class Spider {
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
+                    connectFailsCount = 0;
                 } catch (TimeoutException e) {
                     future.cancel(true);
                     LoggerUtils.debugLog.error("Spider - Waiting too long for scraping site " + domain);
                     LoggerUtils.consoleLog.error("Waiting too long for scraping site " + domain);
-                } catch (ConnectionException e) {
-                    LoggerUtils.debugLog.error("DomainTask - Request failed " + domain, e);
-                    LoggerUtils.consoleLog.error("Request failed " + domain + " " + e.getMessage());
-                } catch (HtmlLanguageException e) {
-                    LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain, e);
-                    LoggerUtils.consoleLog.error("Wrong html language " + domain);
+                } catch (ExecutionException e) {
+                    var exClass = e.getCause().getClass();
+                    if (exClass.equals(SplashIsNotRespondingException.class)) {
+                        LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
+                        LoggerUtils.consoleLog.error(e.getMessage());
+                    } else if (exClass.equals(ConnectionException.class)) {
+                        LoggerUtils.debugLog.error("DomainTask - Request failed " + domain, e);
+                        LoggerUtils.consoleLog.error("Request failed " + domain + " " + e.getMessage());
+                        ++connectFailsCount;
+                        if (connectFailsCount == CONNECT_FAILS) {
+                            throw new ConnectionException("Too many connect fails");
+                        }
+                    } else if (exClass.equals(HtmlLanguageException.class)) {
+                        LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain, e);
+                        LoggerUtils.consoleLog.error("Wrong html language " + domain);
+                    } else {
+                        throw e;
+                    }
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
