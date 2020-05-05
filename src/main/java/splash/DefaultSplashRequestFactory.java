@@ -39,6 +39,10 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
 
     @Override
     public Request getPingRequest(DefaultSplashRequestContext context) {
-        return new Request.Builder().url(context.getSplashUrl() + "/_ping").build();
+        String credentials = context.getUsername() + ":" + context.getPassword();
+        String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
+        return new Request.Builder().url(context.getSplashUrl() + "/_ping")
+                .addHeader("Authorization", "Basic " + encodedCredentials)
+                .build();
     }
 }
