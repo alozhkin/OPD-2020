@@ -32,7 +32,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
         return new Request.Builder()
                 .url(context.getSplashUrl().toString() + "/run")
-                .post(RequestBody.create(JSON, jsonObject.toString()))
+                .post(RequestBody.create(jsonObject.toString(), JSON))
                 .addHeader("Authorization", "Basic " + encodedCredentials)
                 .build();
     }
