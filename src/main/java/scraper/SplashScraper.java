@@ -149,7 +149,7 @@ public class SplashScraper implements Scraper {
     }
 
     private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
-        if (!e.getMessage().equals("Cancelled")) {
+        if (!e.getMessage().equals("Canceled")) {
             LoggerUtils.consoleLog.error("SplashScraper - Request failed " + link);
             LoggerUtils.consoleLog.error("SplashScraper - Request failed " + link + " " + e.getMessage());
         }
