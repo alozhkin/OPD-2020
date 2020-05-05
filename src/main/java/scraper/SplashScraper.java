@@ -30,6 +30,7 @@ public class SplashScraper implements Scraper {
     private final AtomicBoolean isSplashRestarting = new AtomicBoolean(false);
     //in millis
     private final int SPLASH_RESTART_TIME = 6000;
+    private final int SPLASH_RETRY_TIMEOUT = 500;
     private final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
@@ -41,7 +42,7 @@ public class SplashScraper implements Scraper {
         if (isSplashRestarting.get()) {
             if (!tryToMakeRequest(link, consumer, SPLASH_RESTART_TIME)) {
                 for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
-                    if (tryToMakeRequest(link, consumer, 500)) return;
+                    if (tryToMakeRequest(link, consumer, SPLASH_RETRY_TIMEOUT)) return;
                 }
                 throw new SplashIsNotRespondingException();
             }
@@ -171,9 +172,9 @@ public class SplashScraper implements Scraper {
         newCall.enqueue(new SplashCallback(link, consumer));
     }
 
-    private class SplashResponse {
-        private String html;
-        private String url;
+    private static class SplashResponse {
+        private final String html;
+        private final String url;
 
         public SplashResponse(String html, String url) {
             this.html = html;
