@@ -90,8 +90,9 @@ public class SplashScraper implements Scraper {
         try {
             var code = call.execute().code();
             return code == 200;
-        } catch (IOException ignored) {}
-        return false;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private void makeRequestToHtmlRenderer(Link link, Consumer<Html> consumer) {
@@ -148,11 +149,14 @@ public class SplashScraper implements Scraper {
     }
 
     private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
-        LoggerUtils.consoleLog.error("SplashScraper - Request failed " + call.request().url().toString());
-        calls.remove(call);
+        if (!e.getMessage().equals("Cancelled")) {
+            LoggerUtils.consoleLog.error("SplashScraper - Request failed " + link);
+            LoggerUtils.consoleLog.error("SplashScraper - Request failed " + link + " " + e.getMessage());
+        }
         if (e.getClass().equals(EOFException.class)) {
             retry(call, link, consumer);
         }
+        calls.remove(call);
     }
 
     private void retry(Call call, Link link, Consumer<Html> consumer) {
