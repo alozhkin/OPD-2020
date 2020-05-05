@@ -22,6 +22,7 @@ public class DomainTask {
         this.resultWords = resultWords;
     }
 
+    // throws exceptions only on first link
     void scrapeDomain() {
         LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
         try {
@@ -52,15 +53,7 @@ public class DomainTask {
     }
 
     private void scrapeFirstLink(Link link) {
-        try {
-            scraper.scrapeSync(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
-        } catch (IOException e) {
-            LoggerUtils.debugLog.error("DomainTask - Request failed " + link, e);
-            LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
-        } catch (HtmlLanguageException e) {
-            LoggerUtils.debugLog.error("DomainTask - Wrong html language " + link, e);
-            LoggerUtils.consoleLog.error("Wrong html language " + link);
-        }
+        scraper.scrapeSync(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
     }
 
     private void scrapeNextLink() throws InterruptedException {

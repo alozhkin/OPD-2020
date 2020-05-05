@@ -8,6 +8,7 @@ import splash.SplashIsNotRespondingException;
 import utils.CSVParser;
 import utils.Link;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +20,8 @@ public class Spider {
 
     private final ContextFactory contextFactory;
     private final Database database;
+
+    private int failsCount = 0;
 
     public Spider(ContextFactory contextFactory, Database database) {
         this.contextFactory = contextFactory;
@@ -50,13 +53,12 @@ public class Spider {
                     future.cancel(true);
                     LoggerUtils.debugLog.error("Spider - Waiting too long for scraping site " + domain);
                     LoggerUtils.consoleLog.error("Waiting too long for scraping site " + domain);
+                } catch (ConnectionException e) {
+                    LoggerUtils.debugLog.error("DomainTask - Request failed " + domain, e);
+                    LoggerUtils.consoleLog.error("Request failed " + domain + " " + e.getMessage());
                 } catch (HtmlLanguageException e) {
-                    if (e.getCause().getClass().equals(HtmlLanguageException.class)) {
-                        LoggerUtils.debugLog.error("Spider - Domain has wrong language " + domain);
-                        LoggerUtils.consoleLog.error("Site has wrong language " + domain);
-                    } else {
-                        throw e;
-                    }
+                    LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain, e);
+                    LoggerUtils.consoleLog.error("Wrong html language " + domain);
                 }
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }

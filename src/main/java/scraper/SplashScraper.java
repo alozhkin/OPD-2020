@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import logger.LoggerUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import spider.ConnectionException;
 import spider.HtmlLanguageException;
 import splash.DefaultSplashRequestContext;
 import splash.SplashIsNotRespondingException;
@@ -40,21 +41,27 @@ public class SplashScraper implements Scraper {
 
     @Override
     public void scrapeAsync(Link link, Consumer<Html> htmlConsumer) {
-        CallHandler<Call> callHandler = call -> {
+        Consumer<Call> callHandler = call -> {
             calls.add(call);
             call.enqueue(new SplashCallbackRetry(link, htmlConsumer));
         };
         try {
             scrape(link, callHandler);
-        } catch (IOException e) {
+        } catch (ConnectionException e) {
             LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
         }
     }
 
+    // throws exceptions
     @Override
-    public void scrapeSync(Link link, Consumer<Html> consumer) throws IOException {
-        CallHandler<Call> callHandler = call -> {
-            var response = call.execute();
+    public void scrapeSync(Link link, Consumer<Html> consumer) {
+        Consumer<Call> callHandler = call -> {
+            Response response = null;
+            try {
+                response = call.execute();
+            } catch (IOException e) {
+                throw new ConnectionException(e);
+            }
             handleResponse(response, call, link, consumer);
         };
         scrape(link, callHandler);
@@ -80,7 +87,7 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    private void scrape(Link link, CallHandler<Call> callHandler) throws IOException {
+    private void scrape(Link link, Consumer<Call> callHandler) {
         if (isSplashRestarting.get()) {
             if (!tryToMakeRequest(link, callHandler, SPLASH_RESTART_TIME)) {
                 for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
@@ -93,7 +100,7 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    private boolean tryToMakeRequest(Link link, CallHandler<Call> callHandler, int timeout) throws IOException {
+    private boolean tryToMakeRequest(Link link, Consumer<Call> callHandler, int timeout) {
         if (pingSplash())  {
             makeRequestToHtmlRenderer(link, callHandler);
             isSplashRestarting.set(false);
@@ -117,10 +124,10 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    private void makeRequestToHtmlRenderer(Link link, CallHandler<Call> callHandler) throws IOException {
+    private void makeRequestToHtmlRenderer(Link link, Consumer<Call> callHandler) {
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
-        callHandler.consume(call);
+        callHandler.accept(call);
     }
 
     private int handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
@@ -138,7 +145,7 @@ public class SplashScraper implements Scraper {
         try (response) {
             var responseBody = response.body();
             if (responseBody == null) {
-                throw new IOException("Response body is absent");
+                throw new ConnectionException("Response body is absent");
             }
             var gson = new Gson();
             var splashResponse = gson.fromJson(responseBody.string(), SplashResponse.class);
@@ -264,10 +271,5 @@ public class SplashScraper implements Scraper {
             } catch (HtmlLanguageException ignored) {}
             calls.remove(call);
         }
-    }
-
-    @FunctionalInterface
-    private interface CallHandler<T> {
-        void consume(T t) throws IOException;
     }
 }
