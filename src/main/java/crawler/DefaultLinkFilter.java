@@ -17,14 +17,17 @@ public class DefaultLinkFilter implements LinkFilter {
     private static final Set<String> languages = new HashSet<>();
     private static final Set<String> fileExtensions = new HashSet<>();
     private static final Set<String> ignoredLinks = new HashSet<>();
+    private static final Set<String> ignoredSubdomains = new HashSet<>();
 
     private final Set<LinkIdentifiers> occurredLinks;
 
     static {
         ConfigurationUtils.parseResourceToCollection("languages.txt", languages, DefaultLinkFilter.class);
         ConfigurationUtils.parseResourceToCollection("file_extensions.txt", fileExtensions, DefaultLinkFilter.class);
-
         ConfigurationUtils.parseResourceToCollection("ignored_links.txt", ignoredLinks, DefaultLinkFilter.class);
+        ConfigurationUtils.parseResourceToCollection(
+                "ignored_subdomains.txt", ignoredSubdomains, DefaultLinkFilter.class
+        );
     }
 
     public DefaultLinkFilter() {
@@ -90,8 +93,12 @@ public class DefaultLinkFilter implements LinkFilter {
 
     private boolean hasUsefulInfo(Link link) {
         var paths = link.getPath().split("/");
-        for (String p : paths) {
-            if (ignoredLinks.contains(p)) return false;
+        for (String path : paths) {
+            if (ignoredLinks.contains(path)) return false;
+        }
+        var subdomains = link.getSubdomains();
+        for (String subdomain : subdomains) {
+            if (ignoredSubdomains.contains(subdomain)) return false;
         }
         return true;
     }

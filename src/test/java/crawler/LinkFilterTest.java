@@ -227,4 +227,17 @@ public class LinkFilterTest {
         );
         assertEquals(0, filtered.size());
     }
+
+    @Test
+    void shouldIgnoreCertainSubdomains() {
+        linkFilter.addDomain();
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("ordershop.example.com"),
+                        new Link("shop.example.com")
+                ),
+                new Link("example.com")
+        );
+        assertEquals(0, filtered.size());
+    }
 }

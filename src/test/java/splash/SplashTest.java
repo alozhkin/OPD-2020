@@ -32,11 +32,13 @@ public class SplashTest {
     }
 
     @Test
+    @Disabled
     void scrapeOnePageWithSplash() {
         scraper.scrapeAsync(new Link("http://www.zwickedelstahl.de"), System.out::println);
     }
 
     @Test
+    @Disabled
     void shouldBeAbleToHandleRedirect() throws IOException {
         initMockServer();
         var html = Html.fromFile(Path.of("src/test/resources/scraper_res/simple.html"));
@@ -61,6 +63,7 @@ public class SplashTest {
     }
 
     @Test
+    @Disabled
     public void ignorePics() throws IOException {
         initMockServer();
         stubFor(get(urlEqualTo("/"))
@@ -83,6 +86,7 @@ public class SplashTest {
     }
 
     @Test
+    @Disabled
     public void ignoreCSS() throws IOException {
         initMockServer();
         stubFor(get(urlEqualTo("/"))
@@ -107,6 +111,7 @@ public class SplashTest {
     }
 
     @Test
+    @Disabled
     public void ignoreFavicon() throws IOException {
         initMockServer();
         stubFor(get(urlEqualTo("/"))
@@ -129,6 +134,7 @@ public class SplashTest {
     }
 
     @Test
+    @Disabled
     public void ignoreJS() throws IOException {
         initMockServer();
         stubFor(get(urlEqualTo("/"))
