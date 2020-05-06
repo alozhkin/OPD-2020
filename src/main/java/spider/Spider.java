@@ -2,6 +2,7 @@ package spider;
 
 import database.Database;
 import logger.LoggerUtils;
+import logger.Statistic;
 import scraper.SplashScraper;
 import splash.DefaultSplashRequestFactory;
 import splash.SplashIsNotRespondingException;
@@ -53,6 +54,7 @@ public class Spider {
                     continue;
                 }
                 scrapedDomains.add(fixed);
+                Statistic.reset();
                 var context = contextFactory.createContext();
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
                 var scraper = new SplashScraper(requestFactory);
@@ -83,6 +85,14 @@ public class Spider {
                         throw e;
                     }
                 }
+                LoggerUtils.consoleLog.info(
+                        String.format("Requests sended %d, responses received %d, pages scraped %d, site %s",
+                                Statistic.getRequestsSended(),
+                                Statistic.getResponsesReceived(),
+                                Statistic.getSitesScraped(),
+                                domain.toString()
+                        )
+                );
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (InterruptedException e) {

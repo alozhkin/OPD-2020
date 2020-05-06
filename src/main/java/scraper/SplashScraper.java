@@ -2,6 +2,7 @@ package scraper;
 
 import com.google.gson.Gson;
 import logger.LoggerUtils;
+import logger.Statistic;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import spider.ConnectionException;
@@ -132,6 +133,7 @@ public class SplashScraper implements Scraper {
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
         callHandler.accept(call);
+        Statistic.requestSended();
     }
 
     private int handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
@@ -144,6 +146,7 @@ public class SplashScraper implements Scraper {
         } else if (code == 200) {
             consumeHtml(response, call, link, consumer);
         }
+        Statistic.responseReceived();
         return code;
     }
 
@@ -205,6 +208,7 @@ public class SplashScraper implements Scraper {
             LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
         }
         calls.remove(call);
+        Statistic.responseReceived();
     }
 
     private void retry(Call call, Link link, Consumer<Html> consumer) {

@@ -7,7 +7,7 @@ import spider.DefaultContextFactory;
 import spider.Spider;
 
 public class Main {
-    private static final String INPUT_PATH = "src/main/resources/websites_data.csv";
+    private static final String INPUT_PATH = "src/main/resources/websites_data_jsoup.csv";
     private static final String OUTPUT_PATH = "export.csv";
 
     // prevents class instantiation

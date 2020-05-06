@@ -1,6 +1,7 @@
 package spider;
 
 import logger.LoggerUtils;
+import logger.Statistic;
 import utils.Html;
 import utils.Link;
 
@@ -29,6 +30,7 @@ public class SiteTask {
             var filteredWords = context.filterWords(words);
             LoggerUtils.debugLog.info("SiteTask - Completed " + link.toString());
             resultWords.addAll(filteredWords);
+            Statistic.siteScraped();
         } catch (Exception e) {
             LoggerUtils.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
             LoggerUtils.debugLog.error("SiteTask - Failed to run program:", e);
