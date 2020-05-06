@@ -16,7 +16,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -40,6 +39,19 @@ public class SplashScraper implements Scraper {
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
         this.renderReqFactory = renderReqFactory;
+    }
+
+    public static void shutdown() {
+        try {
+            httpClient.dispatcher().executorService().shutdown();
+            httpClient.connectionPool().evictAll();
+            var cache = httpClient.cache();
+            if (cache != null) {
+                cache.close();
+            }
+        } catch (IOException e) {
+            LoggerUtils.debugLog.error("SplashScraper - Cache closing rejected", e);
+        }
     }
 
     @Override
@@ -77,21 +89,6 @@ public class SplashScraper implements Scraper {
     @Override
     public void cancelAll() {
         calls.forEach(Call::cancel);
-    }
-
-    @Override
-    public void shutdown() {
-        calls.forEach(Call::cancel);
-        try {
-            httpClient.dispatcher().executorService().shutdown();
-            httpClient.connectionPool().evictAll();
-            var cache = httpClient.cache();
-            if (cache != null) {
-                cache.close();
-            }
-        } catch (RejectedExecutionException | IOException e) {
-            LoggerUtils.debugLog.error("SplashScraper - Site scraping rejected due to shutdown", e);
-        }
     }
 
     private void scrape(Link link, Consumer<Call> callHandler) {

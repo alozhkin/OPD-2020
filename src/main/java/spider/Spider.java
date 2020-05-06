@@ -43,7 +43,6 @@ public class Spider {
         var dbExec = Executors.newSingleThreadScheduledExecutor();
 
         var requestFactory = new DefaultSplashRequestFactory();
-        var scraper = new SplashScraper(requestFactory);
 
         try {
             for (Link domain : domains) {
@@ -56,6 +55,7 @@ public class Spider {
                 scrapedDomains.add(fixed);
                 var context = contextFactory.createContext();
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
+                var scraper = new SplashScraper(requestFactory);
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 try {
                     future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
@@ -108,7 +108,7 @@ public class Spider {
                 LoggerUtils.debugLog.error("Spider - Interrupted", e);
             }
             dbExec.shutdown();
-            scraper.shutdown();
+            SplashScraper.shutdown();
             LoggerUtils.debugLog.info("Spider - Resources were closed");
         }
     }
