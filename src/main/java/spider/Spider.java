@@ -9,6 +9,7 @@ import utils.CSVParser;
 import utils.Link;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -21,6 +22,7 @@ public class Spider {
 
     private final ContextFactory contextFactory;
     private final Database database;
+    private final Set<String> scrapedDomains = new HashSet<>();
 
     private int connectFailsCount = 0;
 
@@ -45,6 +47,13 @@ public class Spider {
 
         try {
             for (Link domain : domains) {
+                var fixed = getFixedUrl(domain);
+                if (scrapedDomains.contains(fixed)) {
+                    LoggerUtils.debugLog.info("Spider - Skip domain because is it already scraped " + domain);
+                    LoggerUtils.consoleLog.info("Skip domain because is it already scraped " + domain);
+                    continue;
+                }
+                scrapedDomains.add(fixed);
                 var context = contextFactory.createContext();
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
@@ -102,5 +111,13 @@ public class Spider {
             scraper.shutdown();
             LoggerUtils.debugLog.info("Spider - Resources were closed");
         }
+    }
+
+    private String getFixedUrl(Link link) {
+        var fixed = link.getHost();
+        if (fixed.startsWith("www.")) {
+            fixed = fixed.substring(4);
+        }
+        return fixed;
     }
 }
