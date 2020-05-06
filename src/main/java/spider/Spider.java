@@ -85,14 +85,7 @@ public class Spider {
                         throw e;
                     }
                 }
-                LoggerUtils.consoleLog.info(
-                        String.format("Requests sended %d, responses received %d, pages scraped %d, site %s",
-                                Statistic.getRequestsSended(),
-                                Statistic.getResponsesReceived(),
-                                Statistic.getSitesScraped(),
-                                domain.toString()
-                        )
-                );
+                LoggerUtils.consoleLog.info(Statistic.string() + ", site "  + domain);
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (InterruptedException e) {

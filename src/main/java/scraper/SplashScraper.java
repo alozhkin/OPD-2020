@@ -140,13 +140,14 @@ public class SplashScraper implements Scraper {
         // splash container restarting
         int code = response.code();
         if (code == 504) {
+            Statistic.requestTimeout();
             LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + link);
         } else if (code == 404) {
             LoggerUtils.debugLog.error("SplashScraper - 404 " + link);
         } else if (code == 200) {
             consumeHtml(response, call, link, consumer);
         }
-        Statistic.responseReceived();
+        Statistic.requestSucceeded();
         return code;
     }
 
@@ -165,17 +166,19 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.debugLog.error(
                         String.format("Redirect from %s to another site %s", linkToScrape, scrapedUrlHostWithoutWWW)
                 );
+                Statistic.htmlRejected();
                 return;
             }
             if (!scrapedUrl.getWithoutProtocol().equals(linkToScrape.getWithoutProtocol())) {
                 LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", linkToScrape, scrapedUrl));
-                LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", linkToScrape, scrapedUrl));
+                LoggerUtils.consoleLog.debug(String.format("Redirect from %s to %s", linkToScrape, scrapedUrl));
             }
             var html = new Html(splashResponse.getHtml(), scrapedUrl);
             if (!call.isCanceled()) {
                 if (hasRightLang(html)) {
                     consumer.accept(html);
                 } else {
+                    Statistic.htmlRejected();
                     throw new HtmlLanguageException();
                 }
             }
@@ -198,6 +201,7 @@ public class SplashScraper implements Scraper {
     }
 
     private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
+        Statistic.requestFailed();
         if (!e.getMessage().equals("Canceled") || !e.getMessage().equals("executor rejected")) {
             return;
         }
@@ -208,13 +212,13 @@ public class SplashScraper implements Scraper {
             LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
         }
         calls.remove(call);
-        Statistic.responseReceived();
     }
 
     private void retry(Call call, Link link, Consumer<Html> consumer) {
         var newCall = call.clone();
         calls.add(newCall);
         newCall.enqueue(new SplashCallbackRetry(link, consumer));
+        Statistic.requestRetried();
     }
 
     private void retryOnce(Call call, Link link, Consumer<Html> consumer) {
@@ -224,6 +228,7 @@ public class SplashScraper implements Scraper {
             calls.add(newCall);
             newCall.enqueue(new SplashCallback(link, consumer));
         } catch (InterruptedException ignored) {}
+        Statistic.requestRetried();
     }
 
     private static class SplashResponse {

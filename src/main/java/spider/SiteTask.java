@@ -22,7 +22,7 @@ public class SiteTask {
     public void consumeHtml(Html html) {
         try {
             var link = html.getUrl();
-            LoggerUtils.debugLog.info("SiteTask - Start " + link.toString());
+//            LoggerUtils.debugLog.info("SiteTask - Start " + link.toString());
             var links = context.crawl(html);
             var filteredLinks = context.filterLinks(links, link);
             linkQueue.addAll(filteredLinks);
