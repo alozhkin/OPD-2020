@@ -47,7 +47,7 @@ public class Spider {
 
         try {
             for (Link domain : domains) {
-                var fixed = getFixedUrl(domain);
+                var fixed = domain.fixWWW().getHost();
                 if (scrapedDomains.contains(fixed)) {
                     LoggerUtils.debugLog.info("Spider - Skip domain because is it already scraped " + domain);
                     LoggerUtils.consoleLog.info("Skip domain because is it already scraped " + domain);
@@ -111,13 +111,5 @@ public class Spider {
             scraper.shutdown();
             LoggerUtils.debugLog.info("Spider - Resources were closed");
         }
-    }
-
-    private String getFixedUrl(Link link) {
-        var fixed = link.getHost();
-        if (fixed.startsWith("www.")) {
-            fixed = fixed.substring(4);
-        }
-        return fixed;
     }
 }

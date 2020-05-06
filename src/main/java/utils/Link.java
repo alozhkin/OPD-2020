@@ -63,6 +63,14 @@ public class Link {
         return new Link("");
     }
 
+    public Link fixWWW() {
+        var fixed = this.toString();
+        if (fixed.startsWith("www.")) {
+            fixed = fixed.substring(4);
+        }
+        return new Link(fixed);
+    }
+
     public Set<Parameter> getParams() {
         var res = new HashSet<Parameter>();
         var query = getQuery();

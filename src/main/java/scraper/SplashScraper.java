@@ -22,18 +22,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class SplashScraper implements Scraper {
-    private final SplashRequestFactory renderReqFactory;
-    private final Set<Call> calls = ConcurrentHashMap.newKeySet();
-    private final OkHttpClient httpClient = new OkHttpClient.Builder()
+    private static final OkHttpClient httpClient = new OkHttpClient.Builder()
             .readTimeout(5, TimeUnit.MINUTES)
             .connectTimeout(5, TimeUnit.MINUTES)
             .writeTimeout(5, TimeUnit.MINUTES)
             .build();
     private final AtomicBoolean isSplashRestarting = new AtomicBoolean(false);
     //in millis
-    private final int SPLASH_RESTART_TIME = 6000;
-    private final int SPLASH_RETRY_TIMEOUT = 500;
-    private final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
+    private static final int SPLASH_RESTART_TIME = 6000;
+    private static final int SPLASH_RETRY_TIMEOUT = 500;
+    private static final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
+    private static final Gson gson = new Gson();
+
+    private final SplashRequestFactory renderReqFactory;
+    private final Set<Call> calls = ConcurrentHashMap.newKeySet();
+    private String domain;
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
         this.renderReqFactory = renderReqFactory;
@@ -145,28 +148,37 @@ public class SplashScraper implements Scraper {
         return code;
     }
 
-    private void consumeHtml(Response response, Call call, Link link, Consumer<Html> consumer) {
+    private void consumeHtml(Response response, Call call, Link linkToScrape, Consumer<Html> consumer) {
         try (response) {
             var responseBody = response.body();
             if (responseBody == null) {
                 throw new ConnectionException("Response body is absent");
             }
-            var gson = new Gson();
             var splashResponse = gson.fromJson(responseBody.string(), SplashResponse.class);
-            var url = new Link(splashResponse.getUrl());
-            if (!url.getWithoutProtocol().equals(link.getWithoutProtocol())) {
-                LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", link, url));
-                LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", link, url));
+            var scrapedUrl = new Link(splashResponse.getUrl());
+            var scrapedUrlHostWithoutWWW = scrapedUrl.fixWWW().getHost();
+            if (domain == null) {
+                domain = scrapedUrlHostWithoutWWW;
+            } else if (!scrapedUrlHostWithoutWWW.contains(domain)) {
+                LoggerUtils.debugLog.error(
+                        String.format("Redirect from %s to another site %s", linkToScrape, scrapedUrlHostWithoutWWW)
+                );
+                return;
             }
-            var html = new Html(splashResponse.getHtml(), url);
-            if (!call.isCanceled())
+            if (!scrapedUrl.getWithoutProtocol().equals(linkToScrape.getWithoutProtocol())) {
+                LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", linkToScrape, scrapedUrl));
+                LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", linkToScrape, scrapedUrl));
+            }
+            var html = new Html(splashResponse.getHtml(), scrapedUrl);
+            if (!call.isCanceled()) {
                 if (hasRightLang(html)) {
                     consumer.accept(html);
                 } else {
                     throw new HtmlLanguageException();
                 }
+            }
         } catch (IOException e) {
-            LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
+            LoggerUtils.debugLog.error("SplashScraper - Connection failed " + linkToScrape, e);
         }
     }
 
