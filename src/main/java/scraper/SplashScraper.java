@@ -142,6 +142,8 @@ public class SplashScraper implements Scraper {
         int code = response.code();
         if (code == 504) {
             LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + link);
+        } else if (code == 404) {
+            LoggerUtils.debugLog.error("SplashScraper - 404 " + link);
         } else if (code == 200) {
             consumeHtml(response, call, link, consumer);
         }
