@@ -17,6 +17,10 @@ public interface Database {
         return new DatabaseImpl();
     }
 
+    static Database createDummy() {
+        return new DummyDatabase();
+    }
+
     /**
      * Parses a CSV file and inserts the result of parsing into a database
      *

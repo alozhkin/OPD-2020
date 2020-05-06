@@ -1,5 +1,6 @@
-package main;
+package spider;
 
+import logger.LoggerUtils;
 import org.openqa.selenium.WebDriverException;
 import utils.Link;
 
@@ -23,7 +24,7 @@ public class SiteTask {
 
     public Collection<String> run() {
         try {
-            Main.debugLog.info("SiteTask - Start " + link.toString());
+            LoggerUtils.debugLog.info("SiteTask - Start " + link.toString());
             checkIfInterrupted();
             var html = context.scrape(link);
             checkIfInterrupted();
@@ -37,23 +38,23 @@ public class SiteTask {
             checkIfInterrupted();
             Collection<String> filteredWords = context.filterWords(words);
             checkIfInterrupted();
-            Main.debugLog.info("SiteTask - Completed " + link.toString());
+            LoggerUtils.debugLog.info("SiteTask - Completed " + link.toString());
             return filteredWords;
         } catch (InterruptedException e) {
-            Main.debugLog.info("SiteTask - Interrupted " + link.toString());
+            LoggerUtils.debugLog.info("SiteTask - Interrupted " + link.toString());
         } catch (WebDriverException e) {
             var cause = e.getCause();
             if (cause != null && cause.getClass() == InterruptedIOException.class) {
-                Main.debugLog.info("SiteTask - Interrupted " + link.toString());
+                LoggerUtils.debugLog.info("SiteTask - Interrupted " + link.toString());
             } else if (e.getClass() == org.openqa.selenium.TimeoutException.class) {
-                Main.debugLog.error("SiteTask - Loading timeout is over " + link.toString());
+                LoggerUtils.debugLog.error("SiteTask - Loading timeout is over " + link.toString());
             } else {
-                Main.consoleLog.error("SiteTask - Webdriver fail: {}", e.toString());
-                Main.debugLog.error("SiteTask - Webdriver fail:", e);
+                LoggerUtils.consoleLog.error("SiteTask - Webdriver fail: {}", e.toString());
+                LoggerUtils.debugLog.error("SiteTask - Webdriver fail:", e);
             }
         } catch (Exception e) {
-            Main.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
-            Main.debugLog.error("SiteTask - Failed to run program:", e);
+            LoggerUtils.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
+            LoggerUtils.debugLog.error("SiteTask - Failed to run program:", e);
         }
         return new ArrayList<>();
     }

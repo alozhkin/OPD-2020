@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 public class CSVParser {
     private static final String SEPARATOR = ";";
     private static final String QUOTATION = "\"";
-    private Map<String, Integer> domainsIds = new HashMap<>();
-    private List<Link> links = new ArrayList<>();
+    private final Map<String, Integer> domainsIds = new HashMap<>();
+    private final List<Link> links = new ArrayList<>();
 
     public void parse(String filePath) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(new File(filePath)))) {

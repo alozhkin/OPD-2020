@@ -1,6 +1,6 @@
 package extractor;
 
-import main.Main;
+import logger.LoggerUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import utils.Html;
@@ -15,7 +15,7 @@ public class DefaultExtractor implements Extractor {
         Document doc = Jsoup.parse(html.toString());
         String allInfo = doc.text();
         String[] stringsArray = allInfo.split("\\s");
-        Main.debugLog.debug("Extracting task completed");
+        LoggerUtils.debugLog.debug("Extracting task completed");
         return new HashSet<>(Arrays.asList(stringsArray));
     }
 }

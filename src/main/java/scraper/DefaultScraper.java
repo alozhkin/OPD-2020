@@ -1,7 +1,7 @@
 package scraper;
 
 import diff_match_patch.DiffMatchPatch;
-import main.Main;
+import logger.LoggerUtils;
 import org.jsoup.Jsoup;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
@@ -41,8 +41,8 @@ public class DefaultScraper implements Scraper {
         driver.get(link.toString());
         var url = new Link(driver.getCurrentUrl());
         if (!url.getWithoutProtocol().equals(link.getWithoutProtocol())) {
-            Main.debugLog.info(String.format("Redirect from %s to %s", link, url));
-            Main.consoleLog.info(String.format("Redirect from %s to %s", link, url));
+            LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", link, url));
+            LoggerUtils.consoleLog.info(String.format("Redirect from %s to %s", link, url));
         }
         var pageSource = driver.getPageSource();
         var html = new Html(pageSource, url);
