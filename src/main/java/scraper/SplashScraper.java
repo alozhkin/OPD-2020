@@ -15,6 +15,8 @@ import utils.Link;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +38,7 @@ public class SplashScraper implements Scraper {
 
     private final SplashRequestFactory renderReqFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
+    private final Queue<CallContext> restartQueue = new ArrayDeque<>();
     private String domain;
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
@@ -94,10 +97,18 @@ public class SplashScraper implements Scraper {
 
     private void scrape(Link link, Consumer<Call> callHandler) {
         if (isSplashRestarting.get()) {
-            if (!tryToMakeRequest(link, callHandler, SPLASH_RESTART_TIME)) {
+            var isAvailable = tryToMakeRequest(SPLASH_RESTART_TIME);
+            if (!isAvailable) {
                 for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
-                    if (tryToMakeRequest(link, callHandler, SPLASH_RETRY_TIMEOUT)) return;
+                    isAvailable = tryToMakeRequest(SPLASH_RETRY_TIMEOUT);
+                    if (isAvailable) break;
                 }
+            }
+            if (isAvailable) {
+                isSplashRestarting.set(false);
+                makeRequestToHtmlRenderer(link, callHandler);
+                retryRequestsAfterRestart();
+            } else {
                 throw new SplashIsNotRespondingException();
             }
         } else {
@@ -105,16 +116,21 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    private boolean tryToMakeRequest(Link link, Consumer<Call> callHandler, int timeout) {
+    private boolean tryToMakeRequest(int timeout) {
         if (pingSplash())  {
-            makeRequestToHtmlRenderer(link, callHandler);
-            isSplashRestarting.set(false);
             return true;
         } else {
             try {
                 Thread.sleep(timeout);
             } catch (InterruptedException ignored) {}
             return false;
+        }
+    }
+
+    private void retryRequestsAfterRestart() {
+        CallContext context;
+        while ((context = restartQueue.poll()) != null) {
+            retry(context.getCall(), context.getLink(), context.getConsumer());
         }
     }
 
@@ -222,12 +238,9 @@ public class SplashScraper implements Scraper {
     }
 
     private void retryOnce(Call call, Link link, Consumer<Html> consumer) {
-        try {
-            Thread.sleep(SPLASH_RESTART_TIME);
-            var newCall = call.clone();
-            calls.add(newCall);
-            newCall.enqueue(new SplashCallback(link, consumer));
-        } catch (InterruptedException ignored) {}
+        var newCall = call.clone();
+        calls.add(newCall);
+        newCall.enqueue(new SplashCallback(link, consumer));
         Statistic.requestRetried();
     }
 
@@ -272,7 +285,6 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    //todo внутренняя ссылка не увеличивает размер объекта сильно?
     private class SplashCallbackRetry implements Callback {
         private final Link link;
         private final Consumer<Html> consumer;
@@ -293,10 +305,34 @@ public class SplashScraper implements Scraper {
                 var code = handleResponse(response, call, link, consumer);
                 if (code == 503) {
                     isSplashRestarting.set(true);
-                    retryOnce(call, link, consumer);
+                    restartQueue.add(new CallContext(call.clone(), link, consumer));
                 }
             } catch (HtmlLanguageException ignored) {}
             calls.remove(call);
+        }
+    }
+
+    private static class CallContext {
+        private final Call call;
+        private final Link link;
+        private final Consumer<Html> consumer;
+
+        public CallContext(Call call, Link link, Consumer<Html> consumer) {
+            this.call = call;
+            this.link = link;
+            this.consumer = consumer;
+        }
+
+        public Call getCall() {
+            return call;
+        }
+
+        public Link getLink() {
+            return link;
+        }
+
+        public Consumer<Html> getConsumer() {
+            return consumer;
         }
     }
 }
