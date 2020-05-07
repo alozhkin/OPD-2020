@@ -20,24 +20,17 @@ public class SiteTask {
     }
 
     public void consumeHtml(Html html) {
-        try {
-            if (!html.langRight()) {
-                //todo его ловят внизу
-                throw new HtmlLanguageException();
-            }
-            var link = html.getUrl();
-//            LoggerUtils.debugLog.info("SiteTask - Start " + link.toString());
-            var links = context.crawl(html);
-            var filteredLinks = context.filterLinks(links, link);
-            linkQueue.addAll(filteredLinks);
-            var words = context.extract(html);
-            var filteredWords = context.filterWords(words);
-            LoggerUtils.debugLog.info("SiteTask - Completed " + link.toString());
-            resultWords.addAll(filteredWords);
-            Statistic.siteScraped();
-        } catch (Exception e) {
-            LoggerUtils.consoleLog.error("SiteTask - Failed to run program: {}", e.toString());
-            LoggerUtils.debugLog.error("SiteTask - Failed to run program:", e);
+        if (!html.langRight()) {
+            throw new HtmlLanguageException();
         }
+        var link = html.getUrl();
+        var links = context.crawl(html);
+        var filteredLinks = context.filterLinks(links, link);
+        linkQueue.addAll(filteredLinks);
+        var words = context.extract(html);
+        var filteredWords = context.filterWords(words);
+        LoggerUtils.debugLog.info("SiteTask - Completed " + link.toString());
+        resultWords.addAll(filteredWords);
+        Statistic.siteScraped();
     }
 }
