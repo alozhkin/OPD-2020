@@ -18,7 +18,7 @@ import java.util.concurrent.*;
 
 public class Spider {
     // in seconds
-    private static final int DOMAIN_TIMEOUT = 40;
+    private static final int DOMAIN_TIMEOUT = 10;
     // after that number of fails in a row program stops
     private static final int CONNECT_FAILS = 10;
 
@@ -100,8 +100,8 @@ public class Spider {
             connectFailsCount = 0;
         } catch (TimeoutException e) {
             future.cancel(true);
-            LoggerUtils.debugLog.error("Spider - Waiting too long for scraping site " + domain);
-            LoggerUtils.consoleLog.error("Waiting too long for scraping site " + domain);
+            LoggerUtils.debugLog.error("Spider - Stopped, waiting too long for scraping site " + domain);
+            LoggerUtils.consoleLog.error("Spider stopped, waiting too long for scraping site " + domain);
         } catch (ExecutionException e) {
             var exClass = e.getCause().getClass();
             if (exClass.equals(ScraperConnectionException.class)) {
