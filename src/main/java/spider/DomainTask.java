@@ -62,8 +62,8 @@ public class DomainTask {
         var link = linkQueue.poll(500, TimeUnit.MILLISECONDS);
         if (link != null) {
             scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
+            numberOfScrapedLinks++;
         }
-        numberOfScrapedLinks++;
     }
 
     private void checkIfScraperThrowException() {
