@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 public interface Scraper {
     void cancelAll();
+    List<FailedSite> getFailedSites();
     void scrape(Link link, Consumer<Html> consumer);
     int scrapingSitesCount();
-    List<FailedSite> getFailedSites();
 }

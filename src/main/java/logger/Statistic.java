@@ -11,6 +11,9 @@ public class Statistic {
     private static final AtomicInteger sitesScraped = new AtomicInteger(0);
     private static final AtomicInteger responsesRejected = new AtomicInteger(0);
 
+    // prevents class instantiation
+    private Statistic() {}
+
     public static int getRequestsSended() {
         return requestsSended.get();
     }

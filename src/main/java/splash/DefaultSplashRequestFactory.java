@@ -17,8 +17,6 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
                     "    splash:runjs(\"window.close()\")\n" +
                     "    return {html=html, url=url}\n";
 
-    //todo перестать отдавать OkHttp Request
-    //todo можно просто полностью кастюмизировать splash, но у меня нет на это времени сейчас
     @Override
     public Request getRequest(DefaultSplashRequestContext context) {
         JsonObject jsonObject = new JsonObject();
@@ -33,15 +31,6 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
         return new Request.Builder()
                 .url(context.getSplashUrl().toString() + "/run")
                 .post(RequestBody.create(jsonObject.toString(), JSON))
-                .addHeader("Authorization", "Basic " + encodedCredentials)
-                .build();
-    }
-
-    @Override
-    public Request getPingRequest(DefaultSplashRequestContext context) {
-        String credentials = context.getUsername() + ":" + context.getPassword();
-        String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
-        return new Request.Builder().url(context.getSplashUrl() + "/_ping")
                 .addHeader("Authorization", "Basic " + encodedCredentials)
                 .build();
     }
