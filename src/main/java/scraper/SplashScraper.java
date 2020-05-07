@@ -136,7 +136,6 @@ public class SplashScraper implements Scraper {
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
             this.call = call;
             handleFail(e);
-            failedSites.add(new FailedSite(e, initialLink));
             calls.remove(call);
         }
 
@@ -154,8 +153,10 @@ public class SplashScraper implements Scraper {
 
         private void handleFail(IOException e) {
             Statistic.requestFailed();
-            if (e.getClass().equals(EOFException.class)) {
+            var cause = e.getCause();
+            if (cause != null && cause.getClass().equals(EOFException.class)) {
                 handleSplashRestarting(call, context);
+                return;
             } else if (e.getMessage().equals("Canceled")) {
                 LoggerUtils.debugLog.error("SplashScraper - Request canceled " + initialLink);
             } else if (e.getMessage().equals("executor rejected")) {
@@ -163,6 +164,7 @@ public class SplashScraper implements Scraper {
             } else {
                 LoggerUtils.debugLog.error("SplashScraper - Request failed " + initialLink, e);
             }
+            failedSites.add(new FailedSite(e, initialLink));
         }
 
         private void handleResponse(Response response) throws IOException {
