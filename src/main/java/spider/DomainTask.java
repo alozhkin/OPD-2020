@@ -68,21 +68,24 @@ public class DomainTask {
     }
 
     private void checkIfScraperThrowException() {
-        var failedSite = scraper.getFailedSites().get(0);
-        if (failedSite != null) {
-            var e = failedSite.getException();
-            var exClass = e.getClass();
-            if (exClass.equals(SplashNotRespondingException.class)) {
-                throw (SplashNotRespondingException) e;
-            } else if (exClass.equals(ConnectException.class)) {
-                throw new ScraperConnectionException(e);
-            } else if (exClass.equals(ScraperConnectionException.class)) {
-                throw (ScraperConnectionException) e;
-            } else if (exClass.equals(HtmlLanguageException.class)) {
-                LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
-                LoggerUtils.consoleLog.error("Wrong html language " + domain);
-            } else {
-                LoggerUtils.debugLog.error("DomainTask - Failed", e);
+        var failedSites = scraper.getFailedSites();
+        if (!failedSites.isEmpty()) {
+            var failedSite = failedSites.get(0);
+            if (failedSite != null) {
+                var e = failedSite.getException();
+                var exClass = e.getClass();
+                if (exClass.equals(SplashNotRespondingException.class)) {
+                    throw (SplashNotRespondingException) e;
+                } else if (exClass.equals(ConnectException.class)) {
+                    throw new ScraperConnectionException(e);
+                } else if (exClass.equals(ScraperConnectionException.class)) {
+                    throw (ScraperConnectionException) e;
+                } else if (exClass.equals(HtmlLanguageException.class)) {
+                    LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
+                    LoggerUtils.consoleLog.error("Wrong html language " + domain);
+                } else {
+                    LoggerUtils.debugLog.error("DomainTask - Failed", e);
+                }
             }
         }
     }
