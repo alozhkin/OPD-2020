@@ -132,7 +132,7 @@ public class DefaultLinkFilter implements LinkFilter {
         var res = new HashSet<Parameter>();
         for (Parameter param : params) {
             var name = param.getName().toLowerCase();
-            if (name.contains("id")
+            if (name.equals("id")
                     || name.equals("content")
                     || name.equals("page")
                     || name.equals("objectpath")) {
