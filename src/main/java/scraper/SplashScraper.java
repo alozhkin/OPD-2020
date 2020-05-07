@@ -5,7 +5,6 @@ import logger.LoggerUtils;
 import logger.Statistic;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
-import splash.ConnectionException;
 import spider.FailedSite;
 import splash.DefaultSplashRequestContext;
 import splash.SplashNotRespondingException;
@@ -147,7 +146,7 @@ public class SplashScraper implements Scraper {
             } else if (code == 200) {
                 var responseBody = response.body();
                 if (responseBody == null) {
-                    throw new ConnectionException("Response body is absent");
+                    throw new ScraperConnectionException("Response body is absent");
                 }
                 handleResponseBody(responseBody.string());
             }

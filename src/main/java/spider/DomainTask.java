@@ -2,10 +2,11 @@ package spider;
 
 import logger.LoggerUtils;
 import scraper.Scraper;
-import splash.ConnectionException;
+import scraper.ScraperConnectionException;
 import splash.SplashNotRespondingException;
 import utils.Link;
 
+import java.net.ConnectException;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -73,13 +74,15 @@ public class DomainTask {
             var exClass = e.getClass();
             if (exClass.equals(SplashNotRespondingException.class)) {
                 throw (SplashNotRespondingException) e;
-            } else if (exClass.equals(ConnectionException.class)) {
-                throw (ConnectionException) e;
+            } else if (exClass.equals(ConnectException.class)) {
+                throw new ScraperConnectionException(e);
+            } else if (exClass.equals(ScraperConnectionException.class)) {
+                throw (ScraperConnectionException) e;
             } else if (exClass.equals(HtmlLanguageException.class)) {
                 LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
                 LoggerUtils.consoleLog.error("Wrong html language " + domain);
             } else {
-                LoggerUtils.consoleLog.error("Domain ex", e);
+                LoggerUtils.debugLog.error("DomainTask - Failed", e);
             }
         }
     }

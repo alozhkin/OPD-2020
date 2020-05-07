@@ -4,7 +4,7 @@ import database.Database;
 import logger.LoggerUtils;
 import logger.Statistic;
 import scraper.SplashScraper;
-import splash.ConnectionException;
+import scraper.ScraperConnectionException;
 import splash.DefaultSplashRequestFactory;
 import splash.SplashNotRespondingException;
 import utils.CSVParser;
@@ -101,12 +101,12 @@ public class Spider {
             LoggerUtils.consoleLog.error("Waiting too long for scraping site " + domain);
         } catch (ExecutionException e) {
             var exClass = e.getCause().getClass();
-            if (exClass.equals(ConnectionException.class)) {
+            if (exClass.equals(ScraperConnectionException.class)) {
                 LoggerUtils.debugLog.error("DomainTask - Request failed " + domain, e);
                 LoggerUtils.consoleLog.error("Request failed " + domain + " " + e.getMessage());
                 ++connectFailsCount;
                 if (connectFailsCount == CONNECT_FAILS) {
-                    throw new ConnectionException("Too many connect fails");
+                    throw new ScraperConnectionException("Too many connect fails");
                 }
             } else  {
                 throw e;
