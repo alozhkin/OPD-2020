@@ -1,5 +1,6 @@
 package scraper;
 
+import spider.FailedSite;
 import utils.Html;
 import utils.Link;
 

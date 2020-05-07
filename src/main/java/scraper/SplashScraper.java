@@ -5,10 +5,12 @@ import logger.LoggerUtils;
 import logger.Statistic;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
-import spider.ConnectionException;
+import splash.ConnectionException;
+import spider.FailedSite;
 import splash.DefaultSplashRequestContext;
 import splash.SplashIsNotRespondingException;
 import splash.SplashRequestFactory;
+import splash.SplashResponse;
 import utils.Html;
 import utils.Link;
 

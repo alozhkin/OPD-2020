@@ -4,6 +4,7 @@ import database.Database;
 import logger.LoggerUtils;
 import logger.Statistic;
 import scraper.SplashScraper;
+import splash.ConnectionException;
 import splash.DefaultSplashRequestFactory;
 import splash.SplashIsNotRespondingException;
 import utils.CSVParser;

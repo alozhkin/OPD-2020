@@ -1,4 +1,4 @@
-package scraper;
+package spider;
 
 import utils.Link;
 

@@ -1,6 +1,6 @@
-package scraper;
+package splash;
 
-class SplashResponse {
+public class SplashResponse {
     private final String html;
     private final String url;
 

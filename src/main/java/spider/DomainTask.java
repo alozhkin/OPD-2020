@@ -2,6 +2,7 @@ package spider;
 
 import logger.LoggerUtils;
 import scraper.Scraper;
+import splash.ConnectionException;
 import splash.SplashIsNotRespondingException;
 import utils.Link;
 
