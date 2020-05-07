@@ -81,6 +81,7 @@ public class Spider {
                     }
                 }
                 LoggerUtils.consoleLog.info(Statistic.string() + " site "  + domain);
+                LoggerUtils.debugLog.info(Statistic.string() + " site "  + domain);
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (InterruptedException e) {
