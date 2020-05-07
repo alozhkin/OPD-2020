@@ -24,44 +24,22 @@ public class DomainTask {
         this.resultWords = resultWords;
     }
 
-    // throws exceptions only on first link
     void scrapeDomain() {
         LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
         try {
             scrapeFirstLink(domain);
             while (areAllLinksScraped()) {
                 checkIfInterrupted();
-                try {
-                    scrapeNextLink();
-                } catch (HtmlLanguageException ignored) {}
+                scrapeNextLink();
             }
             if (numberOfScrapedLinks == 1) {
-                findOut();
+                checkIfScraperThrowException();
             }
         } catch (InterruptedException e) {
             handleInterruption();
             LoggerUtils.debugLog.error("Domain Task - Interrupted " + domain);
         } finally {
             LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
-        }
-    }
-
-    private void findOut() {
-        var failedSite = scraper.getFailedSites().get(0);
-        if (failedSite != null) {
-            var e = failedSite.getException();
-            var exClass = e.getClass();
-            if (exClass.equals(SplashNotRespondingException.class)) {
-                LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
-                LoggerUtils.consoleLog.error(e.getMessage());
-            } else if (exClass.equals(ConnectionException.class)) {
-                throw (ConnectionException) e;
-            } else if (exClass.equals(HtmlLanguageException.class)) {
-                LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
-                LoggerUtils.consoleLog.error("Wrong html language " + domain);
-            } else {
-                LoggerUtils.consoleLog.error("Domain ex", e);
-            }
         }
     }
 
@@ -86,6 +64,25 @@ public class DomainTask {
             scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
         }
         numberOfScrapedLinks++;
+    }
+
+    private void checkIfScraperThrowException() {
+        var failedSite = scraper.getFailedSites().get(0);
+        if (failedSite != null) {
+            var e = failedSite.getException();
+            var exClass = e.getClass();
+            if (exClass.equals(SplashNotRespondingException.class)) {
+                LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
+                LoggerUtils.consoleLog.error(e.getMessage());
+            } else if (exClass.equals(ConnectionException.class)) {
+                throw (ConnectionException) e;
+            } else if (exClass.equals(HtmlLanguageException.class)) {
+                LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
+                LoggerUtils.consoleLog.error("Wrong html language " + domain);
+            } else {
+                LoggerUtils.consoleLog.error("Domain ex", e);
+            }
+        }
     }
 
     private void handleInterruption() {
