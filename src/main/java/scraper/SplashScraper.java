@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import splash.ConnectionException;
 import spider.FailedSite;
 import splash.DefaultSplashRequestContext;
-import splash.SplashIsNotRespondingException;
+import splash.SplashNotRespondingException;
 import splash.SplashRequestFactory;
 import splash.SplashResponse;
 import utils.Html;
@@ -92,7 +92,7 @@ public class SplashScraper implements Scraper {
         scheduledToRetry.incrementAndGet();
         var delay = getDelay(context.getRetryCount());
         if (delay == -1) {
-            throw new SplashIsNotRespondingException();
+            throw new SplashNotRespondingException();
         } else {
             retryExecutor.schedule(() -> retry(call, context), delay, TimeUnit.MILLISECONDS);
         }

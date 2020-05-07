@@ -6,7 +6,7 @@ import logger.Statistic;
 import scraper.SplashScraper;
 import splash.ConnectionException;
 import splash.DefaultSplashRequestFactory;
-import splash.SplashIsNotRespondingException;
+import splash.SplashNotRespondingException;
 import utils.CSVParser;
 import utils.Link;
 
@@ -87,7 +87,7 @@ public class Spider {
             Thread.currentThread().interrupt();
             LoggerUtils.debugLog.error("Spider - Interrupted", e);
         } catch (ExecutionException e) {
-            if (e.getCause().getClass().equals(SplashIsNotRespondingException.class)) {
+            if (e.getCause().getClass().equals(SplashNotRespondingException.class)) {
                 LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
                 LoggerUtils.consoleLog.error(e.getMessage());
             } else {

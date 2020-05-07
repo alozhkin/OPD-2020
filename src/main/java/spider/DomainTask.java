@@ -3,7 +3,7 @@ package spider;
 import logger.LoggerUtils;
 import scraper.Scraper;
 import splash.ConnectionException;
-import splash.SplashIsNotRespondingException;
+import splash.SplashNotRespondingException;
 import utils.Link;
 
 import java.util.Set;
@@ -51,7 +51,7 @@ public class DomainTask {
         if (failedSite != null) {
             var e = failedSite.getException();
             var exClass = e.getClass();
-            if (exClass.equals(SplashIsNotRespondingException.class)) {
+            if (exClass.equals(SplashNotRespondingException.class)) {
                 LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
                 LoggerUtils.consoleLog.error(e.getMessage());
             } else if (exClass.equals(ConnectionException.class)) {
