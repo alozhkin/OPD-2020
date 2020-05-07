@@ -199,6 +199,7 @@ public class SplashScraper implements Scraper {
             scheduledToRetry.incrementAndGet();
             var delay = getDelay(context.getRetryCount());
             if (delay == -1) {
+                scheduledToRetry.decrementAndGet();
                 throw new SplashNotRespondingException();
             } else {
                 retryExecutor.schedule(this::retry, delay, TimeUnit.MILLISECONDS);
