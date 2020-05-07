@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class SplashScraper implements Scraper {
@@ -40,11 +41,9 @@ public class SplashScraper implements Scraper {
     private final SplashRequestFactory renderReqFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
     private final ScheduledExecutorService retryExecutor = Executors.newSingleThreadScheduledExecutor();
-    private final AtomicInteger scheduledToRetry = new AtomicInteger(0);
     private final List<FailedSite> failedSites = new ArrayList<>();
-
-    // а это thread-safe?
-    private String domain;
+    private final AtomicInteger scheduledToRetry = new AtomicInteger(0);
+    private final AtomicReference<String> domain = new AtomicReference<>();
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
         this.renderReqFactory = renderReqFactory;
@@ -208,10 +207,10 @@ public class SplashScraper implements Scraper {
 
         private boolean isDomainSuitable() {
             var scrapedUrlHostWithoutWWW = finalLink.fixWWW().getHost();
-            if (domain == null) {
-                domain = scrapedUrlHostWithoutWWW;
+            if (domain.get() == null) {
+                domain.set(scrapedUrlHostWithoutWWW);
             } else {
-                return scrapedUrlHostWithoutWWW.contains(domain);
+                return scrapedUrlHostWithoutWWW.contains(domain.get());
             }
             return true;
         }
