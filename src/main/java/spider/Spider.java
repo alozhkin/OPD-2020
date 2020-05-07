@@ -20,7 +20,7 @@ public class Spider {
     // in seconds
     private static final int DOMAIN_TIMEOUT = 40;
     // after that number of fails in a row program stops
-    private static final int CONNECT_FAILS = 50;
+    private static final int CONNECT_FAILS = 10;
 
     private final ContextFactory contextFactory;
     private final Database database;
@@ -62,6 +62,9 @@ public class Spider {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LoggerUtils.debugLog.error("Spider - Interrupted", e);
+        } catch (ScraperConnectionException e) {
+            LoggerUtils.debugLog.error("Spider - Stopped, too many connection fails", e);
+            LoggerUtils.consoleLog.error("Spider stopped, too many connection fails");
         } catch (ExecutionException e) {
             if (e.getCause().getClass().equals(SplashNotRespondingException.class)) {
                 LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
