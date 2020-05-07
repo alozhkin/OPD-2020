@@ -72,8 +72,7 @@ public class DomainTask {
             var e = failedSite.getException();
             var exClass = e.getClass();
             if (exClass.equals(SplashNotRespondingException.class)) {
-                LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
-                LoggerUtils.consoleLog.error(e.getMessage());
+                throw (SplashNotRespondingException) e;
             } else if (exClass.equals(ConnectionException.class)) {
                 throw (ConnectionException) e;
             } else if (exClass.equals(HtmlLanguageException.class)) {
