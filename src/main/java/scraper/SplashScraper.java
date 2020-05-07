@@ -78,6 +78,7 @@ public class SplashScraper implements Scraper {
             try {
                 var response = call.execute();
                 handleResponse(response, call, link, consumer);
+                response.close();
             } catch (IOException e) {
                 throw new ConnectionException(e);
             }
@@ -138,8 +139,9 @@ public class SplashScraper implements Scraper {
         var request = renderReqFactory.getPingRequest(new DefaultSplashRequestContext.Builder().build());
         var call = httpClient.newCall(request);
         try {
-            var code = call.execute().code();
-            return code == 200;
+            var response = call.execute();
+            response.close();
+            return response.code() == 200;
         } catch (IOException e) {
             return false;
         }
@@ -155,6 +157,7 @@ public class SplashScraper implements Scraper {
     private int handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
         // splash container restarting
         int code = response.code();
+        System.out.println(code);
         if (code == 504) {
             Statistic.requestTimeout();
             LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + link);
@@ -162,8 +165,11 @@ public class SplashScraper implements Scraper {
             LoggerUtils.debugLog.error("SplashScraper - 404 " + link);
         } else if (code == 200) {
             consumeHtml(response, call, link, consumer);
+            Statistic.requestSucceeded();
+            return code;
         }
         Statistic.requestSucceeded();
+        response.close();
         return code;
     }
 
@@ -218,11 +224,12 @@ public class SplashScraper implements Scraper {
 
     private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
         Statistic.requestFailed();
-        if (!e.getMessage().equals("Canceled") || !e.getMessage().equals("executor rejected")) {
-            return;
-        }
         if (e.getClass().equals(EOFException.class)) {
             retry(call, link, consumer);
+        } else if (e.getMessage().equals("Canceled")) {
+            LoggerUtils.consoleLog.error("Request canceled " + link + " " + e.getMessage());
+        } else if (e.getMessage().equals("executor rejected")) {
+            LoggerUtils.consoleLog.error("Executor rejected " + link + " " + e.getMessage());
         } else {
             LoggerUtils.debugLog.error("SplashScraper - Request failed " + link, e);
             LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
@@ -230,6 +237,7 @@ public class SplashScraper implements Scraper {
         calls.remove(call);
     }
 
+    // копия копии
     private void retry(Call call, Link link, Consumer<Html> consumer) {
         var newCall = call.clone();
         calls.add(newCall);
@@ -306,9 +314,13 @@ public class SplashScraper implements Scraper {
                 if (code == 503) {
                     isSplashRestarting.set(true);
                     restartQueue.add(new CallContext(call.clone(), link, consumer));
+                } else if (code == 502) {
+                    // не самое чистое решение, одна и та же ссылка может постоянно оставаться в restart queue
+                    restartQueue.add(new CallContext(call.clone(), link, consumer));
                 }
             } catch (HtmlLanguageException ignored) {}
             calls.remove(call);
+            response.close();
         }
     }
 
