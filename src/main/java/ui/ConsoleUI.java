@@ -1,6 +1,5 @@
 package ui;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import main.Main;
@@ -9,13 +8,13 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static logger.LoggerUtils.consoleLog;
+import static logger.LoggerUtils.debugLog;
 
 public class ConsoleUI implements UI {
     public static ProgressBar pb = new ProgressBar("Test", 100);
-    private static final String PATH = "output.csv";
-    public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
+    private static final String OUTPUT_PATH = "output.csv";
 
     @Argument(required = true)
     private String input;
@@ -24,6 +23,7 @@ public class ConsoleUI implements UI {
 
     public static void main(String[] args) {
         new ConsoleUI().start(args);
+        pb.close();
     }
 
     private void start(String[] args) {
@@ -31,14 +31,10 @@ public class ConsoleUI implements UI {
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
-            consoleLog.error("CmdLineParser - Failed", e);
+            debugLog.error("ConsoleUI - Failed in Cmd line parser: ", e);
+            consoleLog.error("ConsoleUI - Failed in Cmd line parser: ", e);
             return;
         }
-        try {
-            Main.start(input, Objects.requireNonNullElse(output, PATH));
-        } catch (IOException e) {
-            consoleLog.error("Main.start - Failed", e);
-            return;
-        }
+        Main.start(input, Objects.requireNonNullElse(output, OUTPUT_PATH));
     }
 }

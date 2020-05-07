@@ -12,9 +12,11 @@ public class Main {
     private static final String OUTPUT_PATH = "export.csv";
 
     // prevents class instantiation
-    private Main() {}
-
     public static void main(String[] args) {
+        start(INPUT_PATH, OUTPUT_PATH);
+    }
+
+    public static void start(String INPUT_PATH, String OUTPUT_PATH) {
         ConfigurationUtils.configure();
         LoggerUtils.debugLog.info("Main - START");
         var spider = new Spider(new DefaultContextFactory(), Database.newInstance());
