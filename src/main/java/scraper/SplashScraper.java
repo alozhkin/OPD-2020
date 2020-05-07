@@ -34,7 +34,7 @@ public class SplashScraper implements Scraper {
     private static final int SPLASH_RESTART_TIME = 6000;
     private static final int SPLASH_RETRY_TIMEOUT = 500;
     private static final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
-    // если splash отрубится с 503 посреди домена, то ничего не предпримет, просто будет спамить в логгер,
+    // если splash отрубится с 503 посреди домена, то ничего не предпримет
     // если отрубится при загрузке первой страницы, то кинет exception.
     private static final Gson gson = new Gson();
 
@@ -87,37 +87,6 @@ public class SplashScraper implements Scraper {
         return failedSites;
     }
 
-    private void handleSplashRestarting(Call call, CallContext context) {
-        scheduledToRetry.incrementAndGet();
-        var delay = getDelay(context.getRetryCount());
-        if (delay == -1) {
-            throw new SplashNotRespondingException();
-        } else {
-            retryExecutor.schedule(() -> retry(call, context), delay, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    private int getDelay(int retryCount) {
-        var delay = 0;
-        if (retryCount == 0) {
-            delay = SPLASH_RESTART_TIME;
-        } else if (retryCount < SPLASH_IS_UNAVAILABLE_RETRIES) {
-            delay = SPLASH_RETRY_TIMEOUT;
-        } else {
-            delay = -1;
-        }
-        return delay;
-    }
-
-    // а если call cancel?
-    private void retry(Call call, CallContext context) {
-        var newCall = call.clone();
-        calls.add(newCall);
-        newCall.enqueue(new SplashCallback(context.getForNewRetry()));
-        scheduledToRetry.decrementAndGet();
-        Statistic.requestRetried();
-    }
-
 
     private class SplashCallback implements Callback {
         private final Link initialLink;
@@ -155,7 +124,7 @@ public class SplashScraper implements Scraper {
             Statistic.requestFailed();
             var cause = e.getCause();
             if (cause != null && cause.getClass().equals(EOFException.class)) {
-                handleSplashRestarting(call, context);
+                handleSplashRestarting();
                 return;
             } else if (e.getMessage().equals("Canceled")) {
                 LoggerUtils.debugLog.error("SplashScraper - Request canceled " + initialLink);
@@ -170,7 +139,7 @@ public class SplashScraper implements Scraper {
         private void handleResponse(Response response) throws IOException {
             int code = response.code();
             if (code == 503 || code == 502) {
-                handleSplashRestarting(call, context);
+                handleSplashRestarting();
             } else if (code == 504) {
                 Statistic.requestTimeout();
                 LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + initialLink);
@@ -223,6 +192,41 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.debugLog.info(
                         String.format("SplashScraper - Redirect from %s to %s", initialLink, finalLink)
                 );
+            }
+        }
+
+        private void handleSplashRestarting() {
+            scheduledToRetry.incrementAndGet();
+            var delay = getDelay(context.getRetryCount());
+            if (delay == -1) {
+                throw new SplashNotRespondingException();
+            } else {
+                retryExecutor.schedule(this::retry, delay, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        private int getDelay(int retryCount) {
+            var delay = 0;
+            if (retryCount == 0) {
+                delay = SPLASH_RESTART_TIME;
+            } else if (retryCount < SPLASH_IS_UNAVAILABLE_RETRIES) {
+                delay = SPLASH_RETRY_TIMEOUT;
+            } else {
+                delay = -1;
+            }
+            return delay;
+        }
+
+        @SuppressWarnings("SynchronizeOnNonFinalField")
+        private void retry() {
+            synchronized (call) {
+                if (!call.isCanceled()) {
+                    var newCall = call.clone();
+                    calls.add(newCall);
+                    newCall.enqueue(new SplashCallback(context.getForNewRetry()));
+                    scheduledToRetry.decrementAndGet();
+                    Statistic.requestRetried();
+                }
             }
         }
     }
