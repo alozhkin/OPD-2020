@@ -2,9 +2,9 @@ package spider;
 
 import logger.LoggerUtils;
 import scraper.Scraper;
+import splash.SplashIsNotRespondingException;
 import utils.Link;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -14,6 +14,7 @@ public class DomainTask {
     private final Scraper scraper;
     private final BlockingQueue<Link> linkQueue = new LinkedBlockingDeque<>();
     private final Set<String> resultWords;
+    private int numberOfScrapedLinks = 1;
 
     DomainTask(Link domain, Context context, Scraper scraper, Set<String> resultWords) {
         this.domain = domain;
@@ -33,11 +34,33 @@ public class DomainTask {
                     scrapeNextLink();
                 } catch (HtmlLanguageException ignored) {}
             }
+            if (numberOfScrapedLinks == 1) {
+                findOut();
+            }
         } catch (InterruptedException e) {
             handleInterruption();
             LoggerUtils.debugLog.error("Domain Task - Interrupted " + domain);
         } finally {
             LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
+        }
+    }
+
+    private void findOut() {
+        var failedSite = scraper.getFailedSites().get(0);
+        if (failedSite != null) {
+            var e = failedSite.getException();
+            var exClass = e.getClass();
+            if (exClass.equals(SplashIsNotRespondingException.class)) {
+                LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
+                LoggerUtils.consoleLog.error(e.getMessage());
+            } else if (exClass.equals(ConnectionException.class)) {
+                throw (ConnectionException) e;
+            } else if (exClass.equals(HtmlLanguageException.class)) {
+                LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
+                LoggerUtils.consoleLog.error("Wrong html language " + domain);
+            } else {
+                LoggerUtils.consoleLog.error("Domain ex", e);
+            }
         }
     }
 
@@ -53,14 +76,15 @@ public class DomainTask {
     }
 
     private void scrapeFirstLink(Link link) {
-        scraper.scrapeSync(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
+        scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
     }
 
     private void scrapeNextLink() throws InterruptedException {
         var link = linkQueue.poll(500, TimeUnit.MILLISECONDS);
         if (link != null) {
-            scraper.scrapeAsync(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
+            scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
         }
+        numberOfScrapedLinks++;
     }
 
     private void handleInterruption() {

@@ -6,21 +6,18 @@ import logger.Statistic;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import spider.ConnectionException;
-import spider.HtmlLanguageException;
 import splash.DefaultSplashRequestContext;
-import splash.SplashIsNotRespondingException;
 import splash.SplashRequestFactory;
 import utils.Html;
 import utils.Link;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class SplashScraper implements Scraper {
@@ -29,16 +26,21 @@ public class SplashScraper implements Scraper {
             .connectTimeout(5, TimeUnit.MINUTES)
             .writeTimeout(5, TimeUnit.MINUTES)
             .build();
-    private final AtomicBoolean isSplashRestarting = new AtomicBoolean(false);
     //in millis
     private static final int SPLASH_RESTART_TIME = 6000;
     private static final int SPLASH_RETRY_TIMEOUT = 500;
     private static final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
+    // если splash отрубится с 503 посреди домена, то ничего не предпримет, просто будет спамить в логгер,
+    // если отрубится при загрузке первой страницы, то кинет exception.
     private static final Gson gson = new Gson();
 
     private final SplashRequestFactory renderReqFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
-    private final Queue<CallContext> restartQueue = new ArrayDeque<>();
+    private final ScheduledExecutorService retryExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final AtomicInteger scheduledToRetry = new AtomicInteger(0);
+    private final List<FailedSite> failedSites = new ArrayList<>();
+
+    // а это thread-safe?
     private String domain;
 
     public SplashScraper(SplashRequestFactory renderReqFactory) {
@@ -59,36 +61,18 @@ public class SplashScraper implements Scraper {
     }
 
     @Override
-    public void scrapeAsync(Link link, Consumer<Html> htmlConsumer) {
-        Consumer<Call> callHandler = call -> {
-            calls.add(call);
-            call.enqueue(new SplashCallbackRetry(link, htmlConsumer));
-        };
-        try {
-            scrape(link, callHandler);
-        } catch (ConnectionException e) {
-            LoggerUtils.debugLog.error("SplashScraper - Connection failed " + link, e);
-        }
-    }
-
-    // throws exceptions
-    @Override
-    public void scrapeSync(Link link, Consumer<Html> consumer) {
-        Consumer<Call> callHandler = call -> {
-            try {
-                var response = call.execute();
-                handleResponse(response, call, link, consumer);
-                response.close();
-            } catch (IOException e) {
-                throw new ConnectionException(e);
-            }
-        };
-        scrape(link, callHandler);
+    public void scrape(Link link, Consumer<Html> htmlConsumer) {
+        var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
+        var call = httpClient.newCall(request);
+        calls.add(call);
+        call.enqueue(new SplashCallback(new CallContext(link, htmlConsumer)));
+        Statistic.requestSended();
     }
 
     @Override
     public int scrapingSitesCount() {
-        return httpClient.dispatcher().runningCallsCount();
+        // order is important
+        return scheduledToRetry.get() + httpClient.dispatcher().runningCallsCount();
     }
 
     @Override
@@ -96,247 +80,162 @@ public class SplashScraper implements Scraper {
         calls.forEach(Call::cancel);
     }
 
-    private void scrape(Link link, Consumer<Call> callHandler) {
-        if (isSplashRestarting.get()) {
-            var isAvailable = tryToMakeRequest(SPLASH_RESTART_TIME);
-            if (!isAvailable) {
-                for (int i = 0; i < SPLASH_IS_UNAVAILABLE_RETRIES; i++) {
-                    isAvailable = tryToMakeRequest(SPLASH_RETRY_TIMEOUT);
-                    if (isAvailable) break;
-                }
-            }
-            if (isAvailable) {
-                isSplashRestarting.set(false);
-                makeRequestToHtmlRenderer(link, callHandler);
-                retryRequestsAfterRestart();
-            } else {
-                throw new SplashIsNotRespondingException();
-            }
+    @Override
+    public List<FailedSite> getFailedSites() {
+        return failedSites;
+    }
+
+    private void handleSplashRestarting(Call call, CallContext context) {
+        scheduledToRetry.incrementAndGet();
+        var delay = getDelay(context.getRetryCount());
+        if (delay == -1) {
+            LoggerUtils.consoleLog.error("Too many retries");
         } else {
-            makeRequestToHtmlRenderer(link, callHandler);
+            retryExecutor.schedule(() -> retry(call, context), delay, TimeUnit.MILLISECONDS);
         }
     }
 
-    private boolean tryToMakeRequest(int timeout) {
-        if (pingSplash())  {
-            return true;
+    private int getDelay(int retryCount) {
+        var delay = 0;
+        if (retryCount == 0) {
+            delay = SPLASH_RESTART_TIME;
+        } else if (retryCount < SPLASH_IS_UNAVAILABLE_RETRIES) {
+            delay = SPLASH_RETRY_TIMEOUT;
         } else {
-            try {
-                Thread.sleep(timeout);
-            } catch (InterruptedException ignored) {}
-            return false;
+            delay = -1;
         }
+        return delay;
     }
 
-    private void retryRequestsAfterRestart() {
-        CallContext context;
-        while ((context = restartQueue.poll()) != null) {
-            retry(context.getCall(), context.getLink(), context.getConsumer());
-        }
-    }
-
-    private boolean pingSplash() {
-        var request = renderReqFactory.getPingRequest(new DefaultSplashRequestContext.Builder().build());
-        var call = httpClient.newCall(request);
-        try {
-            var response = call.execute();
-            response.close();
-            return response.code() == 200;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private void makeRequestToHtmlRenderer(Link link, Consumer<Call> callHandler) {
-        var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
-        var call = httpClient.newCall(request);
-        callHandler.accept(call);
-        Statistic.requestSended();
-    }
-
-    private int handleResponse(Response response, Call call, Link link, Consumer<Html> consumer) {
-        // splash container restarting
-        int code = response.code();
-        System.out.println(code);
-        if (code == 504) {
-            Statistic.requestTimeout();
-            LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + link);
-        } else if (code == 404) {
-            LoggerUtils.debugLog.error("SplashScraper - 404 " + link);
-        } else if (code == 200) {
-            consumeHtml(response, call, link, consumer);
-            Statistic.requestSucceeded();
-            return code;
-        }
-        Statistic.requestSucceeded();
-        response.close();
-        return code;
-    }
-
-    private void consumeHtml(Response response, Call call, Link linkToScrape, Consumer<Html> consumer) {
-        try (response) {
-            var responseBody = response.body();
-            if (responseBody == null) {
-                throw new ConnectionException("Response body is absent");
-            }
-            var splashResponse = gson.fromJson(responseBody.string(), SplashResponse.class);
-            var scrapedUrl = new Link(splashResponse.getUrl());
-            var scrapedUrlHostWithoutWWW = scrapedUrl.fixWWW().getHost();
-            if (domain == null) {
-                domain = scrapedUrlHostWithoutWWW;
-            } else if (!scrapedUrlHostWithoutWWW.contains(domain)) {
-                LoggerUtils.debugLog.error(
-                        String.format("Redirect from %s to another site %s", linkToScrape, scrapedUrlHostWithoutWWW)
-                );
-                Statistic.htmlRejected();
-                return;
-            }
-            if (!scrapedUrl.getWithoutProtocol().equals(linkToScrape.getWithoutProtocol())) {
-                LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", linkToScrape, scrapedUrl));
-                LoggerUtils.consoleLog.debug(String.format("Redirect from %s to %s", linkToScrape, scrapedUrl));
-            }
-            var html = new Html(splashResponse.getHtml(), scrapedUrl);
-            if (!call.isCanceled()) {
-                if (hasRightLang(html)) {
-                    consumer.accept(html);
-                } else {
-                    Statistic.htmlRejected();
-                    throw new HtmlLanguageException();
-                }
-            }
-        } catch (IOException e) {
-            LoggerUtils.debugLog.error("SplashScraper - Connection failed " + linkToScrape, e);
-        }
-    }
-
-    private boolean hasRightLang(Html html) {
-        var siteLangs = System.getProperty("site.langs");
-        var htmlLang = html.getLang();
-        if (htmlLang != null) {
-            for (String siteLang : siteLangs.split(",")) {
-                if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
-            }
-        } else {
-            return System.getProperty("ignore.html.without.lang").equals("false");
-        }
-        return false;
-    }
-
-    private void handleFail(Call call, IOException e, Link link, Consumer<Html> consumer) {
-        Statistic.requestFailed();
-        if (e.getClass().equals(EOFException.class)) {
-            retry(call, link, consumer);
-        } else if (e.getMessage().equals("Canceled")) {
-            LoggerUtils.consoleLog.error("Request canceled " + link + " " + e.getMessage());
-        } else if (e.getMessage().equals("executor rejected")) {
-            LoggerUtils.consoleLog.error("Executor rejected " + link + " " + e.getMessage());
-        } else {
-            LoggerUtils.debugLog.error("SplashScraper - Request failed " + link, e);
-            LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
-        }
-        calls.remove(call);
-    }
-
-    // копия копии
-    private void retry(Call call, Link link, Consumer<Html> consumer) {
+    // а если call cancel?
+    private void retry(Call call, CallContext context) {
         var newCall = call.clone();
         calls.add(newCall);
-        newCall.enqueue(new SplashCallbackRetry(link, consumer));
+        newCall.enqueue(new SplashCallback(context.getForNewRetry()));
+        scheduledToRetry.decrementAndGet();
         Statistic.requestRetried();
     }
 
-    private void retryOnce(Call call, Link link, Consumer<Html> consumer) {
-        var newCall = call.clone();
-        calls.add(newCall);
-        newCall.enqueue(new SplashCallback(link, consumer));
-        Statistic.requestRetried();
-    }
-
-    private static class SplashResponse {
-        private final String html;
-        private final String url;
-
-        public SplashResponse(String html, String url) {
-            this.html = html;
-            this.url = url;
-        }
-
-        public String getHtml() {
-            return html;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-    }
 
     private class SplashCallback implements Callback {
-        private final Link link;
+        private final Link initialLink;
         private final Consumer<Html> consumer;
+        private final CallContext context;
+        private Link finalLink;
+        private Call call;
 
-        public SplashCallback(Link link, Consumer<Html> consumer) {
-            this.link = link;
-            this.consumer = consumer;
+        public SplashCallback(CallContext context) {
+            this.initialLink = context.getLink();
+            this.consumer = context.getConsumer();
+            this.context = context;
         }
 
         @Override
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
-            handleFail(call, e, link, consumer);
-        }
-
-        @Override
-        public void onResponse(@NotNull Call call, @NotNull Response response) {
-            try {
-                handleResponse(response, call, link, consumer);
-            } catch (HtmlLanguageException ignored) {}
+            this.call = call;
+            handleFail(e);
             calls.remove(call);
         }
-    }
-
-    private class SplashCallbackRetry implements Callback {
-        private final Link link;
-        private final Consumer<Html> consumer;
-
-        public SplashCallbackRetry(Link link, Consumer<Html> consumer) {
-            this.link = link;
-            this.consumer = consumer;
-        }
-
-        @Override
-        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-            handleFail(call, e, link, consumer);
-        }
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
+            this.call = call;
             try {
-                var code = handleResponse(response, call, link, consumer);
-                if (code == 503) {
-                    isSplashRestarting.set(true);
-                    restartQueue.add(new CallContext(call.clone(), link, consumer));
-                } else if (code == 502) {
-                    // не самое чистое решение, одна и та же ссылка может постоянно оставаться в restart queue
-                    restartQueue.add(new CallContext(call.clone(), link, consumer));
+                handleResponse(response);
+            } catch (Exception e) {
+                failedSites.add(new FailedSite(e, initialLink));
+            }
+            calls.remove(call);
+        }
+
+        private void handleFail(IOException e) {
+            Link link = context.getLink();
+            Statistic.requestFailed();
+            if (e.getClass().equals(EOFException.class)) {
+                handleSplashRestarting(call, context);
+            } else if (e.getMessage().equals("Canceled")) {
+                LoggerUtils.consoleLog.error("Request canceled " + link + " " + e.getMessage());
+            } else if (e.getMessage().equals("executor rejected")) {
+                LoggerUtils.consoleLog.error("Executor rejected " + link + " " + e.getMessage());
+            } else {
+                LoggerUtils.debugLog.error("SplashScraper - Request failed " + link, e);
+                LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
+            }
+        }
+
+        private void handleResponse(Response response) throws IOException {
+            int code = response.code();
+            System.out.println(code);
+            if (code == 503 || code == 502) {
+                handleSplashRestarting(call, context);
+            } else if (code == 504) {
+                Statistic.requestTimeout();
+                LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + initialLink);
+            } else if (code == 200) {
+                var responseBody = response.body();
+                if (responseBody == null) {
+                    throw new ConnectionException("Response body is absent");
                 }
-            } catch (HtmlLanguageException ignored) {}
-            calls.remove(call);
+                handleResponseBody(responseBody.string());
+                Statistic.requestSucceeded();
+            }
+            Statistic.requestSucceeded();
             response.close();
         }
-    }
 
-    private static class CallContext {
-        private final Call call;
-        private final Link link;
-        private final Consumer<Html> consumer;
-
-        public CallContext(Call call, Link link, Consumer<Html> consumer) {
-            this.call = call;
-            this.link = link;
-            this.consumer = consumer;
+        private void handleResponseBody(String responseBody) {
+            var splashResponse = gson.fromJson(responseBody, SplashResponse.class);
+            finalLink = new Link(splashResponse.getUrl());
+            if (!checkDomain()) return;
+            checkRedirect();
+            if (!call.isCanceled()) {
+                consumer.accept(new Html(splashResponse.getHtml(), finalLink));
+            }
         }
 
-        public Call getCall() {
-            return call;
+        private boolean checkDomain() {
+            if (isDomainSuitable()) {
+                return true;
+            } else {
+                LoggerUtils.debugLog.error(String.format("Redirect from %s to another site %s", initialLink, finalLink));
+                Statistic.htmlRejected();
+                return false;
+            }
+        }
+
+        private boolean isDomainSuitable() {
+            var scrapedUrlHostWithoutWWW = finalLink.fixWWW().getHost();
+            if (domain == null) {
+                domain = scrapedUrlHostWithoutWWW;
+            } else {
+                return scrapedUrlHostWithoutWWW.contains(domain);
+            }
+            return true;
+        }
+
+        private void checkRedirect() {
+            var isRedirected = !finalLink.getWithoutProtocol().equals(initialLink.getWithoutProtocol());
+            if (!isRedirected) {
+                LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", initialLink, finalLink));
+                LoggerUtils.consoleLog.debug(String.format("Redirect from %s to %s", initialLink, finalLink));
+            }
+        }
+    }
+
+
+    private static class CallContext {
+        private final Link link;
+        private final Consumer<Html> consumer;
+        private final int retryCount;
+
+        public CallContext(Link link, Consumer<Html> consumer) {
+            this(link, consumer, 0);
+        }
+
+        public CallContext(Link link, Consumer<Html> consumer, int retryCount) {
+            this.link = link;
+            this.consumer = consumer;
+            this.retryCount = retryCount;
         }
 
         public Link getLink() {
@@ -345,6 +244,14 @@ public class SplashScraper implements Scraper {
 
         public Consumer<Html> getConsumer() {
             return consumer;
+        }
+
+        public int getRetryCount() {
+            return retryCount;
+        }
+
+        public CallContext getForNewRetry() {
+            return new CallContext(link, consumer, retryCount + 1);
         }
     }
 }

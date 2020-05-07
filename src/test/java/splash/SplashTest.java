@@ -34,7 +34,7 @@ public class SplashTest {
     @Test
     @Disabled
     void scrapeOnePageWithSplash() {
-        scraper.scrapeAsync(new Link("http://www.zwickedelstahl.de"), System.out::println);
+        scraper.scrape(new Link("http://www.zwickedelstahl.de"), System.out::println);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class SplashTest {
                         aResponse().withBody(html.toString())
                 )
         );
-        scraper.scrapeAsync(new Link("localhost:8080/redirect"), t -> {
+        scraper.scrape(new Link("localhost:8080/redirect"), t -> {
             var words = new DefaultExtractor().extract(t);
             assertEquals(Set.of("test"), words);
         });
@@ -75,7 +75,7 @@ public class SplashTest {
         );
         stubFor(get(urlEqualTo("/pic.png"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
-        scraper.scrapeAsync(new Link("http://localhost:8080/"), t -> {});
+        scraper.scrape(new Link("http://localhost:8080/"), t -> {});
         while (scraper.scrapingSitesCount() != 0) {
             try {
                 Thread.sleep(1000);
@@ -100,7 +100,7 @@ public class SplashTest {
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
         stubFor(get(urlEqualTo("/favicon.ico"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
-        scraper.scrapeAsync(new Link("http://localhost:8080/"), System.out::println);
+        scraper.scrape(new Link("http://localhost:8080/"), System.out::println);
         while (scraper.scrapingSitesCount() != 0) {
             try {
                 Thread.sleep(1000);
@@ -123,7 +123,7 @@ public class SplashTest {
         );
         stubFor(get(urlEqualTo("/favicon.ico"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
-        scraper.scrapeAsync(new Link("http://localhost:8080/"), t -> {});
+        scraper.scrape(new Link("http://localhost:8080/"), t -> {});
         while (scraper.scrapingSitesCount() != 0) {
             try {
                 Thread.sleep(1000);
@@ -146,7 +146,7 @@ public class SplashTest {
         );
         stubFor(get(urlEqualTo("/e/analytics.js"))
                 .willReturn(aResponse().withStatus(404).withFixedDelay(5000)));
-        scraper.scrapeAsync(new Link("http://localhost:8080/"), t -> {});
+        scraper.scrape(new Link("http://localhost:8080/"), t -> {});
         while (scraper.scrapingSitesCount() != 0) {
             try {
                 Thread.sleep(1000);

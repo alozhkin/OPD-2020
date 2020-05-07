@@ -68,20 +68,14 @@ public class Spider {
                     LoggerUtils.consoleLog.error("Waiting too long for scraping site " + domain);
                 } catch (ExecutionException e) {
                     var exClass = e.getCause().getClass();
-                    if (exClass.equals(SplashIsNotRespondingException.class)) {
-                        LoggerUtils.debugLog.error("Spider - " + e.getMessage(), e);
-                        LoggerUtils.consoleLog.error(e.getMessage());
-                    } else if (exClass.equals(ConnectionException.class)) {
+                    if (exClass.equals(ConnectionException.class)) {
                         LoggerUtils.debugLog.error("DomainTask - Request failed " + domain, e);
                         LoggerUtils.consoleLog.error("Request failed " + domain + " " + e.getMessage());
                         ++connectFailsCount;
                         if (connectFailsCount == CONNECT_FAILS) {
                             throw new ConnectionException("Too many connect fails");
                         }
-                    } else if (exClass.equals(HtmlLanguageException.class)) {
-                        LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
-                        LoggerUtils.consoleLog.error("Wrong html language " + domain);
-                    } else {
+                    } else  {
                         throw e;
                     }
                 }

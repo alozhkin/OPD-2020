@@ -21,6 +21,10 @@ public class SiteTask {
 
     public void consumeHtml(Html html) {
         try {
+            if (!html.langRight()) {
+                //todo его ловят внизу
+                throw new HtmlLanguageException();
+            }
             var link = html.getUrl();
 //            LoggerUtils.debugLog.info("SiteTask - Start " + link.toString());
             var links = context.crawl(html);

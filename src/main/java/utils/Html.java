@@ -59,6 +59,19 @@ public class Html {
         return url;
     }
 
+    public boolean langRight() {
+        var siteLangs = System.getProperty("site.langs");
+        var htmlLang = lang;
+        if (htmlLang != null) {
+            for (String siteLang : siteLangs.split(",")) {
+                if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
+            }
+        } else {
+            return System.getProperty("ignore.html.without.lang").equals("false");
+        }
+        return false;
+    }
+
     // returns first charset of all in last meta tag with charset attr
     // cannot define if meta tag is incorrect and would not be parsed by browser.
     private static String getCharset(String html) {
