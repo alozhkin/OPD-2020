@@ -9,7 +9,7 @@ public class Statistic {
     private static final AtomicInteger requestsRetried = new AtomicInteger(0);
     private static final AtomicInteger requestsTimeout = new AtomicInteger(0);
     private static final AtomicInteger sitesScraped = new AtomicInteger(0);
-    private static final AtomicInteger htmlsRejected = new AtomicInteger(0);
+    private static final AtomicInteger responsesRejected = new AtomicInteger(0);
 
     public static int getRequestsSended() {
         return requestsSended.get();
@@ -35,8 +35,8 @@ public class Statistic {
         return sitesScraped.get();
     }
 
-    public static int getHtmlsRejected() {
-        return htmlsRejected.get();
+    public static int getResponsesRejected() {
+        return responsesRejected.get();
     }
 
     public static void requestSended() {
@@ -63,8 +63,8 @@ public class Statistic {
         sitesScraped.incrementAndGet();
     }
 
-    public static void htmlRejected() {
-        htmlsRejected.incrementAndGet();
+    public static void responseRejected() {
+        responsesRejected.incrementAndGet();
     }
 
     public static void reset() {
@@ -74,20 +74,20 @@ public class Statistic {
         requestsRetried.set(0);
         requestsTimeout.set(0);
         sitesScraped.set(0);
-        htmlsRejected.set(0);
+        responsesRejected.set(0);
     }
 
     public static String string() {
         return String.format(
                 "Requests sended %d, request retried %d, requests succeeded %d, requests failed %d, "
-                        + "request timeout %d, pages scraped %d, htmls rejected %d",
+                        + "request timeout %d, pages scraped %d, responses rejected %d",
                 Statistic.getRequestsSended(),
                 Statistic.getRequestsRetried(),
                 Statistic.getRequestSucceeded(),
                 Statistic.getRequestsFailed(),
                 Statistic.getRequestsTimeout(),
                 Statistic.getSitesScraped(),
-                Statistic.getHtmlsRejected()
+                Statistic.getResponsesRejected()
         );
     }
 }

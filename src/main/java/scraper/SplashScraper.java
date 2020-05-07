@@ -7,6 +7,7 @@ import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import spider.ConnectionException;
 import splash.DefaultSplashRequestContext;
+import splash.SplashIsNotRespondingException;
 import splash.SplashRequestFactory;
 import utils.Html;
 import utils.Link;
@@ -89,7 +90,7 @@ public class SplashScraper implements Scraper {
         scheduledToRetry.incrementAndGet();
         var delay = getDelay(context.getRetryCount());
         if (delay == -1) {
-            LoggerUtils.consoleLog.error("Too many retries");
+            throw new SplashIsNotRespondingException();
         } else {
             retryExecutor.schedule(() -> retry(call, context), delay, TimeUnit.MILLISECONDS);
         }
@@ -134,6 +135,7 @@ public class SplashScraper implements Scraper {
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
             this.call = call;
             handleFail(e);
+            failedSites.add(new FailedSite(e, initialLink));
             calls.remove(call);
         }
 
@@ -144,28 +146,26 @@ public class SplashScraper implements Scraper {
                 handleResponse(response);
             } catch (Exception e) {
                 failedSites.add(new FailedSite(e, initialLink));
+                Statistic.requestFailed();
             }
             calls.remove(call);
         }
 
         private void handleFail(IOException e) {
-            Link link = context.getLink();
             Statistic.requestFailed();
             if (e.getClass().equals(EOFException.class)) {
                 handleSplashRestarting(call, context);
             } else if (e.getMessage().equals("Canceled")) {
-                LoggerUtils.consoleLog.error("Request canceled " + link + " " + e.getMessage());
+                LoggerUtils.debugLog.error("SplashScraper - Request canceled " + initialLink);
             } else if (e.getMessage().equals("executor rejected")) {
-                LoggerUtils.consoleLog.error("Executor rejected " + link + " " + e.getMessage());
+                LoggerUtils.debugLog.error("SplashScraper - Executor rejected " + initialLink);
             } else {
-                LoggerUtils.debugLog.error("SplashScraper - Request failed " + link, e);
-                LoggerUtils.consoleLog.error("Request failed " + link + " " + e.getMessage());
+                LoggerUtils.debugLog.error("SplashScraper - Request failed " + initialLink, e);
             }
         }
 
         private void handleResponse(Response response) throws IOException {
             int code = response.code();
-            System.out.println(code);
             if (code == 503 || code == 502) {
                 handleSplashRestarting(call, context);
             } else if (code == 504) {
@@ -177,7 +177,6 @@ public class SplashScraper implements Scraper {
                     throw new ConnectionException("Response body is absent");
                 }
                 handleResponseBody(responseBody.string());
-                Statistic.requestSucceeded();
             }
             Statistic.requestSucceeded();
             response.close();
@@ -197,8 +196,10 @@ public class SplashScraper implements Scraper {
             if (isDomainSuitable()) {
                 return true;
             } else {
-                LoggerUtils.debugLog.error(String.format("Redirect from %s to another site %s", initialLink, finalLink));
-                Statistic.htmlRejected();
+                LoggerUtils.debugLog.error(
+                        String.format("SplashScraper - Tried to redirect from %s to site %s", initialLink, finalLink)
+                );
+                Statistic.responseRejected();
                 return false;
             }
         }
@@ -216,8 +217,9 @@ public class SplashScraper implements Scraper {
         private void checkRedirect() {
             var isRedirected = !finalLink.getWithoutProtocol().equals(initialLink.getWithoutProtocol());
             if (!isRedirected) {
-                LoggerUtils.debugLog.info(String.format("Redirect from %s to %s", initialLink, finalLink));
-                LoggerUtils.consoleLog.debug(String.format("Redirect from %s to %s", initialLink, finalLink));
+                LoggerUtils.debugLog.info(
+                        String.format("SplashScraper - Redirect from %s to %s", initialLink, finalLink)
+                );
             }
         }
     }
