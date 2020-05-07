@@ -30,6 +30,7 @@ public class SplashScraper implements Scraper {
             .connectTimeout(5, TimeUnit.MINUTES)
             .writeTimeout(5, TimeUnit.MINUTES)
             .build();
+    private static final ScheduledExecutorService retryExecutor = Executors.newSingleThreadScheduledExecutor();
     //in millis
     private static final int SPLASH_RESTART_TIME = 6000;
     private static final int SPLASH_RETRY_TIMEOUT = 500;
@@ -40,7 +41,6 @@ public class SplashScraper implements Scraper {
 
     private final SplashRequestFactory renderReqFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
-    private final ScheduledExecutorService retryExecutor = Executors.newSingleThreadScheduledExecutor();
     private final List<FailedSite> failedSites = new ArrayList<>();
     private final AtomicInteger scheduledToRetry = new AtomicInteger(0);
     private final AtomicReference<String> domain = new AtomicReference<>();
@@ -51,6 +51,7 @@ public class SplashScraper implements Scraper {
 
     public static void shutdown() {
         try {
+            retryExecutor.shutdown();
             httpClient.dispatcher().executorService().shutdown();
             httpClient.connectionPool().evictAll();
             var cache = httpClient.cache();
