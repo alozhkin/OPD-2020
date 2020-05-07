@@ -217,7 +217,7 @@ public class SplashScraper implements Scraper {
 
         private void checkRedirect() {
             var isRedirected = !finalLink.getWithoutProtocol().equals(initialLink.getWithoutProtocol());
-            if (!isRedirected) {
+            if (isRedirected) {
                 LoggerUtils.debugLog.info(
                         String.format("SplashScraper - Redirect from %s to %s", initialLink, finalLink)
                 );
