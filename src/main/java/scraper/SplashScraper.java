@@ -79,7 +79,9 @@ public class SplashScraper implements Scraper {
 
     @Override
     public void cancelAll() {
-        calls.forEach(Call::cancel);
+        synchronized (calls) {
+            calls.forEach(Call::cancel);
+        }
     }
 
     @Override
@@ -218,17 +220,16 @@ public class SplashScraper implements Scraper {
             return delay;
         }
 
-        @SuppressWarnings("SynchronizeOnNonFinalField")
         private void retry() {
-            synchronized (call) {
+            synchronized (calls) {
                 if (!call.isCanceled()) {
                     var newCall = call.clone();
                     calls.add(newCall);
                     newCall.enqueue(new SplashCallback(context.getForNewRetry()));
-                    scheduledToRetry.decrementAndGet();
-                    Statistic.requestRetried();
                 }
             }
+            scheduledToRetry.decrementAndGet();
+            Statistic.requestRetried();
         }
     }
 
