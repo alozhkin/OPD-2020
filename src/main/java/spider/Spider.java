@@ -70,7 +70,6 @@ public class Spider {
             debugLog.error("Main - Failed", e);
         } finally {
             debugLog.info("Main - Completed");
-            //database.exportDataToCSV()
             exec.shutdown();
             try {
                 exec.awaitTermination(10, TimeUnit.SECONDS);

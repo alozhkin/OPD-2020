@@ -16,10 +16,10 @@ public class Main {
         start(INPUT_PATH, OUTPUT_PATH);
     }
 
-    public static void start(String INPUT_PATH, String OUTPUT_PATH) {
+    public static void start(String inputPath, String outputPath) {
         ConfigurationUtils.configure();
         LoggerUtils.debugLog.info("Main - START");
         var spider = new Spider(new DefaultContextFactory(), Database.newInstance());
-        spider.scrapeFromCSVFile(INPUT_PATH, OUTPUT_PATH);
+        spider.scrapeFromCSVFile(inputPath, outputPath);
     }
 }
