@@ -29,7 +29,7 @@ public class SiteTask {
         linkQueue.addAll(filteredLinks);
         var words = context.extract(html);
         var filteredWords = context.filterWords(words);
-        LoggerUtils.debugLog.info("SiteTask - Completed " + htmlLink.toANCIIString());
+        LoggerUtils.debugLog.info("SiteTask - Completed " + htmlLink.toString());
         resultWords.addAll(filteredWords);
         LoggerUtils.pageScraped();
     }

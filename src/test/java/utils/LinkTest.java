@@ -1,5 +1,6 @@
 package utils;
 
+import okhttp3.HttpUrl;
 import org.junit.jupiter.api.Test;
 
 import java.net.IDN;
@@ -17,20 +18,20 @@ public class LinkTest {
     @Test
     void shouldConsiderWrongURLLikeEmptyString() {
         var url = "wrong url [ ] & . oh so wrong";
-        assertEquals("", new Link(url).toANCIIString());
+        assertEquals("", new Link(url).toString());
     }
 
     @Test
     void shouldAcceptEmptyString() {
         var url = "";
-        assertEquals("", new Link(url).toANCIIString());
+        assertEquals("", new Link(url).toString());
     }
 
     @Test
     void shouldRemoveTrailingSlash() {
         var expected = "http://test.com";
         var slashUrl = "http://test.com/";
-        assertEquals(expected, new Link(slashUrl).toANCIIString());
+        assertEquals(expected, new Link(slashUrl).toString());
     }
 
     @Test
@@ -48,25 +49,25 @@ public class LinkTest {
     @Test
     void shouldParseBrackets() {
         var url = "http://test.com/(java.lang.String)/Jsoup.html";
-        assertEquals(url, new Link(url).toANCIIString());
+        assertEquals(url, new Link(url).toString());
     }
 
     @Test
     void shouldAddProtocol() {
         var urlWithoutProtocol = "test.com";
-        assertEquals("http://test.com", new Link(urlWithoutProtocol).toANCIIString());
+        assertEquals("http://test.com", new Link(urlWithoutProtocol).toString());
     }
 
     @Test
     void shouldGetUrlWithoutFragmentAndQuery() {
         var url = "http://example:8080/?name=you#content";
-        assertEquals("http://example:8080/", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example:8080", new Link(url).getWithoutQueryAndFragment());
     }
 
     @Test
     void shouldGetUrlWithoutFragmentAndQueryPortExcluded() {
         var url = "http://example/?name=you#content";
-        assertEquals("http://example/", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example", new Link(url).getWithoutQueryAndFragment());
     }
 
     @Test
@@ -92,5 +93,11 @@ public class LinkTest {
     void shouldParseSpace() {
         var url = "www.bischer-albtrauf.de/grand tour";
         assertEquals("/grand tour", new Link(url).getPath());
+    }
+
+    @Test
+    void shouldParseEncodedPath() {
+        var url = "http://www.alce.at/schlacht-und-zerleges%C3%A4gen";
+        assertEquals("/schlacht-und-zerlegesägen", new Link(url).getPath());
     }
 }

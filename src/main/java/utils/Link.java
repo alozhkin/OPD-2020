@@ -1,38 +1,29 @@
 package utils;
 
-import java.net.IDN;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Path;
+import logger.LoggerUtils;
+import okhttp3.HttpUrl;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 public class Link {
     private static final String DEFAULT_PROTOCOL = "http";
-    private URI uri;
+    private HttpUrl httpUrl;
+    private String strUrl;
 
     // wrong url changes to ""
     // removes trailing slash
     public Link(String urlStr) {
         if (urlStr.equals("")) {
-            uri = null;
+            httpUrl = null;
         } else {
             try {
-                var url = new URL(fix(urlStr));
-                // convert domain to punycode
-                var domain = IDN.toASCII(url.getHost());
-                uri = new URI(url.getProtocol(), url.getUserInfo(), domain, url.getPort(), url.getPath(),
-                        url.getQuery(), url.getRef()
-                );
+                httpUrl = HttpUrl.get(fix(urlStr));
             } catch (Exception e) {
-                uri = null;
+                httpUrl = null;
             }
         }
-    }
-
-    private Link(URI uri) {
-        this.uri = uri;
     }
 
     private static String fix(String url) {
@@ -56,20 +47,12 @@ public class Link {
         return url;
     }
 
-    public static Link createFileLink(Path path) {
-        try {
-            return new Link(path.toUri());
-        } catch (Exception e) {
-            return new Link("");
-        }
-    }
-
     public static Link createEmptyLink() {
         return new Link("");
     }
 
     public Link fixWWW() {
-        var fixed = this.toANCIIString();
+        var fixed = this.toString();
         if (fixed.startsWith("www.")) {
             fixed = fixed.substring(4);
         }
@@ -138,66 +121,97 @@ public class Link {
     }
 
     public String getAbsoluteURL() {
-        if (uri == null) return null;
-        return uri.toString();
+        if (httpUrl == null) return null;
+        return toString();
     }
 
     public String getScheme() {
-        if (uri == null) return null;
-        return uri.getScheme();
-    }
-
-    public String getSchemeSpecificPart() {
-        if (uri == null) return null;
-        return uri.getSchemeSpecificPart();
-    }
-
-    public String getAuthority() {
-        if (uri == null) return null;
-        return uri.getAuthority();
+        if (httpUrl == null) return null;
+        return httpUrl.scheme();
     }
 
     public String getUserInfo() {
-        if (uri == null) return null;
-        return uri.getUserInfo();
+        if (httpUrl == null) return null;
+        var username = httpUrl.username();
+        var password = httpUrl.password();
+        var userInfo = new StringBuilder();
+        if (!username.equals("")) {
+            userInfo.append(username);
+            if (!password.equals("")) {
+                userInfo.append(password);
+            }
+            return userInfo.toString();
+        } else {
+            return null;
+        }
     }
 
     public String getHost() {
-        if (uri == null) return null;
-        return uri.getHost();
+        if (httpUrl == null) return null;
+        return httpUrl.host();
     }
 
     public int getPort() {
-        if (uri == null) return -1;
-        return uri.getPort();
+        if (httpUrl == null) return -1;
+        int port = httpUrl.port();
+        if (port == 80 || port == 443) return -1;
+        return port;
     }
 
     public String getPath() {
-        if (uri == null) return "";
-        return uri.getPath();
+        if (httpUrl == null) return "";
+        var pathSeg = httpUrl.pathSegments();
+        if (pathSeg.size() == 1 && pathSeg.get(0).equals("")) {
+            return "";
+        } else {
+            return "/" + String.join("/", pathSeg);
+        }
     }
 
     public String getQuery() {
-        if (uri == null) return null;
-        return uri.getQuery();
+        if (httpUrl == null) return null;
+        return httpUrl.query();
     }
 
     public String getFragment() {
-        if (uri == null) return null;
-        return uri.getFragment();
+        if (httpUrl == null) return null;
+        return httpUrl.fragment();
     }
 
-    // gives encoded url
-    public String toANCIIString() {
-        if (uri == null) return "";
-        return uri.toASCIIString();
+    private String setStrUrl() {
+        var url = new StringBuilder();
+        url.append(httpUrl.scheme()).append("://");
+        var userInfo = getUserInfo();
+        if (userInfo != null) {
+            url.append(userInfo).append("@");
+        }
+        url.append(getHost());
+        var port = getPort();
+        if (port != -1) {
+            url.append(":").append(port);
+        }
+        var path = getPath();
+        if (!path.equals("")) {
+            url.append(path);
+        }
+        var query = getQuery();
+        if (query != null) {
+            url.append("?").append(query);
+        }
+        var fragment = getFragment();
+        if (fragment != null) {
+            url.append("#").append(fragment);
+        }
+        return url.toString();
     }
 
-    // gives decoded url
     @Override
     public String toString() {
-        if (uri == null) return "";
-        return uri.toString();
+        if (httpUrl == null) return "";
+        if (strUrl == null) {
+            strUrl = setStrUrl();
+        }
+        return strUrl;
     }
 
     @Override
@@ -205,11 +219,11 @@ public class Link {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Link link = (Link) o;
-        return Objects.equals(uri, link.uri);
+        return Objects.equals(httpUrl, link.httpUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(httpUrl);
     }
 }

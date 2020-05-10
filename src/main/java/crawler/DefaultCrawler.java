@@ -17,12 +17,12 @@ public class DefaultCrawler implements Crawler {
     @Override
     public Collection<Link> crawl(@NotNull Html html) {
         Set<Link> list = new HashSet<>();
-        Document doc = Jsoup.parse(html.toString(), html.getUrl().toANCIIString());
+        Document doc = Jsoup.parse(html.toString(), html.getUrl().toString());
         Elements linksOnPage = doc.select("a[href]");
 
         for (Element page : linksOnPage) {
             Link url = new Link(page.attr("abs:href"));
-            if (!url.toANCIIString().equals("") && url != html.getUrl()) {
+            if (!url.toString().equals("") && url != html.getUrl()) {
                 list.add(url);
             }
         }
