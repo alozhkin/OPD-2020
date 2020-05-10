@@ -46,11 +46,13 @@ public class DefaultLinkFilter implements LinkFilter {
         }
     }
 
-    public Collection<Link> filter(@NotNull Collection<Link> links, Link domain) {
+    @Override
+    public Collection<Link> filter(@NotNull Collection<Link> links, Link currentLink) {
         Set<Link> res = new HashSet<>();
+        occurredLinks.add(getLinkIdentifiers(currentLink));
         for (Link link : links) {
-            var linkIdentifiers = new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains());
-            if (isLinkSuitable(link, domain) && isLinkNotOccurred(linkIdentifiers)) {
+            var linkIdentifiers = getLinkIdentifiers(link);
+            if (isLinkSuitable(link, currentLink) && isLinkNotOccurred(linkIdentifiers)) {
                 res.add(link);
             }
         }
@@ -58,8 +60,18 @@ public class DefaultLinkFilter implements LinkFilter {
         return res;
     }
 
-    private boolean isLinkSuitable(Link link, Link domain) {
-        return isOnSameDomain(link, domain)
+    @Override
+    public Collection<Link> filter(@NotNull Collection<Link> links, Link currentLink, Link initialLink) {
+        occurredLinks.add(getLinkIdentifiers(initialLink));
+        return filter(links, currentLink);
+    }
+
+    private LinkIdentifiers getLinkIdentifiers(Link link) {
+        return new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains());
+    }
+
+    private boolean isLinkSuitable(Link link, Link currentLink) {
+        return isOnSameDomain(link, currentLink)
                 && hasNoFragment(link)
                 && hasNoUserInfo(link)
                 && hasRightLang(link)
@@ -67,8 +79,8 @@ public class DefaultLinkFilter implements LinkFilter {
                 && isFileExtensionSuitable(link);
     }
 
-    private boolean isOnSameDomain(Link link, Link domain) {
-        return link.getHost().contains(domain.getHost());
+    private boolean isOnSameDomain(Link link, Link currentLink) {
+        return link.getHost().contains(currentLink.getHost());
     }
 
     private boolean hasNoFragment(Link link) {

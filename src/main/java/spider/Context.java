@@ -7,7 +7,7 @@ import java.util.Collection;
 
 public interface Context {
     Collection<Link> crawl(Html html);
-    Collection<Link> filterLinks(Collection<Link> links, Link domain);
+    Collection<Link> filterLinks(Collection<Link> links, Link currentLink, Link initialLink);
     Collection<String> extract(Html html);
     Collection<String> filterWords(Collection<String> words);
 }

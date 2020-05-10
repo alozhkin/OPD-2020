@@ -56,13 +56,13 @@ public class DomainTask {
     }
 
     private void scrapeFirstLink(Link link) {
-        scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
+        scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::handleSite);
     }
 
     private void scrapeNextLink() throws InterruptedException {
         var link = linkQueue.poll(500, TimeUnit.MILLISECONDS);
         if (link != null) {
-            scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::consumeHtml);
+            scraper.scrape(link, new SiteTask(context, linkQueue, resultWords)::handleSite);
             numberOfScrapedLinks++;
         }
     }

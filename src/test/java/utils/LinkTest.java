@@ -17,20 +17,20 @@ public class LinkTest {
     @Test
     void shouldConsiderWrongURLLikeEmptyString() {
         var url = "wrong url [ ] & . oh so wrong";
-        assertEquals("", new Link(url).toString());
+        assertEquals("", new Link(url).toANCIIString());
     }
 
     @Test
     void shouldAcceptEmptyString() {
         var url = "";
-        assertEquals("", new Link(url).toString());
+        assertEquals("", new Link(url).toANCIIString());
     }
 
     @Test
     void shouldRemoveTrailingSlash() {
         var expected = "http://test.com";
         var slashUrl = "http://test.com/";
-        assertEquals(expected, new Link(slashUrl).toString());
+        assertEquals(expected, new Link(slashUrl).toANCIIString());
     }
 
     @Test
@@ -48,13 +48,13 @@ public class LinkTest {
     @Test
     void shouldParseBrackets() {
         var url = "http://test.com/(java.lang.String)/Jsoup.html";
-        assertEquals(url, new Link(url).toString());
+        assertEquals(url, new Link(url).toANCIIString());
     }
 
     @Test
     void shouldAddProtocol() {
         var urlWithoutProtocol = "test.com";
-        assertEquals("http://test.com", new Link(urlWithoutProtocol).toString());
+        assertEquals("http://test.com", new Link(urlWithoutProtocol).toANCIIString());
     }
 
     @Test
@@ -84,6 +84,13 @@ public class LinkTest {
     @Test
     void shouldParseUmlaut() {
         var url = "www.erlebnisregion-schwäbischer-albtrauf.de";
-        assertEquals(url, new Link(url).getHost());
+        var idnUrl = IDN.toASCII(url);
+        assertEquals(idnUrl, new Link(url).getHost());
+    }
+
+    @Test
+    void shouldParseSpace() {
+        var url = "www.bischer-albtrauf.de/grand tour";
+        assertEquals("/grand tour", new Link(url).getPath());
     }
 }

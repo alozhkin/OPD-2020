@@ -31,8 +31,8 @@ public class DefaultContext implements Context {
     }
 
     @Override
-    public Collection<Link> filterLinks(Collection<Link> links, Link domain) {
-        return linkFilter.filter(links, domain);
+    public Collection<Link> filterLinks(Collection<Link> links, Link currentLink, Link initialLink) {
+        return linkFilter.filter(links, currentLink, initialLink);
     }
 
     @Override

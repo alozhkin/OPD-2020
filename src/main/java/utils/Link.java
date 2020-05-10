@@ -9,17 +9,22 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Link {
-    private URI uri;
     private static final String DEFAULT_PROTOCOL = "http";
+    private URI uri;
 
     // wrong url changes to ""
     // removes trailing slash
-    public Link(String url) {
-        if (url.equals("")) {
+    public Link(String urlStr) {
+        if (urlStr.equals("")) {
             uri = null;
         } else {
             try {
-                uri = new URL(fix(url)).toURI();
+                var url = new URL(fix(urlStr));
+                // convert domain to punycode
+                var domain = IDN.toASCII(url.getHost());
+                uri = new URI(url.getProtocol(), url.getUserInfo(), domain, url.getPort(), url.getPath(),
+                        url.getQuery(), url.getRef()
+                );
             } catch (Exception e) {
                 uri = null;
             }
@@ -64,7 +69,7 @@ public class Link {
     }
 
     public Link fixWWW() {
-        var fixed = this.toString();
+        var fixed = this.toANCIIString();
         if (fixed.startsWith("www.")) {
             fixed = fixed.substring(4);
         }
@@ -159,12 +164,7 @@ public class Link {
 
     public String getHost() {
         if (uri == null) return null;
-        var host = uri.getHost();
-        if (host == null) {
-            // URI class writes urls with umlaut into authority
-            return getAuthority();
-        }
-        return host;
+        return uri.getHost();
     }
 
     public int getPort() {
@@ -187,6 +187,13 @@ public class Link {
         return uri.getFragment();
     }
 
+    // gives encoded url
+    public String toANCIIString() {
+        if (uri == null) return "";
+        return uri.toASCIIString();
+    }
+
+    // gives decoded url
     @Override
     public String toString() {
         if (uri == null) return "";

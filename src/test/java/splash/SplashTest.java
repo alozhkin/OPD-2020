@@ -57,7 +57,7 @@ public class SplashTest {
                 )
         );
         scraper.scrape(new Link("localhost:8080/redirect"), t -> {
-            var words = new DefaultExtractor().extract(t);
+            var words = new DefaultExtractor().extract(t.getHtml());
             assertEquals(Set.of("test"), words);
         });
     }

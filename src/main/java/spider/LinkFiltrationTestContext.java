@@ -26,9 +26,9 @@ public class LinkFiltrationTestContext implements Context {
     }
 
     @Override
-    public Collection<Link> filterLinks(Collection<Link> links, Link domain) {
+    public Collection<Link> filterLinks(Collection<Link> links, Link currentLink, Link initialLink) {
         all.addAll(links);
-        var filtered = linkFilter.filter(links, domain);
+        var filtered = linkFilter.filter(links, currentLink, initialLink);
         accepted.addAll(filtered);
         return filtered;
     }

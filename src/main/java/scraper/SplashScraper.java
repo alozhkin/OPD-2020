@@ -6,6 +6,7 @@ import logger.Statistic;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import spider.FailedSite;
+import spider.Site;
 import splash.DefaultSplashRequestContext;
 import splash.SplashNotRespondingException;
 import splash.SplashRequestFactory;
@@ -63,11 +64,11 @@ public class SplashScraper implements Scraper {
     }
 
     @Override
-    public void scrape(Link link, Consumer<Html> htmlConsumer) {
+    public void scrape(Link link, Consumer<Site> siteConsumer) {
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
         calls.add(call);
-        call.enqueue(new SplashCallback(new CallContext(link, htmlConsumer)));
+        call.enqueue(new SplashCallback(new CallContext(link, siteConsumer)));
         Statistic.requestSended();
     }
 
@@ -92,7 +93,7 @@ public class SplashScraper implements Scraper {
 
     private class SplashCallback implements Callback {
         private final Link initialLink;
-        private final Consumer<Html> consumer;
+        private final Consumer<Site> consumer;
         private final CallContext context;
         private Link finalLink;
         private Call call;
@@ -162,7 +163,7 @@ public class SplashScraper implements Scraper {
             if (!checkDomain()) return;
             checkRedirect();
             if (!call.isCanceled()) {
-                consumer.accept(new Html(splashResponse.getHtml(), finalLink));
+                consumer.accept(new Site(new Html(splashResponse.getHtml(), finalLink), initialLink));
             }
         }
 
@@ -170,7 +171,7 @@ public class SplashScraper implements Scraper {
             if (isDomainSuitable()) {
                 return true;
             } else {
-                LoggerUtils.debugLog.error(
+                LoggerUtils.debugLog.info(
                         String.format("SplashScraper - Tried to redirect from %s to site %s", initialLink, finalLink)
                 );
                 Statistic.responseRejected();
@@ -236,14 +237,14 @@ public class SplashScraper implements Scraper {
 
     private static class CallContext {
         private final Link link;
-        private final Consumer<Html> consumer;
+        private final Consumer<Site> consumer;
         private final int retryCount;
 
-        public CallContext(Link link, Consumer<Html> consumer) {
+        public CallContext(Link link, Consumer<Site> consumer) {
             this(link, consumer, 0);
         }
 
-        public CallContext(Link link, Consumer<Html> consumer, int retryCount) {
+        public CallContext(Link link, Consumer<Site> consumer, int retryCount) {
             this.link = link;
             this.consumer = consumer;
             this.retryCount = retryCount;
@@ -253,7 +254,7 @@ public class SplashScraper implements Scraper {
             return link;
         }
 
-        public Consumer<Html> getConsumer() {
+        public Consumer<Site> getConsumer() {
             return consumer;
         }
 

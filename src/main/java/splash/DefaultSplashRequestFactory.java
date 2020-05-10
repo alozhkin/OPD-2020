@@ -20,7 +20,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
     @Override
     public Request getRequest(DefaultSplashRequestContext context) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("url", context.getSiteUrl().toString());
+        jsonObject.addProperty("url", context.getSiteUrl().toANCIIString());
         jsonObject.addProperty("images", 0);
         jsonObject.addProperty("filters", "filter,easyprivacy,fanboy-annoyance");
         jsonObject.addProperty("timeout", 20.0);
@@ -29,7 +29,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
         String credentials = context.getUsername() + ":" + context.getPassword();
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
         return new Request.Builder()
-                .url(context.getSplashUrl().toString() + "/run")
+                .url(context.getSplashUrl().toANCIIString() + "/run")
                 .post(RequestBody.create(jsonObject.toString(), JSON))
                 .addHeader("Authorization", "Basic " + encodedCredentials)
                 .build();
