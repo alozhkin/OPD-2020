@@ -1,6 +1,5 @@
 package utils;
 
-import logger.LoggerUtils;
 import okhttp3.HttpUrl;
 
 import java.util.HashSet;
@@ -52,7 +51,7 @@ public class Link {
     }
 
     public Link fixWWW() {
-        var fixed = this.toString();
+        var fixed = getWithoutProtocol();
         if (fixed.startsWith("www.")) {
             fixed = fixed.substring(4);
         }
@@ -103,21 +102,29 @@ public class Link {
     }
 
     public String getWithoutProtocol() {
-        var str = getHost();
+        var url = new StringBuilder();
+        var userInfo = getUserInfo();
+        if (userInfo != null) {
+            url.append(userInfo).append("@");
+        }
+        url.append(getHost());
         var port = getPort();
         if (port != -1) {
-            str = str + ":" + port;
+            url.append(":").append(port);
         }
-        str += getPath();
+        var path = getPath();
+        if (!path.equals("")) {
+            url.append(path);
+        }
         var query = getQuery();
         if (query != null) {
-            str += query;
+            url.append("?").append(query);
         }
         var fragment = getFragment();
         if (fragment != null) {
-            str += fragment;
+            url.append("#").append(fragment);
         }
-        return str;
+        return url.toString();
     }
 
     public String getAbsoluteURL() {
@@ -178,38 +185,11 @@ public class Link {
         return httpUrl.fragment();
     }
 
-    private String setStrUrl() {
-        var url = new StringBuilder();
-        url.append(httpUrl.scheme()).append("://");
-        var userInfo = getUserInfo();
-        if (userInfo != null) {
-            url.append(userInfo).append("@");
-        }
-        url.append(getHost());
-        var port = getPort();
-        if (port != -1) {
-            url.append(":").append(port);
-        }
-        var path = getPath();
-        if (!path.equals("")) {
-            url.append(path);
-        }
-        var query = getQuery();
-        if (query != null) {
-            url.append("?").append(query);
-        }
-        var fragment = getFragment();
-        if (fragment != null) {
-            url.append("#").append(fragment);
-        }
-        return url.toString();
-    }
-
     @Override
     public String toString() {
         if (httpUrl == null) return "";
         if (strUrl == null) {
-            strUrl = setStrUrl();
+            strUrl = getScheme() + "://" + getWithoutProtocol();
         }
         return strUrl;
     }
