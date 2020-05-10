@@ -16,6 +16,7 @@ import utils.Link;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -142,8 +143,8 @@ public class SplashScraper implements Scraper {
             if (cause != null && cause.getClass().equals(EOFException.class)) {
                 handleSplashRestarting();
                 return;
-            } else if (e.getMessage().equals("Canceled")) {
-                LoggerUtils.debugLog.error("SplashScraper - Request canceled " + initialLink);
+            } else if (cause != null && cause.getClass().equals(SocketException.class)) {
+                LoggerUtils.debugLog.error("SplashScraper - Socket is closed " + initialLink);
             } else if (e.getMessage().equals("executor rejected")) {
                 LoggerUtils.debugLog.error("SplashScraper - Executor rejected " + initialLink);
                 stat.requestFailed();
