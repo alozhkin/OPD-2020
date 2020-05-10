@@ -71,8 +71,6 @@ class DatabaseImpl implements Database {
     @Override
     public boolean putWords(Collection<Word> words) {
         if (words.isEmpty()) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - An empty list of words came to the database");
-            LoggerUtils.debugLog.error("DatabaseImpl -An empty list of words came to the database");
             return false;
         }
         try (Connection connection = getConnection()) {

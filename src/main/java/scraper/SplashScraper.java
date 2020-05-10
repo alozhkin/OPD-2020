@@ -5,6 +5,7 @@ import logger.LoggerUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import spider.FailedSite;
+import spider.HtmlLanguageException;
 import spider.Site;
 import splash.DefaultSplashRequestContext;
 import splash.SplashNotRespondingException;
@@ -120,10 +121,16 @@ public class SplashScraper implements Scraper {
                 handleResponse(response);
             } catch (Exception e) {
                 failedSites.add(new FailedSite(e, initialLink));
-                LoggerUtils.debugLog.error("SplashScraper - Exception while handling response with site "
-                        + initialLink.toString(),
-                        e
-                );
+                if (e.getClass().equals(HtmlLanguageException.class)) {
+                    LoggerUtils.debugLog.error("SplashScraper - Wrong html language "
+                                    + initialLink.toString()
+                    );
+                } else {
+                    LoggerUtils.debugLog.error("SplashScraper - Exception while handling response with site "
+                                    + initialLink.toString(),
+                            e
+                    );
+                }
                 stat.requestFailed();
             }
             calls.remove(call);
