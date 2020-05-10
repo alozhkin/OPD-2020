@@ -100,4 +100,11 @@ public class LinkTest {
         var url = "http://www.alce.at/schlacht-und-zerleges%C3%A4gen";
         assertEquals("/schlacht-und-zerlegesägen", new Link(url).getPath());
     }
+
+    @Test
+    void shouldFixWWW() {
+        var url = "https://www.breitwiesenhaus.de/cms/wp-login.php?redirect_to=https://www.breitwiesenhaus.de/cms/wp-" +
+                "admin/&reauth=1";
+        assertEquals("breitwiesenhaus.de",new Link(url).fixWWW().getHost());
+    }
 }

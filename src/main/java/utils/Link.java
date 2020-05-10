@@ -5,9 +5,11 @@ import okhttp3.HttpUrl;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class Link {
     private static final String DEFAULT_PROTOCOL = "http";
+    private static final Pattern schemePattern = Pattern.compile("^[a-z][a-z0-9]*://");
     private HttpUrl httpUrl;
     private String strUrl;
 
@@ -32,7 +34,7 @@ public class Link {
     }
 
     private static String fixProtocol(String url) {
-        if (url.contains("://")) {
+        if (schemePattern.matcher(url).find()) {
             return url;
         } else {
             return DEFAULT_PROTOCOL + "://" + url;
