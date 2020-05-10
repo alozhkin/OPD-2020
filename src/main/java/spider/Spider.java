@@ -2,7 +2,7 @@ package spider;
 
 import database.Database;
 import logger.LoggerUtils;
-import logger.Statistic;
+import scraper.Statistic;
 import scraper.SplashScraper;
 import scraper.ScraperConnectionException;
 import splash.DefaultSplashRequestFactory;
@@ -56,7 +56,7 @@ public class Spider {
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 handleDomainFuture(future);
-                trackStatistic();
+                trackStatistic(scraper.getStatistic());
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
             }
         } catch (InterruptedException e) {
@@ -117,10 +117,9 @@ public class Spider {
         }
     }
 
-    private void trackStatistic() {
-        LoggerUtils.consoleLog.info(Statistic.string() + " site "  + domain);
-        LoggerUtils.debugLog.info(Statistic.string() + " site "  + domain);
-        Statistic.reset();
+    private void trackStatistic(Statistic statistic) {
+        LoggerUtils.consoleLog.info(statistic.toString() + " site "  + domain);
+        LoggerUtils.debugLog.info(statistic.toString() + " site "  + domain);
     }
 
     private void shutdownExecutorService(ExecutorService executorService) {

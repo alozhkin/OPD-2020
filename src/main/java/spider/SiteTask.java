@@ -1,7 +1,6 @@
 package spider;
 
 import logger.LoggerUtils;
-import logger.Statistic;
 import utils.Link;
 
 import java.util.Collection;
@@ -32,6 +31,6 @@ public class SiteTask {
         var filteredWords = context.filterWords(words);
         LoggerUtils.debugLog.info("SiteTask - Completed " + htmlLink.toANCIIString());
         resultWords.addAll(filteredWords);
-        Statistic.siteScraped();
+        LoggerUtils.pageScraped();
     }
 }

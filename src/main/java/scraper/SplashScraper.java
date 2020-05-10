@@ -2,7 +2,6 @@ package scraper;
 
 import com.google.gson.Gson;
 import logger.LoggerUtils;
-import logger.Statistic;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import spider.FailedSite;
@@ -35,10 +34,9 @@ public class SplashScraper implements Scraper {
     private static final int SPLASH_RESTART_TIME = 6000;
     private static final int SPLASH_RETRY_TIMEOUT = 500;
     private static final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
-    // если splash отрубится с 503 посреди домена, то ничего не предпримет
-    // если отрубится при загрузке первой страницы, то кинет exception.
     private static final Gson gson = new Gson();
 
+    private final Statistic stat = new Statistic();
     private final SplashRequestFactory renderReqFactory;
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
     private final List<FailedSite> failedSites = new ArrayList<>();
@@ -69,7 +67,7 @@ public class SplashScraper implements Scraper {
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new SplashCallback(new CallContext(link, siteConsumer)));
-        Statistic.requestSended();
+        stat.requestSended();
     }
 
     @Override
@@ -88,6 +86,10 @@ public class SplashScraper implements Scraper {
     @Override
     public List<FailedSite> getFailedSites() {
         return failedSites;
+    }
+
+    public Statistic getStatistic() {
+        return stat;
     }
 
 
@@ -118,13 +120,16 @@ public class SplashScraper implements Scraper {
                 handleResponse(response);
             } catch (Exception e) {
                 failedSites.add(new FailedSite(e, initialLink));
-                Statistic.requestFailed();
+                LoggerUtils.debugLog.error("SplashScraper - Exception while handling response with site "
+                        + initialLink.toString(),
+                        e
+                );
+                stat.requestFailed();
             }
             calls.remove(call);
         }
 
         private void handleFail(IOException e) {
-            Statistic.requestFailed();
             var cause = e.getCause();
             if (cause != null && cause.getClass().equals(EOFException.class)) {
                 handleSplashRestarting();
@@ -133,8 +138,10 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.debugLog.error("SplashScraper - Request canceled " + initialLink);
             } else if (e.getMessage().equals("executor rejected")) {
                 LoggerUtils.debugLog.error("SplashScraper - Executor rejected " + initialLink);
+                stat.requestFailed();
             } else {
                 LoggerUtils.debugLog.error("SplashScraper - Request failed " + initialLink, e);
+                stat.requestFailed();
             }
             failedSites.add(new FailedSite(e, initialLink));
         }
@@ -144,7 +151,7 @@ public class SplashScraper implements Scraper {
             if (code == 503 || code == 502) {
                 handleSplashRestarting();
             } else if (code == 504) {
-                Statistic.requestTimeout();
+                stat.requestTimeout();
                 LoggerUtils.debugLog.error("SplashScraper - Timeout expired " + initialLink);
             } else if (code == 200) {
                 var responseBody = response.body();
@@ -153,7 +160,7 @@ public class SplashScraper implements Scraper {
                 }
                 handleResponseBody(responseBody.string());
             }
-            Statistic.requestSucceeded();
+            stat.requestSucceeded();
             response.close();
         }
 
@@ -164,6 +171,7 @@ public class SplashScraper implements Scraper {
             checkRedirect();
             if (!call.isCanceled()) {
                 consumer.accept(new Site(new Html(splashResponse.getHtml(), finalLink), initialLink));
+                stat.siteScraped();
             }
         }
 
@@ -174,7 +182,7 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.debugLog.info(
                         String.format("SplashScraper - Tried to redirect from %s to site %s", initialLink, finalLink)
                 );
-                Statistic.responseRejected();
+                stat.responseRejected();
                 return false;
             }
         }
@@ -230,7 +238,7 @@ public class SplashScraper implements Scraper {
                 }
             }
             scheduledToRetry.decrementAndGet();
-            Statistic.requestRetried();
+            stat.requestRetried();
         }
     }
 
