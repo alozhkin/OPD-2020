@@ -10,6 +10,7 @@ public class Statistic {
     private final AtomicInteger requestsTimeout = new AtomicInteger(0);
     private final AtomicInteger sitesScraped = new AtomicInteger(0);
     private final AtomicInteger responsesRejected = new AtomicInteger(0);
+    private final AtomicInteger responsesException = new AtomicInteger(0);
 
     public int getRequestsSended() {
         return requestsSended.get();
@@ -33,6 +34,10 @@ public class Statistic {
 
     public int getSitesScraped() {
         return sitesScraped.get();
+    }
+
+    public int getResponsesException() {
+        return responsesException.get();
     }
 
     public int getResponsesRejected() {
@@ -63,6 +68,10 @@ public class Statistic {
         sitesScraped.incrementAndGet();
     }
 
+    public void responseException() {
+        responsesException.incrementAndGet();
+    }
+
     public void responseRejected() {
         responsesRejected.incrementAndGet();
     }
@@ -71,13 +80,14 @@ public class Statistic {
     public String toString() {
         return String.format(
                 "Requests sended %d, request retried %d, requests succeeded %d, requests failed %d, "
-                        + "request timeout %d, pages scraped %d, responses rejected %d",
+                        + "request timeout %d, pages scraped %d, exceptions %d, responses rejected %d",
                 getRequestsSended(),
                 getRequestsRetried(),
                 getRequestSucceeded(),
                 getRequestsFailed(),
                 getRequestsTimeout(),
                 getSitesScraped(),
+                getResponsesException(),
                 getResponsesRejected()
         );
     }

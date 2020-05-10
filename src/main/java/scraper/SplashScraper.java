@@ -125,13 +125,14 @@ public class SplashScraper implements Scraper {
                     LoggerUtils.debugLog.error("SplashScraper - Wrong html language "
                                     + initialLink.toString()
                     );
+                    stat.responseRejected();
                 } else {
                     LoggerUtils.debugLog.error("SplashScraper - Exception while handling response with site "
                                     + initialLink.toString(),
                             e
                     );
+                    stat.responseException();
                 }
-                stat.requestFailed();
             }
             calls.remove(call);
         }
