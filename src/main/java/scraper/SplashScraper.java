@@ -201,7 +201,7 @@ public class SplashScraper implements Scraper {
         private void handleResponse(Response response) throws IOException {
             int code = response.code();
             if (code == 503 || code == 502) {
-                LoggerUtils.debugLog.warn("SplashScraper - HTTP " + code + ", request will be retried");
+                LoggerUtils.debugLog.warn("SplashScraper - HTTP " + code + ", request will be retried " + initialLink);
                 handleSplashRestarting();
             } else if (code == 504) {
                 stat.requestTimeout();
