@@ -4,6 +4,7 @@ import logger.LoggerUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -42,40 +43,38 @@ public class ConfigurationUtils {
     public static void parseResourceToCollection(String fileName, Collection<String> collection, Class<?> c) {
         try (InputStream resource = ClassLoader.getSystemResourceAsStream(fileName)) {
             if (resource != null) {
-                parseResource(resource, fileName, collection, c);
+                collection.addAll(parseResource(resource, fileName, c));
             } else {
                 LoggerUtils.logFileNotFound(fileName, c);
             }
-        } catch (FileNotFoundException e) {
-            LoggerUtils.logFileNotFound(fileName, c);
         } catch (IOException e) {
-            LoggerUtils.logFileReadingFail(fileName, c);
+            LoggerUtils.debugLog.error("ConfigurationUtils - Resource" + fileName + "closing error", e);
         }
     }
 
-    private static void parseResource(InputStream res, String fileName, Collection<String> collection, Class<?> c) {
+    private static Collection<String> parseResource(InputStream res, String fileName, Class<?> c) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(res))) {
-            collection.addAll(br.lines().collect(Collectors.toSet()));
+            return br.lines().collect(Collectors.toSet());
         } catch (IOException e) {
             LoggerUtils.logFileReadingFail(fileName, c);
+            return new ArrayList<>();
         }
     }
 
     private static void loadProperties() {
-        Properties necessaryProperties = ConfigurationUtils
-                .parseRequiredPropertiesFromFiles(GLOBAL_PROPERTIES_FILE_PATH);
+        Properties requiredProperties = ConfigurationUtils.parseRequiredPropsFromFiles(GLOBAL_PROPERTIES_FILE_PATH);
 
-        if (necessaryProperties.isEmpty()) {
+        if (requiredProperties.isEmpty()) {
             throw new ConfigurationFailException("Configuration file " + GLOBAL_PROPERTIES_FILE_PATH + " is not found");
         }
 
-        Properties optionalProperties = ConfigurationUtils.parseOptionalPropertiesFromFiles(
+        Properties optionalProperties = ConfigurationUtils.parseOptionalPropsFromFiles(
                 LOCAL_PROPERTIES_FILE_PATH,
                 DATABASE_PROPERTIES_FILE_PATH
         );
 
         Properties properties = new Properties();
-        properties.putAll(necessaryProperties);
+        properties.putAll(requiredProperties);
         properties.putAll(optionalProperties);
 
         for (String key : properties.stringPropertyNames()) {
@@ -84,15 +83,15 @@ public class ConfigurationUtils {
         }
     }
 
-    private static Properties parseRequiredPropertiesFromFiles(String... propertiesPaths) {
+    private static Properties parseRequiredPropsFromFiles(String... propertiesPaths) {
         var properties = new Properties();
         try {
             for (String path : propertiesPaths) {
-                var res = parsePropertiesFromFile(path);
-                if (res == null) {
+                var fileProperties = parsePropertiesFromFile(path);
+                if (fileProperties == null) {
                     throw new ConfigurationFailException("Configuration files are not found");
                 } else {
-                    properties.putAll(res);
+                    properties.putAll(fileProperties);
                 }
             }
         } catch (IOException e) {
@@ -101,7 +100,7 @@ public class ConfigurationUtils {
         return properties;
     }
 
-    private static Properties parseOptionalPropertiesFromFiles(String... propertiesPaths) {
+    private static Properties parseOptionalPropsFromFiles(String... propertiesPaths) {
         var properties = new Properties();
         for (String path : propertiesPaths) {
             try {
