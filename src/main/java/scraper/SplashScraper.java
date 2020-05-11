@@ -124,6 +124,7 @@ public class SplashScraper implements Scraper {
         return stat;
     }
 
+
     /**
      * Class that contains all logic in charge of handling response
      */
@@ -154,37 +155,6 @@ public class SplashScraper implements Scraper {
             calls.remove(call);
         }
 
-        /**
-         * Extracts html and final link from response and and gives them to consumer.
-         * <p>
-         * Considers HTTP 502 and HTTP 503 like signs of Splash restarting and retries.
-         * HTTP 200 is the only code which allows html consuming.
-         * If exception is thrown, logs it and saves in failed pages.
-         *
-         * @param call call to http client
-         * @param response response from splash
-         */
-        @Override
-        public void onResponse(@NotNull Call call, @NotNull Response response) {
-            this.call = call;
-            try {
-                handleResponse(response);
-            } catch (Exception e) {
-                failedPages.add(new FailedPage(e, initialLink));
-                if (e.getClass().equals(HtmlLanguageException.class)) {
-                    LoggerUtils.debugLog.info("SplashScraper - Wrong html language " + initialLink.toString());
-                    stat.responseRejected();
-                } else {
-                    LoggerUtils.debugLog.error("SplashScraper - Exception while handling response, site "
-                                    + initialLink.toString(),
-                            e
-                    );
-                    stat.responseException();
-                }
-            }
-            calls.remove(call);
-        }
-
         private void handleFail(IOException e) {
             var cause = e.getCause();
             if (cause != null && cause.getClass().equals(EOFException.class)) {
@@ -205,6 +175,27 @@ public class SplashScraper implements Scraper {
                 stat.requestFailed();
             }
             failedPages.add(new FailedPage(e, initialLink));
+        }
+
+        /**
+         * Extracts html and final link from response and and gives them to consumer.
+         * <p>
+         * Considers HTTP 502 and HTTP 503 like signs of Splash restarting and retries.
+         * HTTP 200 is the only code which allows html consuming.
+         * If exception is thrown, logs it and saves in failed pages.
+         *
+         * @param call call to http client
+         * @param response response from splash
+         */
+        @Override
+        public void onResponse(@NotNull Call call, @NotNull Response response) {
+            this.call = call;
+            try {
+                handleResponse(response);
+            } catch (Exception e) {
+                handleExceptionOnResponse(e);
+            }
+            calls.remove(call);
         }
 
         private void handleResponse(Response response) throws IOException {
@@ -271,6 +262,18 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.debugLog.info(
                         String.format("SplashScraper - Redirect from %s to %s", initialLink, finalLink)
                 );
+            }
+        }
+
+        private void handleExceptionOnResponse(Exception e) {
+            failedPages.add(new FailedPage(e, initialLink));
+            if (e.getClass().equals(HtmlLanguageException.class)) {
+                LoggerUtils.debugLog.info("SplashScraper - Wrong html language " + initialLink.toString());
+                stat.responseRejected();
+            } else {
+                LoggerUtils.debugLog.error("SplashScraper - Exception while handling response, site "
+                        + initialLink.toString(), e);
+                stat.responseException();
             }
         }
 
