@@ -15,16 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * DefaultLinkFilter removes:
- * 1. Links that have path segment from {@link DefaultLinkFilter#ignoredLinks}
- * Links that have path segment from {@link DefaultLinkFilter#ignoredLanguages} which are not specified
- * in site.langs property
- * 2. Links which file extension is not present in {@link DefaultLinkFilter#allowedFileExtensions}
- * 3. Links with subdomains from {@link DefaultLinkFilter#ignoredSubdomains}
- * 4. Links which host name is not a domain or subdomain of page url
- * 5. Repeated links. Links are separated by its subdomains (not www), path segments and
+ * links that have path segment from {@link DefaultLinkFilter#ignoredLinks}
+ * links that have path segment from {@link DefaultLinkFilter#ignoredLanguages} which is not matching
+ * site.langs property
+ * links which file extension is not present in {@link DefaultLinkFilter#allowedFileExtensions}
+ * links with subdomains from {@link DefaultLinkFilter#ignoredSubdomains}
+ * links which host name is not a domain or subdomain of page url
+ * repeating links. Links are separated by its subdomains (not www), path segments and
  * selected query params from {@link DefaultLinkFilter#getContentParams(Link)}.
- * 6. Links with fragment
- * 7. Links with user info
+ * links with fragment
+ * links with user info
  */
 public class DefaultLinkFilter implements LinkFilter {
     private static final Set<String> ignoredLanguages = new HashSet<>();
@@ -139,11 +139,11 @@ public class DefaultLinkFilter implements LinkFilter {
             var lastIndex = path.lastIndexOf('/');
             var lastSegment = path.substring(lastIndex);
             // last array part is file extension if array has size > 1
-            var lastSegmentSplitted = lastSegment.split("\\.");
-            if (lastSegmentSplitted.length == 1) {
+            var lastSegmentSplit = lastSegment.split("\\.");
+            if (lastSegmentSplit.length == 1) {
                 return true;
             } else {
-                return allowedFileExtensions.contains(lastSegmentSplitted[lastSegmentSplitted.length - 1]);
+                return allowedFileExtensions.contains(lastSegmentSplit[lastSegmentSplit.length - 1]);
             }
         }
         return true;

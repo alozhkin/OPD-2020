@@ -3,18 +3,18 @@ package spider;
 import utils.Link;
 
 /**
- * Class that contains site that was not scraped due to error and all information that useful for understanding why
+ * Class for page that was not scraped due to error and all information that useful for understanding why
  */
-public class FailedSite {
+public class FailedPage {
     private final Exception exception;
     private final Link link;
 
     /**
      *
      * @param exception that lead to inability to scrape site
-     * @param link site that was not scraped
+     * @param link page that was not scraped
      */
-    public FailedSite(Exception exception, Link link) {
+    public FailedPage(Exception exception, Link link) {
         this.exception = exception;
         this.link = link;
     }

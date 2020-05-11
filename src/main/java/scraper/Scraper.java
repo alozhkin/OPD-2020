@@ -1,7 +1,7 @@
 package scraper;
 
-import spider.FailedSite;
-import spider.Site;
+import spider.FailedPage;
+import spider.Page;
 import utils.Link;
 
 import java.util.List;
@@ -12,27 +12,25 @@ import java.util.function.Consumer;
  */
 public interface Scraper {
     /**
-     * Cancel scraping sites which are being processed
+     * Cancel scraping pages which are being processed
      */
     void cancelAll();
 
     /**
-     *
-     * @return all sites that were not scraped due to error
+     * @return all pages that were not scraped due to error with additional information
      */
-    List<FailedSite> getFailedSites();
+    List<FailedPage> getFailedPages();
 
     /**
-     * Extracts html from link and gives it to consumer with all required info
+     * Follows link, extracts html and gives it to consumer with all required info
      *
      * @param link web page to be scraped
-     * @param consumer consumes html
+     * @param consumer consumer of html and additional information
      */
-    void scrape(Link link, Consumer<Site> consumer);
+    void scrape(Link link, Consumer<Page> consumer);
 
     /**
-     *
-     * @return number of sites which are being processed
+     * @return number of pages which are being processed
      */
-    int scrapingSitesCount();
+    int scrapingPagesCount();
 }

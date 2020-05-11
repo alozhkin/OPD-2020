@@ -6,16 +6,16 @@ import java.util.Collection;
 
 public interface LinkFilter {
     /**
-     * Filter links
+     * Filter links relying on internal implementation
      *
-     * @param links to be filtered
+     * @param links links to be filtered
      * @param currentLink from that page all links were taken
      * @return filtered links
      */
     Collection<Link> filter(Collection<Link> links, Link currentLink);
 
     /**
-     * Filter links
+     * Filter links relying on internal implementation
      *
      * @param links to be filtered
      * @param currentLink from that page all links were taken

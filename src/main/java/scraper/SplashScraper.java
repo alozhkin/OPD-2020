@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import logger.LoggerUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
-import spider.FailedSite;
+import spider.FailedPage;
 import spider.HtmlLanguageException;
-import spider.Site;
+import spider.Page;
 import splash.DefaultSplashRequestContext;
 import splash.SplashNotRespondingException;
 import splash.SplashRequestFactory;
@@ -27,7 +27,12 @@ import java.util.function.Consumer;
 
 /**
  * Class that uses <a href="https://splash.readthedocs.io">Splash</a> - lightweight web browser with an HTTP API
- * to scrape sites
+ * to scrape pages
+ * splash is restarting when eats up too much RAM
+ * in that period splash may return 503 or 502 and some connections may fail with {@link EOFException}
+ * or {@link SocketException}
+ * so program schedules request retry specified number of times with some delay
+ * if splash will not answer, url will be added to failed pages with {@link SplashNotRespondingException}
  */
 public class SplashScraper implements Scraper {
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
@@ -36,7 +41,7 @@ public class SplashScraper implements Scraper {
             .writeTimeout(5, TimeUnit.MINUTES)
             .build();
     private static final ScheduledExecutorService retryExecutor = Executors.newSingleThreadScheduledExecutor();
-    //in millis
+    // in millis
     private static final int SPLASH_RESTART_TIME = 6000;
     private static final int SPLASH_RETRY_TIMEOUT = 500;
     private static final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
@@ -46,7 +51,7 @@ public class SplashScraper implements Scraper {
     private final SplashRequestFactory renderReqFactory;
     // contains calls that are proceeded by http client or retry schedule executor
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
-    private final List<FailedSite> failedSites = new ArrayList<>();
+    private final List<FailedPage> failedPages = new ArrayList<>();
     private final AtomicInteger scheduledToRetry = new AtomicInteger(0);
     private final AtomicReference<String> domain = new AtomicReference<>();
 
@@ -75,10 +80,10 @@ public class SplashScraper implements Scraper {
      * Makes scrape request to Splash and sets callback
      *
      * @param link web page to be scraped
-     * @param siteConsumer consumes html
+     * @param siteConsumer consumer of html and additional information
      */
     @Override
-    public void scrape(Link link, Consumer<Site> siteConsumer) {
+    public void scrape(Link link, Consumer<Page> siteConsumer) {
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
         calls.add(call);
@@ -87,19 +92,19 @@ public class SplashScraper implements Scraper {
     }
 
     /**
-     * Takes into account requests that are proceeded by http client and requests that only waiting to be retried
+     * Return number of pages which are being processed, takes into account requests that are proceeded by http client
+     * and requests that only waiting to be retried
      *
-     * @return number of sites which are being processed
+     * @return number of pages which are being processed
      */
     @Override
-    public int scrapingSitesCount() {
+    public int scrapingPagesCount() {
         // order is important
         return scheduledToRetry.get() + httpClient.dispatcher().runningCallsCount();
     }
 
     /**
      * Cancels requests that are proceeded by http client and requests that only waiting to be retried
-     *
      */
     @Override
     public void cancelAll() {
@@ -109,15 +114,15 @@ public class SplashScraper implements Scraper {
     }
 
     /**
-     *
-     * @return all sites that were not scraped due to error
+     * @return all pages that were not scraped due to error with additional information
      */
     @Override
-    public List<FailedSite> getFailedSites() {
-        return failedSites;
+    public List<FailedPage> getFailedPages() {
+        return failedPages;
     }
 
     /**
+     * Returns object with information about requests and responses
      *
      * @return statistic
      */
@@ -126,11 +131,11 @@ public class SplashScraper implements Scraper {
     }
 
     /**
-     * Class that contains all logic responsible for handle response
+     * Class that contains all logic in charge of handling response
      */
     private class SplashCallback implements Callback {
         private final Link initialLink;
-        private final Consumer<Site> consumer;
+        private final Consumer<Page> consumer;
         private final CallContext context;
         private Link finalLink;
         private Call call;
@@ -142,7 +147,7 @@ public class SplashScraper implements Scraper {
         }
 
         /**
-         * Logs failures, saves failed sites, consider EOFException and SocketException
+         * Logs failures, saves failed pages, consider EOFException and SocketException
          * like signs of Splash restarting and retries
          *
          * @param call
@@ -156,12 +161,10 @@ public class SplashScraper implements Scraper {
         }
 
         /**
-         *
-         * gets html and final link from response and use it
-         * consider redirects only if it is first link or on same domain or on subdomain, logs it
+         * Extracts html and final link from response and and gives them to consumer
          * consider HTTP 502 and HTTP 503 like signs of Splash restarting and retries
          * HTTP 200 is the only code which allows html consuming
-         * if exception is thrown, logs it and saves in failed sited
+         * if exception is thrown, logs it and saves in failed pages
          *
          * @param call
          * @param response
@@ -172,7 +175,7 @@ public class SplashScraper implements Scraper {
             try {
                 handleResponse(response);
             } catch (Exception e) {
-                failedSites.add(new FailedSite(e, initialLink));
+                failedPages.add(new FailedPage(e, initialLink));
                 if (e.getClass().equals(HtmlLanguageException.class)) {
                     LoggerUtils.debugLog.info("SplashScraper - Wrong html language " + initialLink.toString());
                     stat.responseRejected();
@@ -206,7 +209,7 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.debugLog.error("SplashScraper - Request failed " + initialLink, e);
                 stat.requestFailed();
             }
-            failedSites.add(new FailedSite(e, initialLink));
+            failedPages.add(new FailedPage(e, initialLink));
         }
 
         private void handleResponse(Response response) throws IOException {
@@ -231,15 +234,21 @@ public class SplashScraper implements Scraper {
         private void handleResponseBody(String responseBody) {
             var splashResponse = gson.fromJson(responseBody, SplashResponse.class);
             finalLink = new Link(splashResponse.getUrl());
-            if (!checkDomain()) return;
-            checkRedirect();
+            if (!isSameSite()) return;
+            logRedirect();
             if (!call.isCanceled()) {
-                consumer.accept(new Site(new Html(splashResponse.getHtml(), finalLink), initialLink));
+                consumer.accept(new Page(new Html(splashResponse.getHtml(), finalLink), initialLink));
                 stat.siteScraped();
             }
         }
 
-        private boolean checkDomain() {
+        /**
+         * Makes sure that we stayed on same site
+         *
+         * @return {@code true} if it first scraped site, or redirect last point is on same domain or subdomain
+         * {@code false} if redirected not on same domain or subdomain (on another site)
+         */
+        private boolean isSameSite() {
             if (isDomainSuitable()) {
                 return true;
             } else {
@@ -261,7 +270,7 @@ public class SplashScraper implements Scraper {
             return true;
         }
 
-        private void checkRedirect() {
+        private void logRedirect() {
             var isRedirected = !finalLink.getWithoutProtocol().equals(initialLink.getWithoutProtocol());
             if (isRedirected) {
                 LoggerUtils.debugLog.info(
@@ -270,11 +279,6 @@ public class SplashScraper implements Scraper {
             }
         }
 
-        /**
-         * Splash is restarting when eats too much RAM
-         * in that period splash returns 503 and some connections may fail
-         * schedule retry specified number of times
-         */
         private void handleSplashRestarting() {
             scheduledToRetry.incrementAndGet();
             var delay = getDelay(context.getRetryCount());
@@ -287,10 +291,11 @@ public class SplashScraper implements Scraper {
         }
 
         /**
-         * Returns -1 if retry count is done
+         * Gives delay for next retry
+         * returns -1 if retry count is done
          *
-         * @param retryCount
-         * @return delay
+         * @param retryCount number of retries
+         * @return delay (in millis)
          */
         private int getDelay(int retryCount) {
             var delay = 0;
@@ -319,18 +324,18 @@ public class SplashScraper implements Scraper {
 
 
     /**
-     * Little data class for calls
+     * Little data class with information useful for calls
      */
     private static class CallContext {
         private final Link link;
-        private final Consumer<Site> consumer;
+        private final Consumer<Page> consumer;
         private final int retryCount;
 
-        public CallContext(Link link, Consumer<Site> consumer) {
+        public CallContext(Link link, Consumer<Page> consumer) {
             this(link, consumer, 0);
         }
 
-        public CallContext(Link link, Consumer<Site> consumer, int retryCount) {
+        public CallContext(Link link, Consumer<Page> consumer, int retryCount) {
             this.link = link;
             this.consumer = consumer;
             this.retryCount = retryCount;
@@ -340,7 +345,7 @@ public class SplashScraper implements Scraper {
             return link;
         }
 
-        public Consumer<Site> getConsumer() {
+        public Consumer<Page> getConsumer() {
             return consumer;
         }
 

@@ -33,12 +33,6 @@ public class Html {
     private final Link url;
     private String lang;
 
-    /**
-     *
-     *
-     * @param html
-     * @param url from where html were got
-     */
     public Html(String html, @NotNull Link url) {
         this.html = html;
         this.url = url;
@@ -87,10 +81,10 @@ public class Html {
 
     /**
      * Gets language of html if it is specified in <html lang="de"></html> or <meta lang="de"> or
-     * <meta name="language" content="de">. in meta tag tries to find any thing that matched "language" and then gets
-     * content, so something like <meta language-not-an-attr content="de"> would work. Cannot distinguish incorrect tags
-     * from incorrect. quotes and spaces are not important
-     * @return
+     * <meta name="language" content="de">. tries to find any meta tag that contains word "language" and then gets
+     * content, so something like <meta language-not-an-attr content="de"> would give "de". Cannot distinguish incorrect
+     * tags from correct.
+     * @return lang
      */
     public String getLang() {
         return lang;
@@ -101,10 +95,10 @@ public class Html {
     }
 
     /**
-     * Compares lang with comma separated langs in site.langs property. Result of compare for html with no lang depends
-     * on ignore.html.without.lang property
+     * Compares lang with comma separated languages in site.langs property. Result of comparing for html
+     * without language depends on ignore.html.without.lang property
      *
-     * @return is lang corresponds to properties
+     * @return {@code true} if language suitable, {@code false} if not
      */
     public boolean isLangRight() {
         var siteLangs = System.getProperty("site.langs");

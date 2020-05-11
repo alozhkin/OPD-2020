@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Class that read CSV file "id";"company_id";"website", and stores content in {@link CSVParser#links}
+ * and {@link CSVParser#domainsIds}
+ */
 public class CSVParser {
     private static final String SEPARATOR = ";";
     private static final String QUOTATION = "\"";

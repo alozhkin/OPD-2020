@@ -26,6 +26,8 @@ public class DefaultContextFactory implements ContextFactory {
         var linkFilter = new DefaultLinkFilter();
         linkFilter.addDomain();
 
+        // LinkFilter and WordFilter have static variables with occurred link/words, so they must be reinitialized
+        // for every domain
         return new DefaultContext(crawler, extractor, linkFilter, new DefaultWordFilter());
     }
 }

@@ -8,8 +8,9 @@ import okhttp3.RequestBody;
 import java.util.Base64;
 
 /**
- * Class that tune Splash but setting its settings to be good at extracting words
- * Send request to /run. With help of filters ignores images, css, analitics, etc.
+ * Splash is very flexible, because it allows to set settings with every request
+ * DefaultSplashRequestFactory tune splash to be good at extracting words
+ * it sends requests to /run, with custom script. With help of filters it ignores images, css, analytics.
  */
 public class DefaultSplashRequestFactory implements SplashRequestFactory {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -22,9 +23,8 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
                     "    return {html=html, url=url}\n";
 
     /**
-     *
-     * @param context credentials and variables, that are not responsible for settings, but needed
-     * @return request to Splash, with all settings. In response would be html and url of page
+     * @param context credentials and variables
+     * @return request to Splash, with all settings
      */
     @Override
     public Request getRequest(DefaultSplashRequestContext context) {

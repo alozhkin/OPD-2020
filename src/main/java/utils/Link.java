@@ -62,7 +62,7 @@ public class Link {
     }
 
     /**
-     * Empty link it is link, that returns "" path and toString, -1 port and null in other cases
+     * Empty link is link, that returns "" path and toString, -1 port and null in other cases
      *
      * @return link without url
      */
@@ -84,20 +84,20 @@ public class Link {
     }
 
     /**
-     * Get all query params, that is separated with "="
+     * Return all key-value query params
      *
-     * @return
+     * @return params
      */
     public Set<Parameter> getParams() {
         var res = new HashSet<Parameter>();
         var query = getQuery();
         if (query != null) {
-            var querySplitted = query.split("&");
-            for (String parameter : querySplitted) {
-                var paramSplitted = parameter.split("=");
-                if (paramSplitted.length == 2) {
-                    var name = paramSplitted[0];
-                    var value = paramSplitted[1];
+            var querySplit = query.split("&");
+            for (String parameter : querySplit) {
+                var paramSplit = parameter.split("=");
+                if (paramSplit.length == 2) {
+                    var name = paramSplit[0];
+                    var value = paramSplit[1];
                     res.add(new Parameter(name, value));
                 }
             }
@@ -108,17 +108,17 @@ public class Link {
     /**
      * Returns domains, ignores top-level and second-level domain and www.
      *
-     * @return domains without top-level and second level and .www
+     * @return domains without top-level and second level and www.
      */
     public Set<String> getSubdomains() {
         var res = new HashSet<String>();
         var host = getHost();
-        var hostSplitted = host.split("\\.");
-        var levelsNumber = hostSplitted.length;
+        var hostSplit = host.split("\\.");
+        var levelsNumber = hostSplit.length;
         // ignore top-level and second-level domain
         for (int i = 0; i < levelsNumber - 2; i++) {
             // ignore www
-            var subdomain = hostSplitted[i];
+            var subdomain = hostSplit[i];
             if (!subdomain.equals("www")) {
                 res.add(subdomain);
             }
@@ -173,7 +173,7 @@ public class Link {
     }
 
     /**
-     * Get user info "username:password" or "username" or null if username = ""
+     * Get user info "username:password" or "username" or null if username == ""
      *
      * @return user info or null
      */
@@ -199,9 +199,9 @@ public class Link {
     }
 
     /**
-     * Gets port, or -1 if it is not specified, and if port matches 80, 443, that HttpUrl return automatically
+     * Return port, or -1 if it is not specified or matches 80, 443 - HttpUrl automatically ports
      *
-     * @return
+     * @return port
      */
     public int getPort() {
         if (httpUrl == null) return -1;
@@ -214,7 +214,7 @@ public class Link {
      * Gets "" if path is absent
      * Gets / + path if not
      *
-     * @return
+     * @return path
      */
     public String getPath() {
         if (httpUrl == null) return "";

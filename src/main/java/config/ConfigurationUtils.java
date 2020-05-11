@@ -6,18 +6,17 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
  * Class responsible for properties configuration
- * There are two types of property files: <b>required</b> {@throws exception if file is absent and
- * <B></>optional (would not throw exception)
+ * There are two types of property files: <b>required</b> {@throws ConfigurationFailException} if file is absent and
+ * <b>optional</b> (only would log fail)
  */
 public class ConfigurationUtils {
-    // required properties. Would throw exception if absent
+    // required properties
     private static final String GLOBAL_PROPERTIES_FILE_PATH = "properties/global.properties";
-    // optional properties. Would log fail if absent
+    // optional properties
     private static final String LOCAL_PROPERTIES_FILE_PATH = "properties/local.properties";
     private static final String DATABASE_PROPERTIES_FILE_PATH = "properties/database.properties";
 
@@ -25,20 +24,20 @@ public class ConfigurationUtils {
     private ConfigurationUtils() {}
 
     /**
-     * Method that should be called at the beginning of the program
+     * Loads properties to {@link System}, they can be obtained using the method {@code System.getProperty()}
+     * should be called at the beginning of the program
      */
     public static void configure() {
         loadProperties();
         setConsoleEncoding();
-        TreeMap
     }
 
     /**
-     * Method for resources in jar
+     * Adds to collection all lines from resource
      *
-     * @param fileName
-     * @param collection
-     * @param c
+     * @param fileName name of file with resources
+     * @param collection collection to which the result will be sent
+     * @param c class that call the method (will be used in logging)
      */
     public static void parseResourceToCollection(String fileName, Collection<String> collection, Class<?> c) {
         try (InputStream resource = ClassLoader.getSystemResourceAsStream(fileName)) {
@@ -85,7 +84,6 @@ public class ConfigurationUtils {
         }
     }
 
-    // last properties files override first
     private static Properties parseRequiredPropertiesFromFiles(String... propertiesPaths) {
         var properties = new Properties();
         try {
@@ -103,7 +101,6 @@ public class ConfigurationUtils {
         return properties;
     }
 
-    // last properties files override first
     private static Properties parseOptionalPropertiesFromFiles(String... propertiesPaths) {
         var properties = new Properties();
         for (String path : propertiesPaths) {

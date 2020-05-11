@@ -6,7 +6,7 @@ import utils.Link;
 import java.util.Collection;
 
 /**
- * Encapsulates all logic for html processing
+ * Encapsulates all algorithms for html processing
  */
 public interface Context {
     /**

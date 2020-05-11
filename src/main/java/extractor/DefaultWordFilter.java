@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
-// TODO дока
+// TODO documentation
 public class DefaultWordFilter implements WordFilter {
 
     private final Collection<String> filteredWords = getFilterWords();

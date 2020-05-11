@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public interface WordFilter {
     /**
-     * Filters words
+     * Filters words relying on internal implementation
      *
      * @param words
      * @return filtered words

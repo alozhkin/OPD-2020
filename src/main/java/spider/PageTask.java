@@ -9,31 +9,31 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Class that processes html
  */
-public class SiteTask {
+public class PageTask {
     private final Context context;
     private final BlockingQueue<Link> linkQueue;
     private final Collection<String> resultWords;
 
     /**
-     *
      * @param context contains behaviors
-     * @param linkQueue would get all links from html
-     * @param resultWords would get all words from html
+     * @param linkQueue accumulate all links from html
+     * @param resultWords accumulate all words from html
      */
-    SiteTask(Context context, BlockingQueue<Link> linkQueue, Collection<String> resultWords) {
+    PageTask(Context context, BlockingQueue<Link> linkQueue, Collection<String> resultWords) {
         this.context = context;
         this.linkQueue = linkQueue;
         this.resultWords = resultWords;
     }
 
     /**
-     * Extracts links, runs them through filter and gives to collections, defined by constructor
+     * Extracts links/words, runs them through filters and adds to {@link PageTask#linkQueue}/
+     * {@link PageTask#resultWords}
      *
-     * @param site html and all useful info
+     * @param page html and all useful info
      */
-    public void handleSite(Site site) {
-        var html = site.getHtml();
-        var initialLink = site.getInitialLink();
+    public void handlePage(Page page) {
+        var html = page.getHtml();
+        var initialLink = page.getInitialLink();
         if (!html.isLangRight()) {
             throw new HtmlLanguageException();
         }
@@ -43,7 +43,7 @@ public class SiteTask {
         linkQueue.addAll(filteredLinks);
         var words = context.extract(html);
         var filteredWords = context.filterWords(words);
-        LoggerUtils.debugLog.info("SiteTask - Completed " + htmlLink.toString());
+        LoggerUtils.debugLog.info("PageTask - Completed " + htmlLink.toString());
         resultWords.addAll(filteredWords);
         LoggerUtils.pageScraped();
     }

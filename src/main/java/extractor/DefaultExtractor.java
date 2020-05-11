@@ -10,9 +10,8 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class DefaultExtractor implements Extractor {
-
     /**
-     * Returns all text from html element splited with '\\s'
+     * Returns all text from html element split with '\\s'
      *
      * @param html
      * @return all words
