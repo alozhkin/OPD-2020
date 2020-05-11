@@ -9,6 +9,9 @@ import utils.Link;
 
 import java.util.Collection;
 
+/**
+ * Simple class that does not change the algorithm and fully rely on preassigned behaviors
+ */
 public class DefaultContext implements Context {
     private final Crawler crawler;
     private final LinkFilter linkFilter;

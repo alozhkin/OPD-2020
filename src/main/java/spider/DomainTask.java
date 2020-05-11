@@ -10,6 +10,9 @@ import java.net.ConnectException;
 import java.util.Set;
 import java.util.concurrent.*;
 
+/**
+ * Class that is fully responsible for scrape all pages from domain and put them into {@link DomainTask#resultWords}
+ */
 public class DomainTask {
     private final Context context;
     private final Link domain;
@@ -18,6 +21,13 @@ public class DomainTask {
     private final Set<String> resultWords;
     private int numberOfScrapedLinks = 1;
 
+    /**
+     *
+     * @param domain to be scraped
+     * @param context to be handed to SiteTask
+     * @param scraper to scrape
+     * @param resultWords to get all words
+     */
     DomainTask(Link domain, Context context, Scraper scraper, Set<String> resultWords) {
         this.domain = domain;
         this.context = context;
@@ -25,6 +35,10 @@ public class DomainTask {
         this.resultWords = resultWords;
     }
 
+    /**
+     * rethrows exception if domain failed, else ignore
+     * Scraper gets link and gives html, SiteTask gives words for database and links for Scraper.
+     */
     void scrapeDomain() {
         LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
         try {

@@ -11,6 +11,12 @@ import java.util.HashSet;
 
 public class DefaultExtractor implements Extractor {
 
+    /**
+     * Returns all text from html element splited with '\\s'
+     *
+     * @param html
+     * @return all words
+     */
     public Collection<String> extract(Html html) {
         Document doc = Jsoup.parse(html.toString());
         String allInfo = doc.text();

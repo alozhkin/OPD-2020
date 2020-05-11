@@ -7,6 +7,9 @@ import extractor.DefaultExtractor;
 import extractor.DefaultWordFilter;
 import extractor.Extractor;
 
+/**
+ * Simple class that choose default behaviors
+ */
 public class DefaultContextFactory implements ContextFactory {
     private Crawler crawler;
     private Extractor extractor;

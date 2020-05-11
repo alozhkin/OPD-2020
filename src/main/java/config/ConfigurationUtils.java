@@ -6,8 +6,14 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+/**
+ * Class responsible for properties configuration
+ * There are two types of property files: <b>required</b> {@throws exception if file is absent and
+ * <B></>optional (would not throw exception)
+ */
 public class ConfigurationUtils {
     // required properties. Would throw exception if absent
     private static final String GLOBAL_PROPERTIES_FILE_PATH = "properties/global.properties";
@@ -18,11 +24,22 @@ public class ConfigurationUtils {
     // prevents class instantiation
     private ConfigurationUtils() {}
 
+    /**
+     * Method that should be called at the beginning of the program
+     */
     public static void configure() {
         loadProperties();
         setConsoleEncoding();
+        TreeMap
     }
 
+    /**
+     * Method for resources in jar
+     *
+     * @param fileName
+     * @param collection
+     * @param c
+     */
     public static void parseResourceToCollection(String fileName, Collection<String> collection, Class<?> c) {
         try (InputStream resource = ClassLoader.getSystemResourceAsStream(fileName)) {
             if (resource != null) {

@@ -9,6 +9,9 @@ import utils.LinkFactory;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+/**
+ * Class responsible for putting words into database
+ */
 public class DatabaseTask {
     private final Database database;
     private final Link domain;

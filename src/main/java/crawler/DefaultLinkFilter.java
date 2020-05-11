@@ -13,35 +13,52 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * DefaultLinkFilter removes:
+ * 1. Links that have path segment from {@link DefaultLinkFilter#ignoredLinks}
+ * Links that have path segment from {@link DefaultLinkFilter#ignoredLanguages} which are not specified
+ * in site.langs property
+ * 2. Links which file extension is not present in {@link DefaultLinkFilter#allowedFileExtensions}
+ * 3. Links with subdomains from {@link DefaultLinkFilter#ignoredSubdomains}
+ * 4. Links which host name is not a domain or subdomain of page url
+ * 5. Repeated links. Links are separated by its subdomains (not www), path segments and
+ * selected query params from {@link DefaultLinkFilter#getContentParams(Link)}.
+ * 6. Links with fragment
+ * 7. Links with user info
+ */
 public class DefaultLinkFilter implements LinkFilter {
-    private static final Set<String> languages = new HashSet<>();
-    private static final Set<String> fileExtensions = new HashSet<>();
+    private static final Set<String> ignoredLanguages = new HashSet<>();
+    private static final Set<String> allowedFileExtensions = new HashSet<>();
     private static final Set<String> ignoredLinks = new HashSet<>();
     private static final Set<String> ignoredSubdomains = new HashSet<>();
 
     private final Set<LinkIdentifiers> occurredLinks;
 
     static {
-        ConfigurationUtils.parseResourceToCollection("languages.txt", languages, DefaultLinkFilter.class);
-        ConfigurationUtils.parseResourceToCollection("file_extensions.txt", fileExtensions, DefaultLinkFilter.class);
+        ConfigurationUtils.parseResourceToCollection("languages.txt", ignoredLanguages, DefaultLinkFilter.class);
         ConfigurationUtils.parseResourceToCollection("ignored_links.txt", ignoredLinks, DefaultLinkFilter.class);
+        ConfigurationUtils.parseResourceToCollection(
+                "file_extensions.txt", allowedFileExtensions, DefaultLinkFilter.class
+        );
         ConfigurationUtils.parseResourceToCollection(
                 "ignored_subdomains.txt", ignoredSubdomains, DefaultLinkFilter.class
         );
     }
 
     public DefaultLinkFilter() {
-        if (fileExtensions.isEmpty()) {
+        if (allowedFileExtensions.isEmpty()) {
             throw new ConfigurationFailException("DefaultLinkFilter - Allowed file extensions are not found");
         }
         occurredLinks = ConcurrentHashMap.newKeySet();
     }
 
-    //suggests that main page were visited
+    /**
+     * Adds typical home page names to occurred links
+     */
     public void addDomain() {
         occurredLinks.add(new LinkIdentifiers(""));
         occurredLinks.add(new LinkIdentifiers("index"));
-        for (String fe : fileExtensions) {
+        for (String fe : allowedFileExtensions) {
             occurredLinks.add(new LinkIdentifiers("/index." + fe));
         }
     }
@@ -97,7 +114,8 @@ public class DefaultLinkFilter implements LinkFilter {
             var pathWithoutSlash = path.substring(1);
             var firstSegment = pathWithoutSlash.substring(0, indexOfSlash(pathWithoutSlash));
             if (!firstSegment.isEmpty()) {
-                return System.getProperty("site.langs").contains(firstSegment) || !languages.contains(firstSegment);
+                return System.getProperty("site.langs").contains(firstSegment) ||
+                        !ignoredLanguages.contains(firstSegment);
             }
         }
         return true;
@@ -125,7 +143,7 @@ public class DefaultLinkFilter implements LinkFilter {
             if (lastSegmentSplitted.length == 1) {
                 return true;
             } else {
-                return fileExtensions.contains(lastSegmentSplitted[lastSegmentSplitted.length - 1]);
+                return allowedFileExtensions.contains(lastSegmentSplitted[lastSegmentSplitted.length - 1]);
             }
         }
         return true;

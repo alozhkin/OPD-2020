@@ -1,5 +1,8 @@
 package splash;
 
+/**
+ * Class that matches Splash JSON response
+ */
 public class SplashResponse {
     private final String html;
     private final String url;

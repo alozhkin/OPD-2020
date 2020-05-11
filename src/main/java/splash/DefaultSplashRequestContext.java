@@ -2,6 +2,9 @@ package splash;
 
 import utils.Link;
 
+/**
+ * Class that define credentials, ip for access Splash and url to be scraped
+ */
 public class DefaultSplashRequestContext {
     private final Link siteUrl;
     private final Link splashUrl;

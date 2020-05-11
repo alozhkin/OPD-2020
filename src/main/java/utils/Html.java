@@ -14,6 +14,9 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Class that abstracts html and adds useful methods
+ */
 public class Html {
     private static final Pattern htmlTagPattern = Pattern.compile("<\\s*html[^><]*>"
             + "|<\\s*html[^>]*>[^><]*<\\s*/\\s*html\\s*>");
@@ -30,6 +33,12 @@ public class Html {
     private final Link url;
     private String lang;
 
+    /**
+     *
+     *
+     * @param html
+     * @param url from where html were got
+     */
     public Html(String html, @NotNull Link url) {
         this.html = html;
         this.url = url;
@@ -41,21 +50,31 @@ public class Html {
         }
     }
 
+    /**
+     *
+     * @return Html with "" instead html and empty link instead url
+     */
     public static Html emptyHtml() {
         return EMPTY_HTML;
     }
 
-    // tries to parse encoding, if it is not possible uses UTF-8
+    /**
+     *  Gets html from file. Tries to parse encoding, if it is not possible uses UTF-8.
+     */
     public static Html fromFile(Path path) throws IOException {
         String html = Files.readString(path, StandardCharsets.ISO_8859_1);
         String charset = getCharset(html);
         if (charset == null) {
+            //todo link нужно изменить
             return new Html(Files.readString(path, StandardCharsets.UTF_8), new Link(path.toString()));
         } else {
             return new Html(Files.readString(path, Charset.forName(charset)), new Link(path.toString()));
         }
     }
 
+    /**
+     *  Gets html from file. Sets url to domain. Tries to parse encoding, if it is not possible uses UTF-8.
+     */
     public static Html fromFile(Path path, Link domain) throws IOException {
         String html = Files.readString(path, StandardCharsets.ISO_8859_1);
         String charset = getCharset(html);
@@ -66,6 +85,13 @@ public class Html {
         }
     }
 
+    /**
+     * Gets language of html if it is specified in <html lang="de"></html> or <meta lang="de"> or
+     * <meta name="language" content="de">. in meta tag tries to find any thing that matched "language" and then gets
+     * content, so something like <meta language-not-an-attr content="de"> would work. Cannot distinguish incorrect tags
+     * from incorrect. quotes and spaces are not important
+     * @return
+     */
     public String getLang() {
         return lang;
     }
@@ -74,7 +100,13 @@ public class Html {
         return url;
     }
 
-    public boolean langRight() {
+    /**
+     * Compares lang with comma separated langs in site.langs property. Result of compare for html with no lang depends
+     * on ignore.html.without.lang property
+     *
+     * @return is lang corresponds to properties
+     */
+    public boolean isLangRight() {
         var siteLangs = System.getProperty("site.langs");
         var htmlLang = lang;
         if (htmlLang != null) {

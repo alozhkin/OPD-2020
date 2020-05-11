@@ -25,6 +25,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Class that uses <a href="https://splash.readthedocs.io">Splash</a> - lightweight web browser with an HTTP API
+ * to scrape sites
+ */
 public class SplashScraper implements Scraper {
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
             .readTimeout(5, TimeUnit.MINUTES)
@@ -40,6 +44,7 @@ public class SplashScraper implements Scraper {
 
     private final Statistic stat = new Statistic();
     private final SplashRequestFactory renderReqFactory;
+    // contains calls that are proceeded by http client or retry schedule executor
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
     private final List<FailedSite> failedSites = new ArrayList<>();
     private final AtomicInteger scheduledToRetry = new AtomicInteger(0);
@@ -49,6 +54,9 @@ public class SplashScraper implements Scraper {
         this.renderReqFactory = renderReqFactory;
     }
 
+    /**
+     * Shuts down http client and executor service, use only once
+     */
     public static void shutdown() {
         try {
             retryExecutor.shutdown();
@@ -63,6 +71,12 @@ public class SplashScraper implements Scraper {
         }
     }
 
+    /**
+     * Makes scrape request to Splash and sets callback
+     *
+     * @param link web page to be scraped
+     * @param siteConsumer consumes html
+     */
     @Override
     public void scrape(Link link, Consumer<Site> siteConsumer) {
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
@@ -72,12 +86,21 @@ public class SplashScraper implements Scraper {
         stat.requestSended();
     }
 
+    /**
+     * Takes into account requests that are proceeded by http client and requests that only waiting to be retried
+     *
+     * @return number of sites which are being processed
+     */
     @Override
     public int scrapingSitesCount() {
         // order is important
         return scheduledToRetry.get() + httpClient.dispatcher().runningCallsCount();
     }
 
+    /**
+     * Cancels requests that are proceeded by http client and requests that only waiting to be retried
+     *
+     */
     @Override
     public void cancelAll() {
         synchronized (calls) {
@@ -85,16 +108,26 @@ public class SplashScraper implements Scraper {
         }
     }
 
+    /**
+     *
+     * @return all sites that were not scraped due to error
+     */
     @Override
     public List<FailedSite> getFailedSites() {
         return failedSites;
     }
 
+    /**
+     *
+     * @return statistic
+     */
     public Statistic getStatistic() {
         return stat;
     }
 
-
+    /**
+     * Class that contains all logic responsible for handle response
+     */
     private class SplashCallback implements Callback {
         private final Link initialLink;
         private final Consumer<Site> consumer;
@@ -108,6 +141,13 @@ public class SplashScraper implements Scraper {
             this.context = context;
         }
 
+        /**
+         * Logs failures, saves failed sites, consider EOFException and SocketException
+         * like signs of Splash restarting and retries
+         *
+         * @param call
+         * @param e
+         */
         @Override
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
             this.call = call;
@@ -115,6 +155,17 @@ public class SplashScraper implements Scraper {
             calls.remove(call);
         }
 
+        /**
+         *
+         * gets html and final link from response and use it
+         * consider redirects only if it is first link or on same domain or on subdomain, logs it
+         * consider HTTP 502 and HTTP 503 like signs of Splash restarting and retries
+         * HTTP 200 is the only code which allows html consuming
+         * if exception is thrown, logs it and saves in failed sited
+         *
+         * @param call
+         * @param response
+         */
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
             this.call = call;
@@ -143,7 +194,7 @@ public class SplashScraper implements Scraper {
                 handleSplashRestarting();
                 return;
             } else if (e.getMessage().equals("Canceled")) {
-                    LoggerUtils.debugLog.warn("SplashScraper - Request canceled " + initialLink);
+                LoggerUtils.debugLog.warn("SplashScraper - Request canceled " + initialLink);
             } else if (cause != null && cause.getClass().equals(SocketException.class)) {
                 LoggerUtils.debugLog.error("SplashScraper - Socket is closed, request will be retried " + initialLink);
                 handleSplashRestarting();
@@ -219,6 +270,11 @@ public class SplashScraper implements Scraper {
             }
         }
 
+        /**
+         * Splash is restarting when eats too much RAM
+         * in that period splash returns 503 and some connections may fail
+         * schedule retry specified number of times
+         */
         private void handleSplashRestarting() {
             scheduledToRetry.incrementAndGet();
             var delay = getDelay(context.getRetryCount());
@@ -230,6 +286,12 @@ public class SplashScraper implements Scraper {
             }
         }
 
+        /**
+         * Returns -1 if retry count is done
+         *
+         * @param retryCount
+         * @return delay
+         */
         private int getDelay(int retryCount) {
             var delay = 0;
             if (retryCount == 0) {
@@ -256,6 +318,9 @@ public class SplashScraper implements Scraper {
     }
 
 
+    /**
+     * Little data class for calls
+     */
     private static class CallContext {
         private final Link link;
         private final Consumer<Site> consumer;

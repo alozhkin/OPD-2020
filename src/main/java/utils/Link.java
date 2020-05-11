@@ -1,21 +1,34 @@
 package utils;
 
 import okhttp3.HttpUrl;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+/**
+ * Class that abstracts url and contains useful methods
+ */
 public class Link {
     private static final String DEFAULT_PROTOCOL = "http";
     private static final Pattern schemePattern = Pattern.compile("^[a-z][a-z0-9]*://");
     private HttpUrl httpUrl;
     private String strUrl;
 
-    // wrong url changes to ""
-    // removes trailing slash
-    public Link(String urlStr) {
+    /**
+     * Creates Link
+     * wrong url changes to empty link {@link Link#createEmptyLink()}
+     * removes trailing slash
+     * if scheme is absent, uses http
+     * support non-ASCII characters
+     * domains encoded with <a href="https://en.wikipedia.org/wiki/Punycode">punycode</a>
+     * paths are decoded from <a href="https://en.wikipedia.org/wiki/Percent-encoding">percent encoding</a>
+     *
+     * @param urlStr
+     */
+    public Link(@NotNull String urlStr) {
         if (urlStr.equals("")) {
             httpUrl = null;
         } else {
@@ -48,18 +61,33 @@ public class Link {
         return url;
     }
 
+    /**
+     * Empty link it is link, that returns "" path and toString, -1 port and null in other cases
+     *
+     * @return link without url
+     */
     public static Link createEmptyLink() {
         return new Link("");
     }
 
+    /**
+     * Removes www., even when protocol specified
+     *
+     * @return link without www.
+     */
     public Link fixWWW() {
         var fixed = getWithoutProtocol();
         if (fixed.startsWith("www.")) {
             fixed = fixed.substring(4);
         }
-        return new Link(fixed);
+        return new Link(getScheme() + "://" + fixed);
     }
 
+    /**
+     * Get all query params, that is separated with "="
+     *
+     * @return
+     */
     public Set<Parameter> getParams() {
         var res = new HashSet<Parameter>();
         var query = getQuery();
@@ -77,6 +105,11 @@ public class Link {
         return res;
     }
 
+    /**
+     * Returns domains, ignores top-level and second-level domain and www.
+     *
+     * @return domains without top-level and second level and .www
+     */
     public Set<String> getSubdomains() {
         var res = new HashSet<String>();
         var host = getHost();
@@ -139,6 +172,11 @@ public class Link {
         return httpUrl.scheme();
     }
 
+    /**
+     * Get user info "username:password" or "username" or null if username = ""
+     *
+     * @return user info or null
+     */
     public String getUserInfo() {
         if (httpUrl == null) return null;
         var username = httpUrl.username();
@@ -147,7 +185,7 @@ public class Link {
         if (!username.equals("")) {
             userInfo.append(username);
             if (!password.equals("")) {
-                userInfo.append(password);
+                userInfo.append(":").append(password);
             }
             return userInfo.toString();
         } else {
@@ -160,6 +198,11 @@ public class Link {
         return httpUrl.host();
     }
 
+    /**
+     * Gets port, or -1 if it is not specified, and if port matches 80, 443, that HttpUrl return automatically
+     *
+     * @return
+     */
     public int getPort() {
         if (httpUrl == null) return -1;
         int port = httpUrl.port();
@@ -167,6 +210,12 @@ public class Link {
         return port;
     }
 
+    /**
+     * Gets "" if path is absent
+     * Gets / + path if not
+     *
+     * @return
+     */
     public String getPath() {
         if (httpUrl == null) return "";
         var pathSeg = httpUrl.pathSegments();

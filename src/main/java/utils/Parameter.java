@@ -2,6 +2,9 @@ package utils;
 
 import java.util.Objects;
 
+/**
+ * Class that matches query parameter with "="
+ */
 public class Parameter {
     private final String name;
     private final String value;

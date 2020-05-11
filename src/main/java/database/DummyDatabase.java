@@ -6,6 +6,9 @@ import database.models.Word;
 import java.util.Collection;
 import java.util.Set;
 
+/**
+ * Database that does nothing. Returns false instead boolean methods, 0 instead int, null instead Object.
+ */
 public class DummyDatabase implements Database {
     @Override
     public boolean putWebsitesFromCSV(String CSVFile) {

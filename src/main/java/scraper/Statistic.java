@@ -2,6 +2,9 @@ package scraper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Class used by SplashScraper to keep statistic
+ */
 public class Statistic {
     private final AtomicInteger requestsSended = new AtomicInteger(0);
     private final AtomicInteger requestsSucceeded = new AtomicInteger(0);

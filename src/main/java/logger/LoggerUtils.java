@@ -6,9 +6,12 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LoggerUtils {
-    private static final AtomicInteger pagesScraped = new AtomicInteger(0);
+    /**
+     * Writes log into file
+     */
     public static Logger debugLog = LoggerFactory.getLogger("FILE");
     public static Logger consoleLog = LoggerFactory.getLogger("STDOUT");
+    private static final AtomicInteger pagesScraped = new AtomicInteger(0);
 
     // prevents class instantiation
     private LoggerUtils() {}

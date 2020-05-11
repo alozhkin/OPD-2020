@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
+/**
+ * Class carrying out the main work of the program: turn domains into words inside database
+ */
 public class Spider {
     // in seconds
     private static final int DOMAIN_TIMEOUT = 100;
@@ -26,7 +29,7 @@ public class Spider {
     private final Database database;
     private final Set<String> scrapedDomains = new HashSet<>();
 
-    private int connectFailsCount = 0;
+    private int connectFailsInARowCount = 0;
     private Link domain;
 
     public Spider(ContextFactory contextFactory, Database database) {
@@ -34,6 +37,13 @@ public class Spider {
         this.database = database;
     }
 
+    /**
+     * Gets domains from csv file "id";"company_id";"website", extracts words and puts them inside database
+     * Ignores repeated domains, domains are separated by host name without www
+     *
+     * @param input path to CSV file with domains
+     * @param output //todo спросить у Никиты или Андрея
+     */
     public void scrapeFromCSVFile(String input, String output) {
         var csvParser = new CSVParser();
         csvParser.parse(input);
@@ -41,6 +51,12 @@ public class Spider {
         scrapeDomains(domains);
     }
 
+    /**
+     * Extracts words and puts them inside database
+     * Ignores repeated domains, domains are separated by host name without www
+     *
+     * @param domains to be scraped
+     */
     public void scrapeDomains(Collection<Link> domains) {
         var domainExec = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService dbExec = Executors.newSingleThreadScheduledExecutor();
@@ -97,7 +113,7 @@ public class Spider {
     private void handleDomainFuture(Future<?> future) throws InterruptedException, ExecutionException {
         try {
             future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
-            connectFailsCount = 0;
+            connectFailsInARowCount = 0;
         } catch (TimeoutException e) {
             future.cancel(true);
             LoggerUtils.debugLog.error("Spider - Stopped, waiting too long for scraping site " + domain);
@@ -107,8 +123,8 @@ public class Spider {
             if (exClass.equals(ScraperConnectionException.class)) {
                 LoggerUtils.debugLog.error("DomainTask - Request failed " + domain, e);
                 LoggerUtils.consoleLog.error("Request failed " + domain + " " + e.getMessage());
-                ++connectFailsCount;
-                if (connectFailsCount == CONNECT_FAILS) {
+                ++connectFailsInARowCount;
+                if (connectFailsInARowCount == CONNECT_FAILS) {
                     throw new ScraperConnectionException("Too many connect fails");
                 }
             } else  {
