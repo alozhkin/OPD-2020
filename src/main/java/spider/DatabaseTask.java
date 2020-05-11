@@ -22,9 +22,10 @@ public class DatabaseTask {
 
     boolean run() {
         try {
-            LoggerUtils.debugLog.info("Database task start");
+            LoggerUtils.debugLog.info("DatabaseTask - Start");
             if (words.isEmpty()) {
-                LoggerUtils.debugLog.error("DatabaseTask - An empty list of words came to the database " + domain);
+                LoggerUtils.debugLog.warn("DatabaseTask - An empty list of words came to the database " + domain);
+                LoggerUtils.consoleLog.warn("An empty list of words came to the database " + domain);
                 return false;
             } else {
                 return database.putWords(
@@ -38,7 +39,7 @@ public class DatabaseTask {
             LoggerUtils.debugLog.error("DatabaseTask - Failed to put words into database:", e);
             return false;
         } finally {
-            LoggerUtils.debugLog.info("Database task completed");
+            LoggerUtils.debugLog.info("DatabaseTask - Complete");
         }
     }
 }

@@ -15,7 +15,7 @@ public class DefaultExtractor implements Extractor {
         Document doc = Jsoup.parse(html.toString());
         String allInfo = doc.text();
         String[] stringsArray = allInfo.split("\\s");
-        LoggerUtils.debugLog.debug("Extracting task completed");
+        LoggerUtils.debugLog.debug("DefaultExtractor - Extracting task completed");
         return new HashSet<>(Arrays.asList(stringsArray));
     }
 }

@@ -15,11 +15,10 @@ public class DefaultWordFilter implements WordFilter {
 
     @Override
     public Collection<String> filter(Collection<String> words) {
-        LoggerUtils.debugLog.debug("Filtration task started");
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
-        LoggerUtils.debugLog.debug("Filtration task completed");
+        LoggerUtils.debugLog.debug("DefaultWordFilter - Filtration task completed");
         return newSet;
     }
 

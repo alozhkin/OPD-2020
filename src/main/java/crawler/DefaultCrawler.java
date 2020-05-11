@@ -26,7 +26,7 @@ public class DefaultCrawler implements Crawler {
                 list.add(url);
             }
         }
-        LoggerUtils.debugLog.debug("Crawling task completed");
+        LoggerUtils.debugLog.debug("DefaultCrawler - Crawling task completed");
         return list;
     }
 }

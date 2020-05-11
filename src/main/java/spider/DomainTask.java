@@ -38,7 +38,6 @@ public class DomainTask {
             }
         } catch (InterruptedException e) {
             handleInterruption();
-            LoggerUtils.debugLog.error("Domain Task - Interrupted " + domain);
         } finally {
             LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
         }
@@ -81,8 +80,10 @@ public class DomainTask {
                 } else if (exClass.equals(ScraperConnectionException.class)) {
                     throw (ScraperConnectionException) e;
                 } else if (exClass.equals(HtmlLanguageException.class)) {
-                    LoggerUtils.debugLog.error("DomainTask - Wrong html language " + domain);
-                    LoggerUtils.consoleLog.error("Wrong html language " + domain);
+                    LoggerUtils.debugLog.warn("DomainTask - Wrong html language, " +
+                            "site is not taken into account " + domain
+                    );
+                    LoggerUtils.consoleLog.warn("Wrong html language, site is not taken into account " + domain);
                 } else {
                     LoggerUtils.debugLog.error("DomainTask - Failed", e);
                 }

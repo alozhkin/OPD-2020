@@ -56,7 +56,7 @@ public class DefaultLinkFilter implements LinkFilter {
                 res.add(link);
             }
         }
-        LoggerUtils.debugLog.debug("Link filtration task completed");
+        LoggerUtils.debugLog.debug("DefaultLinkFilter - Link filtration task completed");
         return res;
     }
 

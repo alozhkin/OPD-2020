@@ -87,7 +87,7 @@ public class Spider {
         var fixed = domain.fixWWW().getHost();
         if (scrapedDomains.contains(fixed)) {
             LoggerUtils.debugLog.info("Spider - Skip domain because is it already scraped " + domain);
-            LoggerUtils.consoleLog.info("Skip domain because is it already scraped " + domain);
+            LoggerUtils.consoleLog.warn("Skip domain because is it already scraped " + domain);
             return true;
         }
         scrapedDomains.add(fixed);
@@ -119,7 +119,7 @@ public class Spider {
 
     private void trackStatistic(Statistic statistic) {
         LoggerUtils.consoleLog.info(statistic.toString() + " site "  + domain);
-        LoggerUtils.debugLog.info(statistic.toString() + " site "  + domain);
+        LoggerUtils.debugLog.info("Spider - " + statistic.toString() + " site "  + domain);
     }
 
     private void shutdownExecutorService(ExecutorService executorService) {
