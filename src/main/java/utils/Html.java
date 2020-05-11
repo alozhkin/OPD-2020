@@ -98,7 +98,7 @@ public class Html {
 
     /**
      * Compares lang with comma separated languages in site.langs property. Result of comparing for html
-     * without language depends on ignore.html.without.lang property
+     * without language depends on reject.html.without.lang property
      *
      * @return {@code true} if language suitable, {@code false} if not
      */
@@ -110,7 +110,7 @@ public class Html {
                 if (siteLang.toLowerCase().equals(htmlLang.toLowerCase())) return true;
             }
         } else {
-            return System.getProperty("ignore.html.without.lang").equals("false");
+            return System.getProperty("reject.html.without.lang").equals("false");
         }
         return false;
     }

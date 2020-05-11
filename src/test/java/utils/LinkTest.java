@@ -1,6 +1,5 @@
 package utils;
 
-import okhttp3.HttpUrl;
 import org.junit.jupiter.api.Test;
 
 import java.net.IDN;
