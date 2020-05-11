@@ -18,15 +18,16 @@ public class Link {
     private String strUrl;
 
     /**
-     * Creates Link
-     * wrong url changes to empty link {@link Link#createEmptyLink()}
-     * removes trailing slash
-     * if scheme is absent, uses http
-     * support non-ASCII characters
-     * domains encoded with <a href="https://en.wikipedia.org/wiki/Punycode">punycode</a>
-     * paths are decoded from <a href="https://en.wikipedia.org/wiki/Percent-encoding">percent encoding</a>
+     * Creates Link.
+     * <p>
+     * <ul><li>wrong url changes to empty link {@link Link#createEmptyLink()}
+     * <li>removes trailing slash
+     * <li>if scheme is absent, uses http
+     * <li>support non-ASCII characters
+     * <li>domains encoded with <a href="https://en.wikipedia.org/wiki/Punycode">punycode</a>
+     * <li>paths are decoded from <a href="https://en.wikipedia.org/wiki/Percent-encoding">percent encoding</a></ul>
      *
-     * @param urlStr
+     * @param urlStr url (host is required)
      */
     public Link(@NotNull String urlStr) {
         if (urlStr.equals("")) {
@@ -71,9 +72,9 @@ public class Link {
     }
 
     /**
-     * Removes www., even when protocol specified
+     * Removes <i>"www."</i>, even when protocol specified
      *
-     * @return link without www.
+     * @return link without <i>"www."</i>
      */
     public Link fixWWW() {
         var fixed = getWithoutProtocol();
@@ -106,9 +107,9 @@ public class Link {
     }
 
     /**
-     * Returns domains, ignores top-level and second-level domain and www.
+     * Returns domains, ignores top-level, second-level domain and <i>"www."</i>
      *
-     * @return domains without top-level and second level and www.
+     * @return domains without top-level, second level and <i>"www."</i>
      */
     public Set<String> getSubdomains() {
         var res = new HashSet<String>();
@@ -211,8 +212,8 @@ public class Link {
     }
 
     /**
-     * Gets "" if path is absent
-     * Gets / + path if not
+     * Gets "" if path is absent.
+     * Gets "/" + "path" if not.
      *
      * @return path
      */

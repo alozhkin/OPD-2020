@@ -27,12 +27,13 @@ import java.util.function.Consumer;
 
 /**
  * Class that uses <a href="https://splash.readthedocs.io">Splash</a> - lightweight web browser with an HTTP API
- * to scrape pages
- * splash is restarting when eats up too much RAM
- * in that period splash may return 503 or 502 and some connections may fail with {@link EOFException}
- * or {@link SocketException}
- * so program schedules request retry specified number of times with some delay
- * if splash will not answer, url will be added to failed pages with {@link SplashNotRespondingException}
+ * to scrape pages.
+ * <p>
+ * Splash is restarting when eats up too much RAM.
+ * In that period splash may return 503 or 502 and some connections may fail with {@link EOFException}
+ * or {@link SocketException}.
+ * So program schedules request retry specified number of times with some delay.
+ * If splash will not answer, url will be added to failed pages with {@link SplashNotRespondingException}
  */
 public class SplashScraper implements Scraper {
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
@@ -76,12 +77,6 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    /**
-     * Makes scrape request to Splash and sets callback
-     *
-     * @param link web page to be scraped
-     * @param siteConsumer consumer of html and additional information
-     */
     @Override
     public void scrape(Link link, Consumer<Page> siteConsumer) {
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
@@ -92,8 +87,10 @@ public class SplashScraper implements Scraper {
     }
 
     /**
-     * Return number of pages which are being processed, takes into account requests that are proceeded by http client
-     * and requests that only waiting to be retried
+     * Returns number of pages which are being processed.
+     * <p>
+     * Takes into account requests that are proceeded by http client
+     * and requests that only waiting to be retried.
      *
      * @return number of pages which are being processed
      */
@@ -113,9 +110,6 @@ public class SplashScraper implements Scraper {
         }
     }
 
-    /**
-     * @return all pages that were not scraped due to error with additional information
-     */
     @Override
     public List<FailedPage> getFailedPages() {
         return failedPages;
@@ -147,11 +141,11 @@ public class SplashScraper implements Scraper {
         }
 
         /**
-         * Logs failures, saves failed pages, consider EOFException and SocketException
+         * Logs failures, saves failed pages, considers {@link EOFException} and {@link SocketException}
          * like signs of Splash restarting and retries
          *
-         * @param call
-         * @param e
+         * @param call call to http client
+         * @param e exception
          */
         @Override
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -161,13 +155,14 @@ public class SplashScraper implements Scraper {
         }
 
         /**
-         * Extracts html and final link from response and and gives them to consumer
-         * consider HTTP 502 and HTTP 503 like signs of Splash restarting and retries
-         * HTTP 200 is the only code which allows html consuming
-         * if exception is thrown, logs it and saves in failed pages
+         * Extracts html and final link from response and and gives them to consumer.
+         * <p>
+         * Considers HTTP 502 and HTTP 503 like signs of Splash restarting and retries.
+         * HTTP 200 is the only code which allows html consuming.
+         * If exception is thrown, logs it and saves in failed pages.
          *
-         * @param call
-         * @param response
+         * @param call call to http client
+         * @param response response from splash
          */
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
@@ -291,8 +286,9 @@ public class SplashScraper implements Scraper {
         }
 
         /**
-         * Gives delay for next retry
-         * returns -1 if retry count is done
+         * Gives delay for next retry.
+         * <p>
+         * Returns -1 if retry count is done
          *
          * @param retryCount number of retries
          * @return delay (in millis)

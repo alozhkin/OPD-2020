@@ -12,7 +12,7 @@ public interface Context {
     /**
      * Returns all links in html
      *
-     * @param html
+     * @param html html
      * @return links in html
      */
     Collection<Link> crawl(Html html);
@@ -30,7 +30,7 @@ public interface Context {
     /**
      * Returns all words from html
      *
-     * @param html
+     * @param html html
      * @return all words
      */
     Collection<String> extract(Html html);
@@ -38,7 +38,7 @@ public interface Context {
     /**
      * Filters words
      *
-     * @param words
+     * @param words words to be filtered
      * @return filtered words
      */
     Collection<String> filterWords(Collection<String> words);

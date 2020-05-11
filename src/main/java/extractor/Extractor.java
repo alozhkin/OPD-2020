@@ -8,7 +8,7 @@ public interface Extractor {
     /**
      * Returns all words from html
      *
-     * @param html
+     * @param html html
      * @return all words
      */
     Collection<String> extract(Html html);

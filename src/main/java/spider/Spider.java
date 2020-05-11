@@ -38,8 +38,9 @@ public class Spider {
     }
 
     /**
-     * Gets domains from csv file "id";"company_id";"website", extracts words and puts them inside database
-     * Ignores repeated domains, domains are separated by host name without www
+     * Gets domains from csv file, extracts words and puts them inside database.
+     * <p>
+     * CSV file: "id";"company_id";"website";
      *
      * @param input path to CSV file with domains
      * @param output //todo спросить у Никиты или Андрея
@@ -52,8 +53,9 @@ public class Spider {
     }
 
     /**
-     * Extracts words and puts them inside database
-     * Ignores repeated domains, domains are separated by host name without www
+     * Follows links, extracts words and puts them inside database.
+     * <p>
+     * Ignores repeated domains, domains are separated by host name without <i>"www"<i/>.
      *
      * @param domains to be scraped
      */
@@ -121,7 +123,7 @@ public class Spider {
         } catch (ExecutionException e) {
             var exClass = e.getCause().getClass();
             if (exClass.equals(ScraperConnectionException.class)) {
-                LoggerUtils.debugLog.error("DomainTask - Request failed " + domain, e);
+                LoggerUtils.debugLog.error("Spider - Request failed " + domain, e);
                 LoggerUtils.consoleLog.error("Request failed " + domain + " " + e.getMessage());
                 ++connectFailsInARowCount;
                 if (connectFailsInARowCount == CONNECT_FAILS) {

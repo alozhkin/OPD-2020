@@ -11,9 +11,9 @@ import java.util.HashSet;
 
 public class DefaultExtractor implements Extractor {
     /**
-     * Returns all text from html element split with '\\s'
+     * Returns all text from html element split with <i>"\\s"</i>
      *
-     * @param html
+     * @param html html
      * @return all words
      */
     public Collection<String> extract(Html html) {

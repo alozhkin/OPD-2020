@@ -13,6 +13,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Class responsible for extracting links from html
+ */
 public class DefaultCrawler implements Crawler {
     @Override
     public Collection<Link> crawl(@NotNull Html html) {

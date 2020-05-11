@@ -35,25 +35,33 @@ public class DomainTask {
     }
 
     /**
-     * Go through all pages on site and give them to {@link Scraper}
-     * {@link Scraper} gets link and gives html, {@link PageTask} gives words for database and links for {@link Scraper}
-     * rethrows exception if domain (first link) failed, else ignore
+     * Gets all words from website
+     * <p>
+     * Go through all pages on site and give them to {@link Scraper}.
+     * {@link Scraper} gets link and gives html,
+     * {@link PageTask} gives words for database and links for {@link Scraper}.
+     * <p>
+     * Rethrows exception if domain (first link) failed, else ignore.
      */
     void scrapeDomain() {
         LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
         try {
-            scrapeFirstLink(domain);
-            while (areAllLinksScraped()) {
-                checkIfInterrupted();
-                scrapeNextLink();
-            }
-            if (numberOfScrapedLinks == 1) {
-                checkIfScraperThrowException();
-            }
+            handleDomain();
         } catch (InterruptedException e) {
             handleInterruption();
         } finally {
             LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
+        }
+    }
+
+    private void handleDomain() throws InterruptedException {
+        scrapeFirstLink(domain);
+        while (areAllLinksScraped()) {
+            checkIfInterrupted();
+            scrapeNextLink();
+        }
+        if (numberOfScrapedLinks == 1) {
+            checkIfScraperThrowException();
         }
     }
 
@@ -85,23 +93,26 @@ public class DomainTask {
         if (!failedSites.isEmpty()) {
             var failedSite = failedSites.get(0);
             if (failedSite != null) {
-                var e = failedSite.getException();
-                var exClass = e.getClass();
-                if (exClass.equals(SplashNotRespondingException.class)) {
-                    throw (SplashNotRespondingException) e;
-                } else if (exClass.equals(ConnectException.class)) {
-                    throw new ScraperConnectionException(e);
-                } else if (exClass.equals(ScraperConnectionException.class)) {
-                    throw (ScraperConnectionException) e;
-                } else if (exClass.equals(HtmlLanguageException.class)) {
-                    LoggerUtils.debugLog.warn("DomainTask - Wrong html language, " +
-                            "site is not taken into account " + domain
-                    );
-                    LoggerUtils.consoleLog.warn("Wrong html language, site is not taken into account " + domain);
-                } else {
-                    LoggerUtils.debugLog.error("DomainTask - Failed", e);
-                }
+                handleException(failedSite.getException());
             }
+        }
+    }
+
+    private void handleException(Exception e) {
+        var exClass = e.getClass();
+        if (exClass.equals(SplashNotRespondingException.class)) {
+            throw (SplashNotRespondingException) e;
+        } else if (exClass.equals(ConnectException.class)) {
+            throw new ScraperConnectionException(e);
+        } else if (exClass.equals(ScraperConnectionException.class)) {
+            throw (ScraperConnectionException) e;
+        } else if (exClass.equals(HtmlLanguageException.class)) {
+            LoggerUtils.debugLog.warn("DomainTask - Wrong html language, " +
+                    "site is not taken into account " + domain
+            );
+            LoggerUtils.consoleLog.warn("Wrong html language, site is not taken into account " + domain);
+        } else {
+            LoggerUtils.debugLog.error("DomainTask - Failed", e);
         }
     }
 

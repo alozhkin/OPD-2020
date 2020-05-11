@@ -80,10 +80,12 @@ public class Html {
     }
 
     /**
-     * Gets language of html if it is specified in <html lang="de"></html> or <meta lang="de"> or
-     * <meta name="language" content="de">. tries to find any meta tag that contains word "language" and then gets
-     * content, so something like <meta language-not-an-attr content="de"> would give "de". Cannot distinguish incorrect
-     * tags from correct.
+     * Gets language of html if it is specified in <i>&lt;html lang="de"&gt;</i> or <i>&lt;meta lang="de"&gt;</i> or
+     * <i>&lt;meta name="language" content="de"&gt;</i>.
+     * <p>
+     * Tries to find any meta tag that contains word "language" and then gets
+     * content, so something like <i>&lt;meta language-not-an-attr content="de"&gt;</i> would give "de".
+     * Cannot distinguish incorrect tags from correct.
      * @return lang
      */
     public String getLang() {
@@ -105,7 +107,7 @@ public class Html {
         var htmlLang = lang;
         if (htmlLang != null) {
             for (String siteLang : siteLangs.split(",")) {
-                if (siteLang.contains(htmlLang) || htmlLang.contains(siteLang)) return true;
+                if (siteLang.toLowerCase().equals(htmlLang.toLowerCase())) return true;
             }
         } else {
             return System.getProperty("ignore.html.without.lang").equals("false");
@@ -117,11 +119,9 @@ public class Html {
     // cannot define if meta tag is incorrect and would not be parsed by browser.
     private static String getCharset(String html) {
         var tags = getTagsFromHtml(html, metaTagPattern);
-        if (tags.size() != 0) {
-            for (String tag : tags) {
-                var charset = getAttrFromHtmlElement(tag, charsetAttrPattern);
-                if (charset != null) return charset;
-            }
+        for (String tag : tags) {
+            var charset = getAttrFromHtmlElement(tag, charsetAttrPattern);
+            if (charset != null) return charset;
         }
         return null;
     }
@@ -135,13 +135,11 @@ public class Html {
             if (lang != null) return lang;
         }
         var metaTags = getTagsFromHtml(html, metaTagPattern);
-
         for (String tag : metaTags) {
             Matcher langMatcher = simpleLanguageAttrPattern.matcher(tag);
             if (langMatcher.find()) {
                 return getAttrFromHtmlElement(tag, contentAttrPattern);
             }
-
         }
         return null;
     }

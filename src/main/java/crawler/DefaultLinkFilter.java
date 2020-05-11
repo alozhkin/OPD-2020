@@ -15,24 +15,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * DefaultLinkFilter removes:
- * links that have path segment from {@link DefaultLinkFilter#ignoredLinks}
- * links that have path segment from {@link DefaultLinkFilter#ignoredLanguages} which is not matching
+ * <ul><li>links that have path segment from {@link DefaultLinkFilter#ignoredLinks}
+ * <li>links that have first path segment from {@link DefaultLinkFilter#ignoredLanguages} which is not matching
  * site.langs property
- * links which file extension is not present in {@link DefaultLinkFilter#allowedFileExtensions}
- * links with subdomains from {@link DefaultLinkFilter#ignoredSubdomains}
- * links which host name is not a domain or subdomain of page url
- * repeating links. Links are separated by its subdomains (not www), path segments and
+ * <li>links which file extension is not present in {@link DefaultLinkFilter#allowedFileExtensions}
+ * <li>links with subdomains from {@link DefaultLinkFilter#ignoredSubdomains}
+ * <li>links which host name is not a domain or subdomain of page url
+ * <li>repeating links. Links are separated by its subdomains (not <i>"www"</i>), path segments and
  * selected query params from {@link DefaultLinkFilter#getContentParams(Link)}.
- * links with fragment
- * links with user info
+ * <li>links with fragment
+ * <li>links with user info<ul/>
  */
 public class DefaultLinkFilter implements LinkFilter {
     private static final Set<String> ignoredLanguages = new HashSet<>();
     private static final Set<String> allowedFileExtensions = new HashSet<>();
     private static final Set<String> ignoredLinks = new HashSet<>();
     private static final Set<String> ignoredSubdomains = new HashSet<>();
-
-    private final Set<LinkIdentifiers> occurredLinks;
 
     static {
         ConfigurationUtils.parseResourceToCollection("languages.txt", ignoredLanguages, DefaultLinkFilter.class);
@@ -45,11 +43,12 @@ public class DefaultLinkFilter implements LinkFilter {
         );
     }
 
+    private final Set<LinkIdentifiers> occurredLinks = ConcurrentHashMap.newKeySet();
+
     public DefaultLinkFilter() {
         if (allowedFileExtensions.isEmpty()) {
             throw new ConfigurationFailException("DefaultLinkFilter - Allowed file extensions are not found");
         }
-        occurredLinks = ConcurrentHashMap.newKeySet();
     }
 
     /**
@@ -58,8 +57,8 @@ public class DefaultLinkFilter implements LinkFilter {
     public void addDomain() {
         occurredLinks.add(new LinkIdentifiers(""));
         occurredLinks.add(new LinkIdentifiers("index"));
-        for (String fe : allowedFileExtensions) {
-            occurredLinks.add(new LinkIdentifiers("/index." + fe));
+        for (String fileExtension : allowedFileExtensions) {
+            occurredLinks.add(new LinkIdentifiers("/index." + fileExtension));
         }
     }
 
@@ -114,8 +113,11 @@ public class DefaultLinkFilter implements LinkFilter {
             var pathWithoutSlash = path.substring(1);
             var firstSegment = pathWithoutSlash.substring(0, indexOfSlash(pathWithoutSlash));
             if (!firstSegment.isEmpty()) {
-                return System.getProperty("site.langs").contains(firstSegment) ||
-                        !ignoredLanguages.contains(firstSegment);
+                var propertySplit = System.getProperty("site.langs").split(",");
+                for (String lang : propertySplit) {
+                    if (lang.equals(firstSegment)) return true;
+                }
+                return !ignoredLanguages.contains(firstSegment);
             }
         }
         return true;
@@ -124,7 +126,7 @@ public class DefaultLinkFilter implements LinkFilter {
     private boolean hasUsefulInfo(Link link) {
         var paths = link.getPath().split("/");
         for (String path : paths) {
-            if (ignoredLinks.contains(path)) return false;
+            if (!path.equals("") && ignoredLinks.contains(path)) return false;
         }
         var subdomains = link.getSubdomains();
         for (String subdomain : subdomains) {
@@ -145,8 +147,9 @@ public class DefaultLinkFilter implements LinkFilter {
             } else {
                 return allowedFileExtensions.contains(lastSegmentSplit[lastSegmentSplit.length - 1]);
             }
+        } else {
+            return true;
         }
-        return true;
     }
 
     private synchronized boolean isLinkNotOccurred(LinkIdentifiers linkIdentifiers) {

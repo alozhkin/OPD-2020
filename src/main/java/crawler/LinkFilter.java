@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public interface LinkFilter {
     /**
-     * Filter links relying on internal implementation
+     * Filters links relying on internal implementation
      *
      * @param links links to be filtered
      * @param currentLink from that page all links were taken
@@ -15,7 +15,7 @@ public interface LinkFilter {
     Collection<Link> filter(Collection<Link> links, Link currentLink);
 
     /**
-     * Filter links relying on internal implementation
+     * Filters links relying on internal implementation
      *
      * @param links to be filtered
      * @param currentLink from that page all links were taken

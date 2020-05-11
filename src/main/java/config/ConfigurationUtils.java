@@ -11,8 +11,9 @@ import java.util.stream.Collectors;
 
 /**
  * Class responsible for properties configuration
- * There are two types of property files: <b>required</b> {@throws ConfigurationFailException} if file is absent and
+ * There are two types of property files: <b>required</b> throw {@link ConfigurationFailException} if file is absent and
  * <b>optional</b> (only would log fail)
+ * {@throws ConfigurationFailException}
  */
 public class ConfigurationUtils {
     // required properties
