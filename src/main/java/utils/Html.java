@@ -1,5 +1,6 @@
 package utils;
 
+import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -14,16 +15,30 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Html {
+    private static final Pattern htmlTagPattern = Pattern.compile("<\\s*html[^><]*>"
+            + "|<\\s*html[^>]*>[^><]*<\\s*/\\s*html\\s*>");
+    private static final Pattern metaTagPattern = Pattern.compile("<\\s*meta[^><]*>"
+            + "|<\\s*meta[^>]*>[^><]*<\\s*/\\s*meta\\s*>");
+    private static final Pattern charsetAttrPattern = Pattern.compile("charset\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?");
+    private static final Pattern contentAttrPattern = Pattern.compile("content\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?");
+    private static final Pattern langAttrPattern    = Pattern.compile("lang\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?");
+    private static final Pattern simpleLanguageAttrPattern = Pattern.compile("language");
+
     private static final Html EMPTY_HTML = new Html("", new Link(""));
 
     private final String html;
     private final Link url;
-    private final String lang;
+    private String lang;
 
     public Html(String html, @NotNull Link url) {
         this.html = html;
         this.url = url;
-        this.lang = findLang(html);
+        try {
+            this.lang = findLang(html);
+        } catch (Exception e) {
+            LoggerUtils.debugLog.error("HTML - Failed to parse lang");
+            this.lang = "";
+        }
     }
 
     public static Html emptyHtml() {
@@ -75,10 +90,10 @@ public class Html {
     // returns first charset of all in last meta tag with charset attr
     // cannot define if meta tag is incorrect and would not be parsed by browser.
     private static String getCharset(String html) {
-        var tags = getTagsFromHtml(html, "meta");
+        var tags = getTagsFromHtml(html, metaTagPattern);
         if (tags.size() != 0) {
             for (String tag : tags) {
-                var charset = getAttrFromHtmlElement(tag, "charset");
+                var charset = getAttrFromHtmlElement(tag, charsetAttrPattern);
                 if (charset != null) return charset;
             }
         }
@@ -87,40 +102,34 @@ public class Html {
 
     // use first html tag
     private static String findLang(String html) {
-        var htmlTags = getTagsFromHtml(html, "html");
+        var htmlTags = getTagsFromHtml(html, htmlTagPattern);
         if (htmlTags.size() != 0) {
             var tag = htmlTags.get(0);
-            var lang = getAttrFromHtmlElement(tag, "lang");
+            var lang = getAttrFromHtmlElement(tag, langAttrPattern);
             if (lang != null) return lang;
         }
-        var metaTags = getTagsFromHtml(html, "meta");
+        var metaTags = getTagsFromHtml(html, metaTagPattern);
+
         for (String tag : metaTags) {
-            String attrStrPattern = "language";
-            Pattern attrPattern = Pattern.compile(attrStrPattern);
-            Matcher langMatcher = attrPattern.matcher(tag);
+            Matcher langMatcher = simpleLanguageAttrPattern.matcher(tag);
             if (langMatcher.find()) {
-                return getAttrFromHtmlElement(tag, "content");
+                return getAttrFromHtmlElement(tag, contentAttrPattern);
             }
 
         }
         return null;
     }
 
-    private static List<String> getTagsFromHtml(String html, String tag) {
-        String htmlTagStrPattern = String.format("<\\s*%s[^><]*>"
-                + "|<\\s*%s[^>]*>[^><]*<\\s*/\\s*%s\\s*>", tag, tag, tag);
-        Pattern htmlTagPattern = Pattern.compile(htmlTagStrPattern);
-        Matcher htmlTagMatcher = htmlTagPattern.matcher(html);
+    private static List<String> getTagsFromHtml(String html, Pattern tagPattern) {
+        Matcher tagMatcher = tagPattern.matcher(html);
         var res = new ArrayList<String>();
-        while (htmlTagMatcher.find()) {
-            res.add(htmlTagMatcher.group());
+        while (tagMatcher.find()) {
+            res.add(tagMatcher.group());
         }
         return res;
     }
 
-    private static String getAttrFromHtmlElement(String el, String attr) {
-        String attrStrPattern = String.format("%s\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?", attr);
-        Pattern attrPattern = Pattern.compile(attrStrPattern);
+    private static String getAttrFromHtmlElement(String el, Pattern attrPattern) {
         Matcher attrMatcher = attrPattern.matcher(el);
         if (attrMatcher.find()) {
             var htmlAttr = attrMatcher.group();
