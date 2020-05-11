@@ -127,14 +127,15 @@ public class Link {
         return res;
     }
 
-    public String getWithoutQueryAndFragment() {
-        var str = getScheme() + "://" + getHost();
+    public String getWithoutQueryUserInfoAndFragment() {
+        var sb = new StringBuilder();
+        sb.append(getScheme()).append("://").append(getHost());
         var port = getPort();
         if (port != -1) {
-            str = str + ":" + port;
+            sb.append(":").append(port);
         }
-        str += getPath();
-        return str;
+        sb.append(getPath());
+        return sb.toString();
     }
 
     public String getWithoutProtocol() {

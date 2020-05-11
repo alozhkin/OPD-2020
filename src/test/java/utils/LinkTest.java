@@ -60,19 +60,19 @@ public class LinkTest {
     @Test
     void shouldGetUrlWithoutFragmentAndQuery() {
         var url = "http://example:8080/?name=you#content";
-        assertEquals("http://example:8080", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example:8080", new Link(url).getWithoutQueryUserInfoAndFragment());
     }
 
     @Test
     void shouldGetUrlWithoutFragmentAndQueryPortExcluded() {
         var url = "http://example/?name=you#content";
-        assertEquals("http://example", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example", new Link(url).getWithoutQueryUserInfoAndFragment());
     }
 
     @Test
     void shouldGetUrlWithoutFragmentAndQueryPathIncluded() {
         var url = "http://example/ttt?name=you#content";
-        assertEquals("http://example/ttt", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example/ttt", new Link(url).getWithoutQueryUserInfoAndFragment());
     }
 
     @Test
