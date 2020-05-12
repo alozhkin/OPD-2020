@@ -81,7 +81,7 @@ public class DomainTask {
     }
 
     private void scrapeNextLink() throws InterruptedException {
-        var link = linkQueue.poll(500, TimeUnit.MILLISECONDS);
+        var link = linkQueue.poll(200, TimeUnit.MILLISECONDS);
         if (link != null) {
             scraper.scrape(link, new PageTask(context, linkQueue, resultWords)::handlePage);
             numberOfScrapedLinks++;

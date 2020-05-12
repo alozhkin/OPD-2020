@@ -21,7 +21,7 @@ import java.util.concurrent.*;
  */
 public class Spider {
     // in seconds
-    private static final int DOMAIN_TIMEOUT = 100;
+    private static final int DOMAIN_TIMEOUT = 30;
     // after that number of fails in a row program stops
     private static final int CONNECT_FAILS = 10;
 

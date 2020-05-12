@@ -43,9 +43,9 @@ public class SplashScraper implements Scraper {
             .build();
     private static final ScheduledExecutorService retryExecutor = Executors.newSingleThreadScheduledExecutor();
     // in millis
-    private static final int SPLASH_RESTART_TIME = 6000;
+    private static final int SPLASH_RESTART_TIME = 3000;
     private static final int SPLASH_RETRY_TIMEOUT = 500;
-    private static final int SPLASH_IS_UNAVAILABLE_RETRIES = 5;
+    private static final int SPLASH_IS_UNAVAILABLE_RETRIES = 10;
     private static final Gson gson = new Gson();
 
     private final Statistic stat = new Statistic();
