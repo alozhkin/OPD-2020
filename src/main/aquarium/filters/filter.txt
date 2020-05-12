@@ -1,0 +1,12 @@
+$image,stylesheet
+prettify.js^
+analytics.js^
+favicon.svg^
+favicon.ico^
+.css^
+.png^
+.jpg^
+.zip^
+||google-analytics.com^
+.ttf|
+.woff|
