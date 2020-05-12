@@ -32,11 +32,20 @@ public class DefaultLinkFilter implements LinkFilter {
     private static final Set<String> ignoredSubdomains = new HashSet<>();
 
     static {
-        ConfigurationUtils.parseResourceToCollection("languages.txt", ignoredLanguages, DefaultLinkFilter.class);
-        ConfigurationUtils.parseResourceToCollection("ignored_links.txt", ignoredLinks, DefaultLinkFilter.class);
         ConfigurationUtils.parseResourceToCollection(
                 "file_extensions.txt", allowedFileExtensions, DefaultLinkFilter.class
         );
+        ConfigurationUtils.parseResourceToCollection("languages.txt", ignoredLanguages, DefaultLinkFilter.class);
+        var ignoredLinksFormFile = new HashSet<String>();
+        ConfigurationUtils.parseResourceToCollection(
+                "ignored_links.txt", ignoredLinksFormFile, DefaultLinkFilter.class
+        );
+        for (String l : ignoredLinksFormFile) {
+            ignoredLinks.add(l);
+            for (String fe : allowedFileExtensions) {
+                ignoredLinks.add(l + "." + fe);
+            }
+        }
         ConfigurationUtils.parseResourceToCollection(
                 "ignored_subdomains.txt", ignoredSubdomains, DefaultLinkFilter.class
         );
