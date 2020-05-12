@@ -79,11 +79,13 @@ public class SplashScraper implements Scraper {
 
     @Override
     public void scrape(Link link, Consumer<Page> siteConsumer) {
+        LoggerUtils.debugLog.debug("SplashScraper - Site start " + link);
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new SplashCallback(new CallContext(link, siteConsumer)));
         stat.requestSended();
+        LoggerUtils.debugLog.debug("SplashScraper - Site end " + link);
     }
 
     /**
@@ -189,6 +191,7 @@ public class SplashScraper implements Scraper {
          */
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
+            LoggerUtils.debugLog.debug("SplashScraper - Response is accepted " + initialLink);
             this.call = call;
             try {
                 handleResponse(response);

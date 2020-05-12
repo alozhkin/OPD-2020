@@ -1,13 +1,13 @@
 package extractor;
 
 import config.ConfigurationUtils;
-import logger.LoggerUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+
 // TODO documentation for class and all not inherit methods
 public class DefaultWordFilter implements WordFilter {
 
@@ -18,7 +18,6 @@ public class DefaultWordFilter implements WordFilter {
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
-        LoggerUtils.debugLog.debug("DefaultWordFilter - Filtration task completed");
         return newSet;
     }
 

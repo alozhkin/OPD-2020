@@ -2,7 +2,6 @@ package crawler;
 
 import config.ConfigurationFailException;
 import config.ConfigurationUtils;
-import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
 import utils.Parameter;
@@ -72,7 +71,6 @@ public class DefaultLinkFilter implements LinkFilter {
                 res.add(link);
             }
         }
-        LoggerUtils.debugLog.debug("DefaultLinkFilter - Link filtration task completed");
         return res;
     }
 

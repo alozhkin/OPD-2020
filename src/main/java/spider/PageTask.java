@@ -33,11 +33,12 @@ public class PageTask {
      */
     public void handlePage(Page page) {
         var html = page.getHtml();
+        var htmlLink = html.getUrl();
+        LoggerUtils.debugLog.info("PageTask - Start " + htmlLink.toString());
         var initialLink = page.getInitialLink();
         if (!html.isLangRight()) {
             throw new HtmlLanguageException();
         }
-        var htmlLink = html.getUrl();
         var links = context.crawl(html);
         var filteredLinks = context.filterLinks(links, htmlLink, initialLink);
         linkQueue.addAll(filteredLinks);
