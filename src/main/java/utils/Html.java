@@ -27,8 +27,6 @@ public class Html {
     private static final Pattern langAttrPattern    = Pattern.compile("lang\\s*=\\s*\"?\\s*[\\w\\d\\-]*\\s*\"?");
     private static final Pattern simpleLanguageAttrPattern = Pattern.compile("language");
 
-    private static final Html EMPTY_HTML = new Html("", new Link(""));
-
     private final String html;
     private final Link url;
     private String lang;
@@ -42,14 +40,6 @@ public class Html {
             LoggerUtils.debugLog.error("HTML - Failed to parse lang");
             this.lang = "";
         }
-    }
-
-    /**
-     *
-     * @return Html with "" instead html and empty link instead url
-     */
-    public static Html emptyHtml() {
-        return EMPTY_HTML;
     }
 
     /**
