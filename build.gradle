@@ -35,7 +35,6 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
 
-    implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'me.tongfei:progressbar:0.8.1'
     implementation group: 'args4j', name: 'args4j', version: '2.33'
