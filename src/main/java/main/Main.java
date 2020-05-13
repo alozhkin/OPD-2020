@@ -18,7 +18,7 @@ public class Main {
         LoggerUtils.debugLog.info("Main - START");
         var spider = new Spider(new DefaultContextFactory(), Database.newInstance());
         spider.scrapeFromCSVFile(INPUT_PATH, OUTPUT_PATH);
-        LoggerUtils.debugLog.info("Main - " + LoggerUtils.getPagesScraped() + " pages were scraped in total");
-        LoggerUtils.consoleLog.info("Main - " + LoggerUtils.getPagesScraped() + " pages were scraped in total");
+        LoggerUtils.debugLog.info("Main - {} pages were scraped in total", LoggerUtils.getPagesScraped());
+        LoggerUtils.consoleLog.info("Main - {} pages were scraped in total", LoggerUtils.getPagesScraped());
     }
 }
