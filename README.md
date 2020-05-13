@@ -3,8 +3,23 @@ OPD-2020 is a small scraper which is intended to extract words from static and d
 ## Technology stack
 We use Splash like page renderer inside Docker, Jsoup like parser. WireMock for Server mocking on tests.
 ## Installation
-for linux: docker-compose up in src/main/aquarium directory.
-Another systems may have problems with 8050 Splash port access.
+### Mac OS
+1. Install docker-compose using Terminal or use other methods described [here](https://pilsniak.com/how-to-install-docker-on-mac-os-using-brew/) 
+
+```
+brew install docker docker-compose docker-machine xhyve docker-machine-driver-xhyve
+```
+2. Go to the folder **YOUR_PATH_TO_PROJECT/src/main/aquarium** using
+```
+cd YOUR_PATH_TO_PROJECT/src/main/aquarium
+```
+3. Execute command
+```
+docker-compose up
+```
+### Linux 
+docker-compose up in src/main/aquarium directory.
+### Another systems may have problems with 8050 Splash port access.
 ## How does it work?
 First of all, we use Splash to render html and run js code. What can it do?
 
