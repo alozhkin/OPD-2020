@@ -10,11 +10,16 @@ import splash.SplashNotRespondingException;
 import utils.CSVParser;
 import utils.Link;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
+
+import static logger.LoggerUtils.consoleLog;
+import static logger.LoggerUtils.debugLog;
+import static ui.ConsoleUI.*;
 
 /**
  * Class carrying out the main work of the program: turn domains into words inside database
@@ -47,9 +52,17 @@ public class Spider {
      */
     public void scrapeFromCSVFile(String input, String output) {
         var csvParser = new CSVParser();
-        csvParser.parse(input);
+        try {
+            csvParser.parse(input);
+        } catch (IOException e) {
+            consoleLog.error("Spider - Failed to scrape from CSV file: ", e);
+            debugLog.error("Spider - Failed to scrape from CSV File: ", e);
+            return;
+        }
         List<Link> domains = csvParser.getLinks();
         scrapeDomains(domains);
+        database.exportDataToCSV(output);
+        pb.step();
     }
 
     /**
@@ -62,8 +75,9 @@ public class Spider {
     public void scrapeDomains(Collection<Link> domains) {
         var domainExec = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService dbExec = Executors.newSingleThreadScheduledExecutor();
-
         var requestFactory = new DefaultSplashRequestFactory();
+
+        pb.maxHint(domains.size() + 1);
 
         try {
             for (Link d : domains) {
@@ -76,6 +90,7 @@ public class Spider {
                 handleDomainFuture(future);
                 trackStatistic(scraper.getStatistic());
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
+                pb.step();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -2,10 +2,7 @@ package utils;
 
 import database.models.Website;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,15 +16,13 @@ public class CSVParser {
     private final Map<String, Integer> domainsIds = new HashMap<>();
     private final List<Link> links = new ArrayList<>();
 
-    public void parse(String filePath) {
+    public void parse(String filePath) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(new File(filePath)))) {
             // skip first line (heading)
             var line = br.readLine();
             while ((line = br.readLine()) != null) {
                 convertLineToValues(line);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
