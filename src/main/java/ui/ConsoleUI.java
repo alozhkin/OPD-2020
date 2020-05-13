@@ -12,7 +12,7 @@ import org.kohsuke.args4j.Option;
 import static logger.LoggerUtils.consoleLog;
 import static logger.LoggerUtils.debugLog;
 
-public class ConsoleUI implements UI {
+public class ConsoleUI {
     public static ProgressBar pb = new ProgressBar("Test", 100);
     private static final String OUTPUT_PATH = "output.csv";
 
