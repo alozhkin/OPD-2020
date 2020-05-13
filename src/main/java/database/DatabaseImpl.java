@@ -10,11 +10,15 @@ import utils.Link;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
+import static logger.LoggerUtils.consoleLog;
+import static logger.LoggerUtils.debugLog;
 
 class DatabaseImpl implements Database {
 
@@ -32,15 +36,20 @@ class DatabaseImpl implements Database {
             url = System.getProperty("database.url");
             initDatabase();
         } catch (ClassNotFoundException e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to initialize database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to initialize database:", e);
+            consoleLog.error("DatabaseImpl - Failed to initialize database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to initialize database:", e);
         }
     }
 
     @Override
     public boolean putWebsitesFromCSV(String CSVFile) {
         CSVParser parser = new CSVParser();
-        parser.parse(CSVFile);
+        try {
+            parser.parse(CSVFile);
+        } catch (IOException e) {
+            consoleLog.error("DatabaseImpl - Failed to put websites from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to put websites from database:", e);
+        }
         return putWebsites(parser.getWebsites());
     }
 
@@ -57,8 +66,8 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to put websites into database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to put websites into database:", e);
+            consoleLog.error("DatabaseImpl - Failed to put websites into database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to put websites into database:", e);
             return false;
         }
     }
@@ -71,8 +80,8 @@ class DatabaseImpl implements Database {
     @Override
     public boolean putWords(Collection<Word> words) {
         if (words.isEmpty()) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - An empty list of words came to the database");
-            LoggerUtils.debugLog.error("DatabaseImpl -An empty list of words came to the database");
+            consoleLog.error("DatabaseImpl - An empty list of words came to the database");
+            debugLog.error("DatabaseImpl -An empty list of words came to the database");
             return false;
         }
         try (Connection connection = getConnection()) {
@@ -82,8 +91,8 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to put words into database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to put words into database:", e);
+            consoleLog.error("DatabaseImpl - Failed to put words into database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to put words into database:", e);
             return false;
         }
     }
@@ -136,8 +145,8 @@ class DatabaseImpl implements Database {
             }
             return true;
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to export data from database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to export data from database:", e);
+            consoleLog.error("DatabaseImpl - Failed to export data from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to export data from database:", e);
             return false;
         }
     }
@@ -176,8 +185,8 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to get website information from database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to get website information from database:", e);
+            consoleLog.error("DatabaseImpl - Failed to get website information from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to get website information from database:", e);
             return set;
         }
     }
@@ -209,8 +218,8 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to get words from database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to get words from database:", e);
+            consoleLog.error("DatabaseImpl - Failed to get words from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to get words from database:", e);
             return null;
         }
     }
@@ -227,8 +236,8 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to get word information from database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to get word information from database:", e);
+            consoleLog.error("DatabaseImpl - Failed to get word information from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to get word information from database:", e);
             return -1;
         }
     }
@@ -242,8 +251,8 @@ class DatabaseImpl implements Database {
             statement.execute("CREATE TABLE IF NOT EXISTS websites ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'company_id' int(11) NOT NULL , 'website' TEXT NOT NULL)");
             statement.execute("CREATE TABLE IF NOT EXISTS words ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'website_id' int(11) NOT NULL , 'word' TEXT NOT NULL)");
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to initialize database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to initialize database:", e);
+            consoleLog.error("DatabaseImpl - Failed to initialize database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to initialize database:", e);
         }
     }
 
@@ -268,8 +277,8 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to execute statement: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to execute statement:", e);
+            consoleLog.error("DatabaseImpl - Failed to execute statement: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to execute statement:", e);
             return false;
         }
     }
@@ -285,8 +294,8 @@ class DatabaseImpl implements Database {
                 return true;
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to execute statement: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to execute statement:", e);
+            consoleLog.error("DatabaseImpl - Failed to execute statement: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to execute statement:", e);
             return false;
         }
     }
@@ -300,8 +309,8 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to get information from database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to get information from database:", e);
+            consoleLog.error("DatabaseImpl - Failed to get information from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to get information from database:", e);
             return -1;
         }
     }
@@ -322,8 +331,8 @@ class DatabaseImpl implements Database {
             }
 
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to get words from database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to get words from database:", e);
+            consoleLog.error("DatabaseImpl - Failed to get words from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to get words from database:", e);
             return set;
         }
     }
@@ -342,8 +351,8 @@ class DatabaseImpl implements Database {
                 }
             }
         } catch (Exception e) {
-            LoggerUtils.consoleLog.error("DatabaseImpl - Failed to get websites from database: {}", e.toString());
-            LoggerUtils.debugLog.error("DatabaseImpl - Failed to get websites from database:", e);
+            consoleLog.error("DatabaseImpl - Failed to get websites from database: {}", e.toString());
+            debugLog.error("DatabaseImpl - Failed to get websites from database:", e);
             return set;
         }
     }
