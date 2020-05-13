@@ -44,13 +44,13 @@ public class DomainTask {
      * Rethrows exception if domain (first link) failed, else ignore.
      */
     void scrapeDomain() {
-        LoggerUtils.debugLog.info("Domain Task - Start executing site " + domain);
+        LoggerUtils.debugLog.info("Domain Task - Start executing site {}", domain);
         try {
             handleDomain();
         } catch (InterruptedException e) {
             handleInterruption();
         } finally {
-            LoggerUtils.debugLog.info("Domain Task - Stop executing site " + domain);
+            LoggerUtils.debugLog.info("Domain Task - Stop executing site {}", domain);
         }
     }
 
@@ -108,9 +108,9 @@ public class DomainTask {
             throw (ScraperConnectionException) e;
         } else if (exClass.equals(HtmlLanguageException.class)) {
             LoggerUtils.debugLog.warn("DomainTask - Wrong html language, " +
-                    "site is not taken into account " + domain
+                    "site is not taken into account {}", domain
             );
-            LoggerUtils.consoleLog.warn("Wrong html language, site is not taken into account " + domain);
+            LoggerUtils.consoleLog.warn("Wrong html language, site is not taken into account {}", domain);
         } else {
             LoggerUtils.debugLog.error("DomainTask - Failed", e);
         }

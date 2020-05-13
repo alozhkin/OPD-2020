@@ -43,7 +43,7 @@ public class PageTask {
         linkQueue.addAll(filteredLinks);
         var words = context.extract(html);
         var filteredWords = context.filterWords(words);
-        LoggerUtils.debugLog.info("PageTask - Completed " + htmlLink.toString());
+        LoggerUtils.debugLog.info("PageTask - Completed {}", htmlLink.toString());
         resultWords.addAll(filteredWords);
         LoggerUtils.pageScraped();
     }

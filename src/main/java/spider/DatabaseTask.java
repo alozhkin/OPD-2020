@@ -33,8 +33,8 @@ public class DatabaseTask {
                                 .collect(Collectors.toSet())
                 );
             } else {
-                LoggerUtils.debugLog.warn("DatabaseTask - An empty list of words came to the database " + domain);
-                LoggerUtils.consoleLog.warn("An empty list of words came to the database " + domain);
+                LoggerUtils.debugLog.warn("DatabaseTask - An empty list of words came to the database {}", domain);
+                LoggerUtils.consoleLog.warn("An empty list of words came to the database {}", domain);
                 return false;
             }
         } catch (Exception e) {
