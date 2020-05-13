@@ -79,13 +79,13 @@ public class SplashScraper implements Scraper {
 
     @Override
     public void scrape(Link link, Consumer<Page> siteConsumer) {
-        LoggerUtils.debugLog.debug("SplashScraper - Site start " + link);
+        LoggerUtils.debugLog.debug("SplashScraper - Site start {}", link);
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new SplashCallback(new CallContext(link, siteConsumer)));
         stat.requestSended();
-        LoggerUtils.debugLog.debug("SplashScraper - Site end " + link);
+        LoggerUtils.debugLog.debug("SplashScraper - Site end {}", link);
     }
 
     /**
@@ -160,20 +160,20 @@ public class SplashScraper implements Scraper {
         private void handleFail(IOException e) {
             var cause = e.getCause();
             if (cause != null && cause.getClass().equals(EOFException.class)) {
-                LoggerUtils.debugLog.warn("SplashScraper - EOFException, request will be retried " + initialLink);
+                LoggerUtils.debugLog.warn("SplashScraper - EOFException, request will be retried {}", initialLink);
                 handleSplashRestarting();
                 return;
             } else if (e.getMessage().equals("Canceled")) {
                 LoggerUtils.debugLog.warn("SplashScraper - Request canceled " + initialLink);
             } else if (e.getClass().equals(SocketException.class)) {
-                LoggerUtils.debugLog.error("SplashScraper - Socket is closed, request will be retried " + initialLink);
+                LoggerUtils.debugLog.error("SplashScraper - Socket is closed, request will be retried {}", initialLink);
                 handleSplashRestarting();
                 return;
             } else if (e.getMessage().equals("executor rejected")) {
-                LoggerUtils.debugLog.error("SplashScraper - Executor rejected " + initialLink);
+                LoggerUtils.debugLog.error("SplashScraper - Executor rejected {}", initialLink);
                 stat.requestFailed();
             } else {
-                LoggerUtils.debugLog.error("SplashScraper - Request failed " + initialLink, e);
+                LoggerUtils.debugLog.error("SplashScraper - Request failed {}", initialLink, e);
                 stat.requestFailed();
             }
             failedPages.add(new FailedPage(e, initialLink));
@@ -191,7 +191,7 @@ public class SplashScraper implements Scraper {
          */
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
-            LoggerUtils.debugLog.debug("SplashScraper - Response is accepted " + initialLink);
+            LoggerUtils.debugLog.debug("SplashScraper - Response is accepted {}", initialLink);
             this.call = call;
             try {
                 handleResponse(response);
@@ -204,11 +204,11 @@ public class SplashScraper implements Scraper {
         private void handleResponse(Response response) throws IOException {
             int code = response.code();
             if (code == 503 || code == 502) {
-                LoggerUtils.debugLog.warn("SplashScraper - HTTP " + code + ", request will be retried " + initialLink);
+                LoggerUtils.debugLog.warn("SplashScraper - HTTP {}, request will be retried {}", code, initialLink);
                 handleSplashRestarting();
             } else if (code == 504) {
                 stat.requestTimeout();
-                LoggerUtils.debugLog.warn("SplashScraper - Timeout expired " + initialLink);
+                LoggerUtils.debugLog.warn("SplashScraper - Timeout expired {}", initialLink);
             } else if (code == 200) {
                 var responseBody = response.body();
                 if (responseBody == null) {
@@ -271,11 +271,11 @@ public class SplashScraper implements Scraper {
         private void handleExceptionOnResponse(Exception e) {
             failedPages.add(new FailedPage(e, initialLink));
             if (e.getClass().equals(HtmlLanguageException.class)) {
-                LoggerUtils.debugLog.info("SplashScraper - Wrong html language " + initialLink.toString());
+                LoggerUtils.debugLog.info("SplashScraper - Wrong html language {}", initialLink.toString());
                 stat.responseRejected();
             } else {
-                LoggerUtils.debugLog.error("SplashScraper - Exception while handling response, site "
-                        + initialLink.toString(), e);
+                LoggerUtils.debugLog.error("SplashScraper - Exception while handling response, site {}",
+                        initialLink.toString(), e);
                 stat.responseException();
             }
         }

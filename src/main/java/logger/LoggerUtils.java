@@ -14,13 +14,13 @@ public class LoggerUtils {
     private LoggerUtils() {}
 
     public static void logFileNotFound(String fileName, Class<?> c) {
-        consoleLog.error(c.getSimpleName() + " - File " + fileName + " not found");
-        debugLog.error(c.getSimpleName() + " - File " + fileName + " not found");
+        consoleLog.error("{} - File {} not found", c.getSimpleName(), fileName);
+        debugLog.error("{} - File {} not found", c.getSimpleName(), fileName);
     }
 
     public static void logFileReadingFail(String fileName, Class<?> c) {
-        consoleLog.error(c.getSimpleName() + " - File " + fileName + " reading fail");
-        debugLog.error(c.getSimpleName() + " - File " + fileName + " reading fail");
+        consoleLog.error("{} - File {} reading fail", c.getSimpleName(), fileName);
+        debugLog.error("{} - File {} reading fail", c.getSimpleName(), fileName);
     }
 
     public static void pageScraped() {
