@@ -7,7 +7,6 @@ import spider.DefaultContextFactory;
 import spider.Spider;
 
 public class Main {
-    // in seconds
     private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
     private static final String OUTPUT_PATH = "export.csv";
 
@@ -19,5 +18,7 @@ public class Main {
         LoggerUtils.debugLog.info("Main - START");
         var spider = new Spider(new DefaultContextFactory(), Database.newInstance());
         spider.scrapeFromCSVFile(INPUT_PATH, OUTPUT_PATH);
+        LoggerUtils.debugLog.info("Main - " + LoggerUtils.getPagesScraped() + " pages were scraped in total");
+        LoggerUtils.consoleLog.info("Main - " + LoggerUtils.getPagesScraped() + " pages were scraped in total");
     }
 }

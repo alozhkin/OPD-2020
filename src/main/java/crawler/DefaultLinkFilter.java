@@ -2,7 +2,6 @@ package crawler;
 
 import config.ConfigurationFailException;
 import config.ConfigurationUtils;
-import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 import utils.Link;
 import utils.Parameter;
@@ -13,50 +12,89 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * DefaultLinkFilter removes:
+ * <ul><li>links that have path segment from {@link DefaultLinkFilter#ignoredLinks}
+ * <li>links that have first path segment from {@link DefaultLinkFilter#ignoredLanguages} which is not matching
+ * site.langs property
+ * <li>links which file extension is not present in {@link DefaultLinkFilter#allowedFileExtensions}
+ * <li>links with subdomains from {@link DefaultLinkFilter#ignoredSubdomains}
+ * <li>links which host name is not a domain or subdomain of page url
+ * <li>repeating links. Links are separated by its subdomains (not <i>"www"</i>), path segments and
+ * selected query params from {@link DefaultLinkFilter#getContentParams(Link)}.
+ * <li>links with fragment
+ * <li>links with user info<ul/>
+ */
 public class DefaultLinkFilter implements LinkFilter {
-    private static final Set<String> languages = new HashSet<>();
-    private static final Set<String> fileExtensions = new HashSet<>();
+    private static final Set<String> ignoredLanguages = new HashSet<>();
+    private static final Set<String> allowedFileExtensions = new HashSet<>();
     private static final Set<String> ignoredLinks = new HashSet<>();
-
-    private final Set<LinkIdentifiers> occurredLinks;
+    private static final Set<String> ignoredSubdomains = new HashSet<>();
 
     static {
-        ConfigurationUtils.parseResourceToCollection("languages.txt", languages, DefaultLinkFilter.class);
-        ConfigurationUtils.parseResourceToCollection("file_extensions.txt", fileExtensions, DefaultLinkFilter.class);
-
-        ConfigurationUtils.parseResourceToCollection("ignored_links.txt", ignoredLinks, DefaultLinkFilter.class);
+        ConfigurationUtils.parseResourceToCollection(
+                "file_extensions.txt", allowedFileExtensions, DefaultLinkFilter.class
+        );
+        ConfigurationUtils.parseResourceToCollection("languages.txt", ignoredLanguages, DefaultLinkFilter.class);
+        var ignoredLinksFormFile = new HashSet<String>();
+        ConfigurationUtils.parseResourceToCollection(
+                "ignored_links.txt", ignoredLinksFormFile, DefaultLinkFilter.class
+        );
+        for (String l : ignoredLinksFormFile) {
+            ignoredLinks.add(l);
+            for (String fe : allowedFileExtensions) {
+                ignoredLinks.add(l + "." + fe);
+            }
+        }
+        ConfigurationUtils.parseResourceToCollection(
+                "ignored_subdomains.txt", ignoredSubdomains, DefaultLinkFilter.class
+        );
     }
+
+    private final Set<LinkIdentifiers> occurredLinks = ConcurrentHashMap.newKeySet();
 
     public DefaultLinkFilter() {
-        if (fileExtensions.isEmpty()) {
+        if (allowedFileExtensions.isEmpty()) {
             throw new ConfigurationFailException("DefaultLinkFilter - Allowed file extensions are not found");
         }
-        occurredLinks = ConcurrentHashMap.newKeySet();
     }
 
-    //suggests that main page were visited
+    /**
+     * Adds typical home page names to occurred links
+     */
     public void addDomain() {
         occurredLinks.add(new LinkIdentifiers(""));
         occurredLinks.add(new LinkIdentifiers("index"));
-        for (String fe : fileExtensions) {
-            occurredLinks.add(new LinkIdentifiers("/index." + fe));
+        for (String fileExtension : allowedFileExtensions) {
+            occurredLinks.add(new LinkIdentifiers("/index." + fileExtension));
         }
     }
 
-    public Collection<Link> filter(@NotNull Collection<Link> links, Link domain) {
+    @Override
+    public Collection<Link> filter(@NotNull Collection<Link> links, Link currentLink) {
         Set<Link> res = new HashSet<>();
+        occurredLinks.add(getLinkIdentifiers(currentLink));
         for (Link link : links) {
-            var linkIdentifiers = new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains());
-            if (isLinkSuitable(link, domain) && isLinkNotOccurred(linkIdentifiers)) {
+            var linkIdentifiers = getLinkIdentifiers(link);
+            if (isLinkSuitable(link, currentLink) && isLinkNotOccurred(linkIdentifiers)) {
                 res.add(link);
             }
         }
-        LoggerUtils.debugLog.debug("Link filtration task completed");
         return res;
     }
 
-    private boolean isLinkSuitable(Link link, Link domain) {
-        return isOnSameDomain(link, domain)
+    @Override
+    public Collection<Link> filter(@NotNull Collection<Link> links, Link currentLink, Link initialLink) {
+        occurredLinks.add(getLinkIdentifiers(initialLink));
+        return filter(links, currentLink);
+    }
+
+    private LinkIdentifiers getLinkIdentifiers(Link link) {
+        return new LinkIdentifiers(link.getPath(), getContentParams(link), link.getSubdomains());
+    }
+
+    private boolean isLinkSuitable(Link link, Link currentLink) {
+        return isOnSameDomain(link, currentLink)
                 && hasNoFragment(link)
                 && hasNoUserInfo(link)
                 && hasRightLang(link)
@@ -64,8 +102,8 @@ public class DefaultLinkFilter implements LinkFilter {
                 && isFileExtensionSuitable(link);
     }
 
-    private boolean isOnSameDomain(Link link, Link domain) {
-        return link.getHost().contains(domain.getHost());
+    private boolean isOnSameDomain(Link link, Link currentLink) {
+        return link.getHost().contains(currentLink.getHost());
     }
 
     private boolean hasNoFragment(Link link) {
@@ -82,7 +120,11 @@ public class DefaultLinkFilter implements LinkFilter {
             var pathWithoutSlash = path.substring(1);
             var firstSegment = pathWithoutSlash.substring(0, indexOfSlash(pathWithoutSlash));
             if (!firstSegment.isEmpty()) {
-                return System.getProperty("site.langs").contains(firstSegment) || !languages.contains(firstSegment);
+                var propertySplit = System.getProperty("site.langs").split(",");
+                for (String lang : propertySplit) {
+                    if (lang.equals(firstSegment)) return true;
+                }
+                return !ignoredLanguages.contains(firstSegment);
             }
         }
         return true;
@@ -90,8 +132,12 @@ public class DefaultLinkFilter implements LinkFilter {
 
     private boolean hasUsefulInfo(Link link) {
         var paths = link.getPath().split("/");
-        for (String p : paths) {
-            if (ignoredLinks.contains(p)) return false;
+        for (String path : paths) {
+            if (!path.equals("") && ignoredLinks.contains(path)) return false;
+        }
+        var subdomains = link.getSubdomains();
+        for (String subdomain : subdomains) {
+            if (ignoredSubdomains.contains(subdomain)) return false;
         }
         return true;
     }
@@ -102,14 +148,15 @@ public class DefaultLinkFilter implements LinkFilter {
             var lastIndex = path.lastIndexOf('/');
             var lastSegment = path.substring(lastIndex);
             // last array part is file extension if array has size > 1
-            var lastSegmentSplitted = lastSegment.split("\\.");
-            if (lastSegmentSplitted.length == 1) {
+            var lastSegmentSplit = lastSegment.split("\\.");
+            if (lastSegmentSplit.length == 1) {
                 return true;
             } else {
-                return fileExtensions.contains(lastSegmentSplitted[lastSegmentSplitted.length - 1]);
+                return allowedFileExtensions.contains(lastSegmentSplit[lastSegmentSplit.length - 1]);
             }
+        } else {
+            return true;
         }
-        return true;
     }
 
     private synchronized boolean isLinkNotOccurred(LinkIdentifiers linkIdentifiers) {
@@ -125,7 +172,7 @@ public class DefaultLinkFilter implements LinkFilter {
         var res = new HashSet<Parameter>();
         for (Parameter param : params) {
             var name = param.getName().toLowerCase();
-            if (name.contains("id")
+            if (name.equals("id")
                     || name.equals("content")
                     || name.equals("page")
                     || name.equals("objectpath")) {

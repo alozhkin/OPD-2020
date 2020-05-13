@@ -171,8 +171,8 @@ public class LinkFilterTest {
     void shouldNotConsiderLinksWithDifferentProtocolsDifferent() {
         var filtered = linkFilter.filter(
                 Set.of(
-                        new Link("https://www.les-graveurs.de"),
-                        new Link("http://www.les-graveurs.de")
+                        new Link("https://www.les-graveurs.de/path"),
+                        new Link("http://www.les-graveurs.de/path")
                 ),
                 new Link("les-graveurs.de")
         );
@@ -191,8 +191,8 @@ public class LinkFilterTest {
     void shouldNotConsiderLinksWithWWWDifferent() {
         var filtered = linkFilter.filter(
                 Set.of(
-                        new Link("www.les-graveurs.de"),
-                        new Link("les-graveurs.de")
+                        new Link("www.les-graveurs.de/path"),
+                        new Link("les-graveurs.de/path")
                 ),
                 new Link("www.les-graveurs.de")
         );
@@ -216,12 +216,35 @@ public class LinkFilterTest {
 
     @Test
     void shouldIgnoreCertainPages() {
-        linkFilter.addDomain();
         var filtered = linkFilter.filter(
                 Set.of(
                         new Link("example.com/agb"),
                         new Link("example.com/news"),
                         new Link("example.com/blog")
+                ),
+                new Link("example.com")
+        );
+        assertEquals(0, filtered.size());
+    }
+
+    @Test
+    void shouldIgnoreCertainSubdomains() {
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("ordershop.example.com"),
+                        new Link("shop.example.com")
+                ),
+                new Link("example.com")
+        );
+        assertEquals(0, filtered.size());
+    }
+
+    @Test
+    void shouldIgnoreLinksAfterRedirect() {
+        linkFilter.filter(Set.of(), new Link("example.com/redirected"), new Link("example.com/redirect"));
+        var filtered = linkFilter.filter(
+                Set.of(
+                        new Link("example.com/redirect")
                 ),
                 new Link("example.com")
         );

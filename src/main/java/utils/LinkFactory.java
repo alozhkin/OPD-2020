@@ -3,6 +3,7 @@ package utils;
 import java.util.HashMap;
 
 public class LinkFactory {
+    // todo doc
     private static int id = -1;
     private static final HashMap<Link, Integer> domains = new HashMap<>();
 

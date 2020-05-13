@@ -4,34 +4,28 @@ import crawler.Crawler;
 import crawler.LinkFilter;
 import extractor.Extractor;
 import extractor.WordFilter;
-import scraper.Scraper;
 import utils.Html;
 import utils.Link;
 
 import java.util.Collection;
 
+/**
+ * Simple class that does not change the algorithm and fully rely on preassigned behaviors
+ */
 public class DefaultContext implements Context {
-    private final Scraper scraper;
     private final Crawler crawler;
     private final LinkFilter linkFilter;
     private final Extractor extractor;
     private final WordFilter wordFilter;
 
-    DefaultContext(Scraper scraper,
-            Crawler crawler,
+    DefaultContext(Crawler crawler,
             Extractor extractor,
             LinkFilter linkFilter,
             WordFilter wordFilter) {
-        this.scraper = scraper;
         this.crawler = crawler;
         this.linkFilter = linkFilter;
         this.extractor = extractor;
         this.wordFilter = wordFilter;
-    }
-
-    @Override
-    public Html scrape(Link site) {
-        return scraper.scrape(site);
     }
 
     @Override
@@ -40,8 +34,8 @@ public class DefaultContext implements Context {
     }
 
     @Override
-    public Collection<Link> filterLinks(Collection<Link> links, Link domain) {
-        return linkFilter.filter(links, domain);
+    public Collection<Link> filterLinks(Collection<Link> links, Link currentLink, Link initialLink) {
+        return linkFilter.filter(links, currentLink, initialLink);
     }
 
     @Override
@@ -52,10 +46,5 @@ public class DefaultContext implements Context {
     @Override
     public Collection<String> filterWords(Collection<String> words) {
         return wordFilter.filter(words);
-    }
-
-    @Override
-    public void quit() {
-        scraper.quit();
     }
 }

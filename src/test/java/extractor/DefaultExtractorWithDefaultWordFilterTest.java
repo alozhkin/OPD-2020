@@ -19,7 +19,7 @@ public class DefaultExtractorWithDefaultWordFilterTest {
     void extractWithWordFilterTest() {
         Set<String> expected = Set.of("простенький", "be1ru", "html", "теста", "проверим", "вытащит", "отфильтрует",
                 "список", "повторяющихся", "проверки", "совпадений", "слов", "ыыыыы", "непотребство", "вставить", "англ",
-                "слова", "прикольно", "примеру", "gamburger", "немецком", "versuchs", "und", "lehranstalt", "für",
+                "слова", "прикольно", "примеру", "gamburger", "немецком", "versuchs", "lehranstalt",
                 "brauerei", "berlin", "vlb", "ev");
         Collection<String> set = new DefaultExtractor().extract(h);
         Collection<String> setWithFiltration = new DefaultWordFilter().filter(set);

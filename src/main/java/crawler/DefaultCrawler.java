@@ -1,6 +1,5 @@
 package crawler;
 
-import logger.LoggerUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,6 +12,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Class responsible for extracting links from html
+ */
 public class DefaultCrawler implements Crawler {
     @Override
     public Collection<Link> crawl(@NotNull Html html) {
@@ -26,7 +28,6 @@ public class DefaultCrawler implements Crawler {
                 list.add(url);
             }
         }
-        LoggerUtils.debugLog.debug("Crawling task completed");
         return list;
     }
 }

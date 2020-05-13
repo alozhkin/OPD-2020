@@ -2,8 +2,9 @@ package utils;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.net.IDN;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LinkTest {
 
@@ -59,24 +60,50 @@ public class LinkTest {
     @Test
     void shouldGetUrlWithoutFragmentAndQuery() {
         var url = "http://example:8080/?name=you#content";
-        assertEquals("http://example:8080/", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example:8080", new Link(url).getWithoutQueryUserInfoAndFragment());
     }
 
     @Test
     void shouldGetUrlWithoutFragmentAndQueryPortExcluded() {
         var url = "http://example/?name=you#content";
-        assertEquals("http://example/", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example", new Link(url).getWithoutQueryUserInfoAndFragment());
     }
 
     @Test
     void shouldGetUrlWithoutFragmentAndQueryPathIncluded() {
         var url = "http://example/ttt?name=you#content";
-        assertEquals("http://example/ttt", new Link(url).getWithoutQueryAndFragment());
+        assertEquals("http://example/ttt", new Link(url).getWithoutQueryUserInfoAndFragment());
     }
 
     @Test
     void shouldWorkWithQueryWithoutEqualsSign() {
         var url = "https://jsoup.org/apidocs/index.html?org/jsoup/select/Elements.html";
         assertDoesNotThrow(new Link(url)::getParams);
+    }
+
+    @Test
+    void shouldParseUmlaut() {
+        var url = "www.erlebnisregion-schwäbischer-albtrauf.de";
+        var idnUrl = IDN.toASCII(url);
+        assertEquals(idnUrl, new Link(url).getHost());
+    }
+
+    @Test
+    void shouldParseSpace() {
+        var url = "www.bischer-albtrauf.de/grand tour";
+        assertEquals("/grand tour", new Link(url).getPath());
+    }
+
+    @Test
+    void shouldParseEncodedPath() {
+        var url = "http://www.alce.at/schlacht-und-zerleges%C3%A4gen";
+        assertEquals("/schlacht-und-zerlegesägen", new Link(url).getPath());
+    }
+
+    @Test
+    void shouldFixWWW() {
+        var url = "https://www.breitwiesenhaus.de/cms/wp-login.php?redirect_to=https://www.breitwiesenhaus.de/cms/wp-" +
+                "admin/&reauth=1";
+        assertEquals("breitwiesenhaus.de",new Link(url).fixWWW().getHost());
     }
 }

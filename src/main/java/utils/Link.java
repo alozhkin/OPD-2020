@@ -1,42 +1,54 @@
 package utils;
 
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Path;
+import okhttp3.HttpUrl;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
+/**
+ * Class that abstracts url and contains useful methods
+ */
 public class Link {
-    private URI uri;
     private static final String DEFAULT_PROTOCOL = "http";
+    private static final Pattern schemePattern = Pattern.compile("^[a-z][a-z0-9]*://");
+    private HttpUrl httpUrl;
+    private String strUrl;
 
-    // wrong url changes to ""
-    // removes trailing slash
-    public Link(String url) {
-        if (url.equals("")) {
-            uri = null;
+    /**
+     * Creates Link.
+     * <p>
+     * <ul><li>wrong url changes to empty link {@link Link#createEmptyLink()}
+     * <li>removes trailing slash
+     * <li>if scheme is absent, uses http
+     * <li>support non-ASCII characters
+     * <li>domains encoded with <a href="https://en.wikipedia.org/wiki/Punycode">punycode</a>
+     * <li>paths are decoded from <a href="https://en.wikipedia.org/wiki/Percent-encoding">percent encoding</a></ul>
+     *
+     * @param urlStr url (host is required)
+     */
+    public Link(@NotNull String urlStr) {
+        if (urlStr.equals("")) {
+            httpUrl = null;
         } else {
             try {
-                uri = new URL(fix(url)).toURI();
+                httpUrl = HttpUrl.get(fix(urlStr));
             } catch (Exception e) {
-                uri = null;
+                httpUrl = null;
             }
         }
     }
 
-    private Link(URI uri) {
-        this.uri = uri;
-    }
-
     private static String fix(String url) {
         if (url.isEmpty()) return url;
-        var urlFixed1 = fixProtocol(url);
-        return fixTrailingSlash(urlFixed1);
+        var urlFixed = fixProtocol(url);
+        return fixTrailingSlash(urlFixed);
     }
 
     private static String fixProtocol(String url) {
-        if (url.contains("://")) {
+        if (schemePattern.matcher(url).find()) {
             return url;
         } else {
             return DEFAULT_PROTOCOL + "://" + url;
@@ -50,28 +62,43 @@ public class Link {
         return url;
     }
 
-    public static Link createFileLink(Path path) {
-        try {
-            return new Link(path.toUri());
-        } catch (Exception e) {
-            return new Link("");
-        }
-    }
-
+    /**
+     * Empty link is link, that returns "" path and toString, -1 port and null in other cases
+     *
+     * @return link without url
+     */
     public static Link createEmptyLink() {
         return new Link("");
     }
 
+    /**
+     * Removes <i>"www."</i>, even when protocol specified
+     *
+     * @return link without <i>"www."</i>
+     */
+    public Link fixWWW() {
+        var fixed = getWithoutProtocol();
+        if (fixed.startsWith("www.")) {
+            fixed = fixed.substring(4);
+        }
+        return new Link(getScheme() + "://" + fixed);
+    }
+
+    /**
+     * Return all key-value query params
+     *
+     * @return params
+     */
     public Set<Parameter> getParams() {
         var res = new HashSet<Parameter>();
         var query = getQuery();
         if (query != null) {
-            var querySplitted = query.split("&");
-            for (String parameter : querySplitted) {
-                var paramSplitted = parameter.split("=");
-                if (paramSplitted.length == 2) {
-                    var name = paramSplitted[0];
-                    var value = paramSplitted[1];
+            var querySplit = query.split("&");
+            for (String parameter : querySplit) {
+                var paramSplit = parameter.split("=");
+                if (paramSplit.length == 2) {
+                    var name = paramSplit[0];
+                    var value = paramSplit[1];
                     res.add(new Parameter(name, value));
                 }
             }
@@ -79,104 +106,145 @@ public class Link {
         return res;
     }
 
+    /**
+     * Returns domains, ignores top-level, second-level domain and <i>"www."</i>
+     *
+     * @return domains without top-level, second level and <i>"www."</i>
+     */
     public Set<String> getSubdomains() {
         var res = new HashSet<String>();
         var host = getHost();
-            var hostSplitted = host.split("\\.");
-            var levelsNumber = hostSplitted.length;
-            // ignore top-level and second-level domain
-            for (int i = 0; i < levelsNumber - 2; i++) {
-                // ignore www
-                var subdomain = hostSplitted[i];
-                if (!subdomain.equals("www")) {
-                    res.add(subdomain);
-                }
+        var hostSplit = host.split("\\.");
+        var levelsNumber = hostSplit.length;
+        // ignore top-level and second-level domain
+        for (int i = 0; i < levelsNumber - 2; i++) {
+            // ignore www
+            var subdomain = hostSplit[i];
+            if (!subdomain.equals("www")) {
+                res.add(subdomain);
             }
+        }
         return res;
     }
 
-    public String getWithoutQueryAndFragment() {
-        var str = getScheme() + "://" + getHost();
+    public String getWithoutQueryUserInfoAndFragment() {
+        var sb = new StringBuilder();
+        sb.append(getScheme()).append("://").append(getHost());
         var port = getPort();
         if (port != -1) {
-            str = str + ":" + port;
+            sb.append(":").append(port);
         }
-        str += getPath();
-        return str;
+        sb.append(getPath());
+        return sb.toString();
     }
 
     public String getWithoutProtocol() {
-        var str = getHost();
+        var url = new StringBuilder();
+        var userInfo = getUserInfo();
+        if (userInfo != null) {
+            url.append(userInfo).append("@");
+        }
+        url.append(getHost());
         var port = getPort();
         if (port != -1) {
-            str = str + ":" + port;
+            url.append(":").append(port);
         }
-        str += getPath();
+        var path = getPath();
+        if (!path.equals("")) {
+            url.append(path);
+        }
         var query = getQuery();
         if (query != null) {
-            str += query;
+            url.append("?").append(query);
         }
         var fragment = getFragment();
         if (fragment != null) {
-            str += fragment;
+            url.append("#").append(fragment);
         }
-        return str;
+        return url.toString();
     }
 
     public String getAbsoluteURL() {
-        if (uri == null) return null;
-        return uri.toString();
+        if (httpUrl == null) return null;
+        return toString();
     }
 
     public String getScheme() {
-        if (uri == null) return null;
-        return uri.getScheme();
+        if (httpUrl == null) return null;
+        return httpUrl.scheme();
     }
 
-    public String getSchemeSpecificPart() {
-        if (uri == null) return null;
-        return uri.getSchemeSpecificPart();
-    }
-
-    public String getAuthority() {
-        if (uri == null) return null;
-        return uri.getAuthority();
-    }
-
+    /**
+     * Get user info "username:password" or "username" or null if username == ""
+     *
+     * @return user info or null
+     */
     public String getUserInfo() {
-        if (uri == null) return null;
-        return uri.getUserInfo();
+        if (httpUrl == null) return null;
+        var username = httpUrl.username();
+        var password = httpUrl.password();
+        var userInfo = new StringBuilder();
+        if (!username.equals("")) {
+            userInfo.append(username);
+            if (!password.equals("")) {
+                userInfo.append(":").append(password);
+            }
+            return userInfo.toString();
+        } else {
+            return null;
+        }
     }
 
     public String getHost() {
-        if (uri == null) return null;
-        return uri.getHost();
+        if (httpUrl == null) return null;
+        return httpUrl.host();
     }
 
+    /**
+     * Return port, or -1 if it is not specified or matches 80, 443 - HttpUrl automatically ports
+     *
+     * @return port
+     */
     public int getPort() {
-        if (uri == null) return -1;
-        return uri.getPort();
+        if (httpUrl == null) return -1;
+        int port = httpUrl.port();
+        if (port == 80 || port == 443) return -1;
+        return port;
     }
 
+    /**
+     * Gets "" if path is absent.
+     * Gets "/" + "path" if not.
+     *
+     * @return path
+     */
     public String getPath() {
-        if (uri == null) return "";
-        return uri.getPath();
+        if (httpUrl == null) return "";
+        var pathSeg = httpUrl.pathSegments();
+        if (pathSeg.size() == 1 && pathSeg.get(0).equals("")) {
+            return "";
+        } else {
+            return "/" + String.join("/", pathSeg);
+        }
     }
 
     public String getQuery() {
-        if (uri == null) return null;
-        return uri.getQuery();
+        if (httpUrl == null) return null;
+        return httpUrl.query();
     }
 
     public String getFragment() {
-        if (uri == null) return null;
-        return uri.getFragment();
+        if (httpUrl == null) return null;
+        return httpUrl.fragment();
     }
 
     @Override
     public String toString() {
-        if (uri == null) return "";
-        return uri.toString();
+        if (httpUrl == null) return "";
+        if (strUrl == null) {
+            strUrl = getScheme() + "://" + getWithoutProtocol();
+        }
+        return strUrl;
     }
 
     @Override
@@ -184,11 +252,11 @@ public class Link {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Link link = (Link) o;
-        return Objects.equals(uri, link.uri);
+        return Objects.equals(httpUrl, link.httpUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(httpUrl);
     }
 }
