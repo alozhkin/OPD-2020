@@ -14,15 +14,28 @@ brew install docker docker-compose docker-machine xhyve docker-machine-driver-xh
 ```
 cd YOUR_PATH_TO_PROJECT/src/main/aquarium
 ```
-3. Execute command (If you have problems at startup try [this](https://github.com/docker/compose/issues/2180#issuecomment-147769429))
+3. Run command (If you have problems at startup try [this](https://github.com/docker/compose/issues/2180#issuecomment-147769429))
 ```
 docker-compose up
 ```
 4. Run program
 
 ### Linux 
-docker-compose up in src/main/aquarium directory.
+1. Install docker-compose using in Terminal
+```
+sudo apt install docker-compose
+```
+2. Go to the folder **YOUR_PATH_TO_PROJECT/src/main/aquarium** using
+```
+cd YOUR_PATH_TO_PROJECT/src/main/aquarium
+```
+3. Run command
+```
+sudo docker-compose up
+```
+4. Run program
 ### Another systems may have problems with 8050 Splash port access.
+
 ## How does it work?
 First of all, we use Splash to render html and run js code. What can it do?
 
