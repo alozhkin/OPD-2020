@@ -19,7 +19,6 @@ import java.util.concurrent.*;
 
 import static logger.LoggerUtils.consoleLog;
 import static logger.LoggerUtils.debugLog;
-import static ui.ConsoleUI.*;
 
 /**
  * Class carrying out the main work of the program: turn domains into words inside database
@@ -36,6 +35,7 @@ public class Spider {
 
     private int connectFailsInARowCount = 0;
     private Link domain;
+    private OnSpiderChangesListener listener;
 
     public Spider(ContextFactory contextFactory, Database database) {
         this.contextFactory = contextFactory;
@@ -48,7 +48,7 @@ public class Spider {
      * CSV file: "id";"company_id";"website";
      *
      * @param input path to CSV file with domains
-     * @param output //todo спросить у Никиты или Андрея
+     * @param output path to which the output file with words will be placed
      */
     public void scrapeFromCSVFile(String input, String output) {
         var csvParser = new CSVParser();
@@ -57,12 +57,17 @@ public class Spider {
         } catch (IOException e) {
             consoleLog.error("Spider - Failed to scrape from CSV file: ", e);
             debugLog.error("Spider - Failed to scrape from CSV File: ", e);
+            onFinished();
             return;
         }
-        List<Link> domains = csvParser.getLinks();
-        scrapeDomains(domains);
-        database.exportDataToCSV(output);
-        pb.step();
+        try {
+            List<Link> domains = csvParser.getLinks();
+            scrapeDomains(domains);
+            database.exportDataToCSV(output);
+            onDataExported();
+        } finally {
+            onFinished();
+        }
     }
 
     /**
@@ -76,8 +81,7 @@ public class Spider {
         var domainExec = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService dbExec = Executors.newSingleThreadScheduledExecutor();
         var requestFactory = new DefaultSplashRequestFactory();
-
-        pb.maxHint(domains.size() + 1);
+        onDomainsParsed(domains);
 
         try {
             for (Link d : domains) {
@@ -90,7 +94,7 @@ public class Spider {
                 handleDomainFuture(future);
                 trackStatistic(scraper.getStatistic());
                 dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
-                pb.step();
+                onDomainScraped();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -114,6 +118,10 @@ public class Spider {
             SplashScraper.shutdown();
             LoggerUtils.debugLog.info("Spider - Resources were closed");
         }
+    }
+
+    public void setListener(OnSpiderChangesListener listener) {
+        this.listener = listener;
     }
 
     private boolean checkDomainAlreadyWas() {
@@ -161,6 +169,30 @@ public class Spider {
             executorService.awaitTermination(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void onDomainsParsed(Collection<Link> domains) {
+        if (listener != null) {
+            listener.onDomainsParsed(domains);
+        }
+    }
+
+    private void onDataExported() {
+        if (listener != null) {
+            listener.onDataExported();
+        }
+    }
+
+    private void onDomainScraped() {
+        if (listener != null) {
+            listener.onDomainScraped();
+        }
+    }
+
+    private void onFinished() {
+        if (listener != null) {
+            listener.onFinished();
         }
     }
 }

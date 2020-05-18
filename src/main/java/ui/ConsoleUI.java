@@ -1,5 +1,6 @@
 package ui;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import main.Main;
@@ -8,12 +9,14 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import spider.OnSpiderChangesListener;
+import utils.Link;
 
 import static logger.LoggerUtils.consoleLog;
 import static logger.LoggerUtils.debugLog;
 
-public class ConsoleUI {
-    public static ProgressBar pb = new ProgressBar("Test", 100);
+public class ConsoleUI implements OnSpiderChangesListener {
+    private static ProgressBar pb;
     private static final String OUTPUT_PATH = "output.csv";
 
     @Argument(required = true)
@@ -23,7 +26,6 @@ public class ConsoleUI {
 
     public static void main(String[] args) {
         new ConsoleUI().start(args);
-        pb.close();
     }
 
     private void start(String[] args) {
@@ -35,6 +37,26 @@ public class ConsoleUI {
             consoleLog.error("ConsoleUI - Failed in Cmd line parser: ", e);
             return;
         }
-        Main.start(input, Objects.requireNonNullElse(output, OUTPUT_PATH));
+        Main.start(input, Objects.requireNonNullElse(output, OUTPUT_PATH), this);
+    }
+
+    @Override
+    public void onDomainsParsed(Collection<Link> domains) {
+        pb = new ProgressBar("Words_Extractor", domains.size() + 1);
+    }
+
+    @Override
+    public void onDomainScraped() {
+        pb.step();
+    }
+
+    @Override
+    public void onDataExported() {
+        pb.step();
+    }
+
+    @Override
+    public void onFinished() {
+        pb.close();
     }
 }
