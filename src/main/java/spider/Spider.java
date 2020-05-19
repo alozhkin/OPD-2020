@@ -159,6 +159,7 @@ public class Spider {
     }
 
     private void trackStatistic(Statistic statistic) {
+        System.out.println();
         LoggerUtils.consoleLog.info("{} site {}", statistic.toString(), domain);
         LoggerUtils.debugLog.info("Spider - {} site {}", statistic.toString(), domain);
     }
