@@ -17,13 +17,13 @@ public class DatabaseTask {
     private final Database database;
     private final Link domain;
     private final Collection<String> words;
-    private final Map<String, Integer> ids;
+    private final Map<String, Integer> domainIds;
 
-    DatabaseTask(Database database, Link domain, Collection<String> words, Map<String, Integer> ids) {
+    DatabaseTask(Database database, Link domain, Collection<String> words, Map<String, Integer> domainIds) {
         this.database = database;
         this.domain = domain;
         this.words = words;
-        this.ids = ids;
+        this.domainIds = domainIds;
     }
 
     boolean run() {
@@ -32,7 +32,7 @@ public class DatabaseTask {
             if (!words.isEmpty()) {
                 return database.putWords(
                         words.stream()
-                                .map(word -> Word.newInstance(ids.get(domain.getAbsoluteURL()), word))
+                                .map(word -> Word.newInstance(domainIds.get(domain.getAbsoluteURL()), word))
                                 .collect(Collectors.toSet())
                 );
             } else {
