@@ -175,6 +175,7 @@ public class DefaultLinkFilter implements LinkFilter {
             if (name.equals("id")
                     || name.equals("content")
                     || name.equals("page")
+                    || name.equals("page_id")
                     || name.equals("objectpath")) {
                 res.add(param);
             }
