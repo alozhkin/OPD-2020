@@ -209,17 +209,16 @@ public class SplashScraper implements Scraper {
                 stat.requestTimeout();
                 LoggerUtils.debugLog.warn("SplashScraper - Timeout expired {}", initialLink);
             } else if (code == 200) {
+                stat.requestSucceeded();
                 var body = extractResponseBode(response);
                 handleSuccessfulResponseBody(body);
             } else if (code == 400) {
                 var body = extractResponseBode(response);
                 handle400ResponseBody(body);
                 stat.responseFailCode();
-                return;
             } else {
                 stat.responseFailCode();
             }
-            stat.requestSucceeded();
             response.close();
         }
 

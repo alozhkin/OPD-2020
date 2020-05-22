@@ -76,7 +76,7 @@ public class DefaultLinkFilter implements LinkFilter {
         occurredLinks.add(getLinkIdentifiers(currentLink));
         for (Link link : links) {
             var linkIdentifiers = getLinkIdentifiers(link);
-            if (isLinkSuitable(link, currentLink) && isLinkNotOccurred(linkIdentifiers)) {
+            if (isLinkSuitable(link.fixWWW(), currentLink.fixWWW()) && isLinkNotOccurred(linkIdentifiers)) {
                 res.add(link);
             }
         }

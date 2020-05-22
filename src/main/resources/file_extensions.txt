@@ -7,3 +7,4 @@ shtml
 jsp
 aspx
 cfm
+xhtml
