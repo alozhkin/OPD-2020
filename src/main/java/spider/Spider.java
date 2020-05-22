@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
-import static logger.LoggerUtils.consoleLog;
-import static logger.LoggerUtils.debugLog;
+import static logger.LoggerUtils.*;
+
 
 /**
  * Class carrying out the main work of the program: turn domains into words inside database
@@ -98,25 +98,27 @@ public class Spider {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LoggerUtils.debugLog.error("Spider - Interrupted", e);
+            debugLog.error("Spider - Interrupted", e);
         } catch (ScraperConnectionException e) {
-            LoggerUtils.debugLog.error("Spider - Stopped, too many connection fails", e);
-            LoggerUtils.consoleLog.error("Spider stopped, too many connection fails");
+            debugLog.error("Spider - Stopped, too many connection fails", e);
+            consoleLog.error("Spider stopped, too many connection fails");
         } catch (ExecutionException e) {
             if (e.getCause().getClass().equals(SplashNotRespondingException.class)) {
-                LoggerUtils.debugLog.error("Spider - {}", e.getMessage(), e);
-                LoggerUtils.consoleLog.error(e.getMessage());
+                debugLog.error("Spider - {}", e.getMessage(), e);
+                consoleLog.error(e.getMessage());
             } else {
-                LoggerUtils.debugLog.error("Spider - Failed", e);
+                debugLog.error("Spider - Failed", e);
             }
         } catch (Exception e) {
-            LoggerUtils.debugLog.error("Spider - Failed", e);
+            debugLog.error("Spider - Failed", e);
         } finally {
-            LoggerUtils.debugLog.info("Spider - Completed");
+            debugLog.info("Spider - Completed");
             shutdownExecutorService(dbExec);
             shutdownExecutorService(domainExec);
             SplashScraper.shutdown();
-            LoggerUtils.debugLog.info("Spider - Resources were closed");
+            debugLog.info("Spider - Resources were closed");
+            debugLog.info("Spider - {} sites were scraped", scrapedDomains.size());
+            consoleLog.info("Spider - {} sites were scraped", scrapedDomains.size());
         }
     }
 
@@ -127,8 +129,8 @@ public class Spider {
     private boolean checkDomainAlreadyWas() {
         var fixed = domain.fixWWW().getHost();
         if (scrapedDomains.contains(fixed)) {
-            LoggerUtils.debugLog.info("Spider - Skip domain because is it already scraped {}", domain);
-            LoggerUtils.consoleLog.warn("Skip domain because is it already scraped {}", domain);
+            debugLog.info("Spider - Skip domain because is it already scraped {}", domain);
+            consoleLog.warn("Skip domain because is it already scraped {}", domain);
             return true;
         }
         scrapedDomains.add(fixed);
@@ -141,14 +143,14 @@ public class Spider {
             connectFailsInARowCount = 0;
         } catch (TimeoutException e) {
             future.cancel(true);
-            LoggerUtils.debugLog.error("Spider - Stopped, waiting too long for scraping site {}", domain);
-            LoggerUtils.consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
+            debugLog.error("Spider - Stopped, waiting too long for scraping site {}", domain);
+            consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
         } catch (ExecutionException e) {
             var exClass = e.getCause().getClass();
             if (exClass.equals(ScraperConnectionException.class)) {
                 System.out.println();
-                LoggerUtils.debugLog.error("Spider - Request failed {}", domain, e);
-                LoggerUtils.consoleLog.error("Request failed {} {}", domain, e.getMessage());
+                debugLog.error("Spider - Request failed {}", domain, e);
+                consoleLog.error("Request failed {} {}", domain, e.getMessage());
                 ++connectFailsInARowCount;
                 if (connectFailsInARowCount == CONNECT_FAILS) {
                     throw new ScraperConnectionException("Too many connect fails");
@@ -160,8 +162,8 @@ public class Spider {
     }
 
     private void trackStatistic(Statistic statistic) {
-        LoggerUtils.consoleLog.info("{}, site {}", statistic.toString(), domain);
-        LoggerUtils.debugLog.info("Spider - {}, site {}", statistic.toString(), domain);
+        consoleLog.info("{}, site {}", statistic.toString(), domain);
+        debugLog.info("Spider - {}, site {}", statistic.toString(), domain);
     }
 
     private void shutdownExecutorService(ExecutorService executorService) {
