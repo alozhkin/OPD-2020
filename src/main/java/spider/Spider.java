@@ -63,7 +63,10 @@ public class Spider {
         try {
             List<Link> domains = csvParser.getLinks();
             scrapeDomains(domains);
-            database.exportDataToCSV(output);
+            if (database.exportDataToCSV(output)) {
+                database.clearWebsites();
+                database.clearWords();
+            }
             onDataExported();
         } finally {
             onFinished();
