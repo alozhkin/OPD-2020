@@ -11,16 +11,24 @@ import java.util.Base64;
  * Splash is very flexible, because it allows to set settings with every request.
  * DefaultSplashRequestFactory tune splash to be good at extracting words.
  * It sends requests to /run, with custom script. With help of filters it ignores images, css, analytics.
+ * Response status code depends on site status code
  */
 public class DefaultSplashRequestFactory implements SplashRequestFactory {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private static final String luaScript = "    splash.webgl_enabled = false\n" +
-                    "    splash.media_source_enabled = false\n" +
-                    "    splash:go(args.url)\n" +
-                    "    local html = splash:html()\n" +
-                    "    local url = splash:url()\n" +
-                    "    splash:runjs(\"window.close()\")\n" +
-                    "    return {html=html, url=url}\n";
+    private static final String luaScript = "splash.webgl_enabled = false\n" +
+            "splash.media_source_enabled = false\n" +
+            "local ok, reason = splash:go(args.url)\n" +
+            "if not ok then\n" +
+            "  if reason:sub(0,4) == 'http' then\n" +
+            "      splash:set_result_status_code(tonumber(reason:sub(5)))\n" +
+            "  else\n" +
+            "     error(reason)\n" +
+            "  end\n" +
+            "end\n" +
+            "local html = splash:html()\n" +
+            "local url = splash:url()\n" +
+            "splash:runjs(\"window.close()\")\n" +
+            "return {html=html, url=url}";
 
     /**
      * @param context credentials and variables

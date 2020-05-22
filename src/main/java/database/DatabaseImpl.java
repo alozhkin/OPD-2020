@@ -347,8 +347,8 @@ class DatabaseImpl implements Database {
                         try {
                             set.add(new Website(companyId, new Link(website)));
                         } catch (WrongFormedLinkException e) {
-                            LoggerUtils.consoleLog.error("DatabaseImpl - Not a site " + website);
-                            LoggerUtils.debugLog.error("DatabaseImpl - Not a site " + website, e);
+                            LoggerUtils.consoleLog.error("DatabaseImpl - Not a site {}", website);
+                            LoggerUtils.debugLog.error("DatabaseImpl - Not a site {}", website, e);
                         }
                     }
                     return set;

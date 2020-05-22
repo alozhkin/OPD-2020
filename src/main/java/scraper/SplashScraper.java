@@ -212,17 +212,33 @@ public class SplashScraper implements Scraper {
                 stat.requestTimeout();
                 LoggerUtils.debugLog.warn("SplashScraper - Timeout expired {}", initialLink);
             } else if (code == 200) {
-                var responseBody = response.body();
-                if (responseBody == null) {
-                    throw new ScraperConnectionException("Response body is absent");
-                }
-                handleResponseBody(responseBody.string());
+                var body = extractResponseBode(response);
+                handleSuccessfulResponseBody(body);
+            } else if (code == 400) {
+                var body = extractResponseBode(response);
+                handle400ResponseBody(body);
+                stat.responseFailCode();
+                return;
+            } else {
+                stat.responseFailCode();
             }
             stat.requestSucceeded();
             response.close();
         }
 
-        private void handleResponseBody(String responseBody) {
+        private String extractResponseBode(Response response) throws IOException {
+            var responseBody = response.body();
+            if (responseBody == null) {
+                throw new ScraperConnectionException("Response body is absent");
+            }
+            return responseBody.string();
+        }
+
+        private void handle400ResponseBody(String responseBody) {
+            LoggerUtils.debugLog.error("SplashScraper - Unexpected 400 HTTP {}", responseBody);
+        }
+
+        private void handleSuccessfulResponseBody(String responseBody) {
             var splashResponse = gson.fromJson(responseBody, SplashResponse.class);
             var site = splashResponse.getUrl();
             finalLink = new Link(site);
@@ -277,8 +293,8 @@ public class SplashScraper implements Scraper {
                 LoggerUtils.debugLog.info("SplashScraper - Wrong html language {}", initialLink.toString());
                 stat.responseRejected();
             } if (e.getClass().equals(WrongFormedLinkException.class)) {
-                LoggerUtils.consoleLog.error("SplashScraper - " + e.getMessage());
-                LoggerUtils.debugLog.error("SplashScraper - " + e.getMessage(), e);
+                LoggerUtils.consoleLog.error("SplashScraper - {}", e.getMessage());
+                LoggerUtils.debugLog.error("SplashScraper - {}", e.getMessage(), e);
             } else {
                 LoggerUtils.debugLog.error("SplashScraper - Exception while handling response, site {}",
                         initialLink.toString(), e);

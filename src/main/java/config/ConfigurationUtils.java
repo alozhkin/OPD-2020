@@ -49,7 +49,7 @@ public class ConfigurationUtils {
                 LoggerUtils.logFileNotFound(fileName, c);
             }
         } catch (IOException e) {
-            LoggerUtils.debugLog.error("ConfigurationUtils - Resource" + fileName + "closing error", e);
+            LoggerUtils.debugLog.error("ConfigurationUtils - Resource {} closing error", fileName, e);
         }
     }
 

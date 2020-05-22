@@ -55,8 +55,8 @@ public class CSVParser {
             var id = Integer.valueOf(splitLine[0]);
             domainsIds.put(link.getAbsoluteURL(), id);
         } catch (WrongFormedLinkException e) {
-            LoggerUtils.consoleLog.error("CSVParser - Not a site " + site);
-            LoggerUtils.debugLog.error("CSVParser - Not a site " + site, e);
+            LoggerUtils.consoleLog.error("CSVParser - Not a site {}", site);
+            LoggerUtils.debugLog.error("CSVParser - Not a site {}", site, e);
         }
     }
 }

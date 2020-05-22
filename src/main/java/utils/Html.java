@@ -37,7 +37,7 @@ public class Html {
         try {
             this.lang = findLang(html);
         } catch (Exception e) {
-            LoggerUtils.debugLog.error("HTML - Failed to parse lang on page " + url);
+            LoggerUtils.debugLog.error("HTML - Failed to parse lang on page {}", url);
             this.lang = "";
         }
     }

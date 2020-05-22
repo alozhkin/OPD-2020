@@ -160,8 +160,8 @@ public class Spider {
     }
 
     private void trackStatistic(Statistic statistic) {
-        LoggerUtils.consoleLog.info("{} site {}", statistic.toString(), domain);
-        LoggerUtils.debugLog.info("Spider - {} site {}", statistic.toString(), domain);
+        LoggerUtils.consoleLog.info("{}, site {}", statistic.toString(), domain);
+        LoggerUtils.debugLog.info("Spider - {}, site {}", statistic.toString(), domain);
     }
 
     private void shutdownExecutorService(ExecutorService executorService) {

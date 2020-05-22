@@ -14,6 +14,7 @@ public class Statistic {
     private final AtomicInteger sitesScraped = new AtomicInteger(0);
     private final AtomicInteger responsesRejected = new AtomicInteger(0);
     private final AtomicInteger responsesException = new AtomicInteger(0);
+    private final AtomicInteger responsesWithHTTPFailCode = new AtomicInteger(0);
 
     public int getRequestsSended() {
         return requestsSended.get();
@@ -45,6 +46,10 @@ public class Statistic {
 
     public int getResponsesRejected() {
         return responsesRejected.get();
+    }
+
+    public int getHTTPFail() {
+        return responsesWithHTTPFailCode.get();
     }
 
     public void requestSended() {
@@ -79,11 +84,16 @@ public class Statistic {
         responsesRejected.incrementAndGet();
     }
 
+    public void responseFailCode() {
+        responsesWithHTTPFailCode.incrementAndGet();
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "Requests sended %d, request retried %d, requests succeeded %d, requests failed %d, "
-                        + "request timeout %d, pages scraped %d, exceptions %d, responses rejected %d",
+                "Requests sended %d, request retried %d, requests succeeded %d, requests failed %d, \n"
+                        + "request timeout %d, pages scraped %d, exceptions %d, responses rejected %d, responses" +
+                        " status code fail %d",
                 getRequestsSended(),
                 getRequestsRetried(),
                 getRequestSucceeded(),
@@ -91,7 +101,8 @@ public class Statistic {
                 getRequestsTimeout(),
                 getSitesScraped(),
                 getResponsesException(),
-                getResponsesRejected()
+                getResponsesRejected(),
+                getHTTPFail()
         );
     }
 }
