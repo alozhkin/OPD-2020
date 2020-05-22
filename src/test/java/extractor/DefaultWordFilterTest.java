@@ -89,7 +89,7 @@ class DefaultWordFilterTest {
         expected.add("нога");
         expected.add("404");
         expected.add("Зебры");
-        new DefaultWordFilter().removingLinks(wordsForFiltration);
+        new DefaultWordFilter().removeLinks(wordsForFiltration);
         assertEquals(expected, wordsForFiltration);
     }
 }

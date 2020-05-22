@@ -15,7 +15,7 @@ public class DefaultWordFilter implements WordFilter {
 
     @Override
     public Collection<String> filter(Collection<String> words) {
-        removingLinks(words);
+        removeLinks(words);
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
         unnecessaryWordsFilter(newSet);
@@ -48,7 +48,7 @@ public class DefaultWordFilter implements WordFilter {
     }
 
     //Метод удаления ссылок из коллекции слов
-    public void removingLinks(Collection<String> words) {
+    public void removeLinks(Collection<String> words) {
         words.removeIf(x -> x.matches("^(www|http:|https:)+[^\\s\"]+[\\w]"));
     }
 
