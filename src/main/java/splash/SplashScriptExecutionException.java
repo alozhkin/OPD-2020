@@ -1,7 +1,13 @@
 package splash;
 
 public class SplashScriptExecutionException extends RuntimeException {
-    public SplashScriptExecutionException(String message) {
-        super(message);
+    private final Response400Info info;
+
+    public SplashScriptExecutionException(Response400Info info) {
+        this.info = info;
+    }
+
+    public Response400Info getInfo() {
+        return info;
     }
 }

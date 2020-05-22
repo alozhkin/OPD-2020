@@ -16,7 +16,7 @@ public class Splash400Response {
     private String description;
     @SerializedName("info")
     @Expose
-    private Info info;
+    private Response400Info response400Info;
 
     public Integer getError() {
         return error;
@@ -42,81 +42,12 @@ public class Splash400Response {
         this.description = description;
     }
 
-    public String getInfo() {
-        return info.toString();
+    public Response400Info getInfo() {
+        return response400Info;
     }
 
-    public void setInfo(Info info) {
-        this.info = info;
-    }
-}
-
-class Info {
-
-    @SerializedName("source")
-    @Expose
-    private String source;
-    @SerializedName("line_number")
-    @Expose
-    private Integer lineNumber;
-    @SerializedName("error")
-    @Expose
-    private String error;
-    @SerializedName("type")
-    @Expose
-    private String type;
-    @SerializedName("message")
-    @Expose
-    private String message;
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public Integer getLineNumber() {
-        return lineNumber;
-    }
-
-    public void setLineNumber(Integer lineNumber) {
-        this.lineNumber = lineNumber;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    @Override
-    public String toString() {
-        return "Info{" +
-                "source='" + source + '\'' +
-                ", lineNumber=" + lineNumber +
-                ", error='" + error + '\'' +
-                ", type='" + type + '\'' +
-                ", message='" + message + '\'' +
-                '}';
+    public void setInfo(Response400Info info) {
+        this.response400Info = info;
     }
 }
+

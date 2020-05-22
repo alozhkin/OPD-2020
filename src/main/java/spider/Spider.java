@@ -1,7 +1,7 @@
 package spider;
 
 import database.Database;
-import logger.LoggerUtils;
+import scraper.ScraperFailException;
 import scraper.Statistic;
 import scraper.SplashScraper;
 import scraper.ScraperConnectionException;
@@ -28,13 +28,13 @@ public class Spider {
     // in seconds
     private static final int DOMAIN_TIMEOUT = 30;
     // after that number of fails in a row program stops
-    private static final int CONNECT_FAILS = 10;
+    private static final int DOMAINS_FAILS = 10;
 
     private final ContextFactory contextFactory;
     private final Database database;
     private final Set<String> scrapedDomains = new HashSet<>();
 
-    private int connectFailsInARowCount = 0;
+    private int domainsFailsInARowCount = 0;
     private Link domain;
     private OnSpiderChangesListener listener;
 
@@ -100,9 +100,9 @@ public class Spider {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             debugLog.error("Spider - Interrupted", e);
-        } catch (ScraperConnectionException e) {
-            debugLog.error("Spider - Stopped, too many connection fails", e);
-            consoleLog.error("Spider stopped, too many connection fails");
+        } catch (ScraperFailException e) {
+            debugLog.error("Spider - Stopped, too many fails", e);
+            consoleLog.error("Spider stopped, too many fails");
         } catch (ExecutionException e) {
             if (e.getCause().getClass().equals(SplashNotRespondingException.class)) {
                 debugLog.error("Spider - {}", e.getMessage(), e);
@@ -141,23 +141,18 @@ public class Spider {
     private void handleDomainFuture(Future<?> future) throws InterruptedException, ExecutionException {
         try {
             future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
-            connectFailsInARowCount = 0;
+            domainsFailsInARowCount = 0;
         } catch (TimeoutException e) {
             future.cancel(true);
             debugLog.error("Spider - Stopped, waiting too long for scraping site {}", domain);
             consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
         } catch (ExecutionException e) {
             var exClass = e.getCause().getClass();
-            if (exClass.equals(ScraperConnectionException.class)
-                    || exClass.equals(SplashScriptExecutionException.class)
-            ) {
-                debugLog.error("Spider - Request failed {}", domain, e);
-                consoleLog.error("Request failed {} {}", domain, e.getMessage());
-                ++connectFailsInARowCount;
-                if (connectFailsInARowCount == CONNECT_FAILS) {
-                    throw new ScraperConnectionException("Too many connect fails");
-                }
-            } else  {
+            if (exClass.equals(SplashScriptExecutionException.class)) {
+                handleSplashExecutionFail((SplashScriptExecutionException) e.getCause());
+            } else if (exClass.equals(ScraperConnectionException.class)) {
+                handleConnectionFail((ScraperConnectionException) e.getCause());
+            } else {
                 throw e;
             }
         }
@@ -198,6 +193,27 @@ public class Spider {
     private void onFinished() {
         if (listener != null) {
             listener.onFinished();
+        }
+    }
+
+    private void handleSplashExecutionFail(SplashScriptExecutionException e) {
+        if (!e.getInfo().getError().startsWith("network")) {
+            debugLog.error("Spider - Request failed {}", domain, e);
+            consoleLog.error("Request failed {} {}", domain, e.getMessage());
+        }
+        ++domainsFailsInARowCount;
+        if (domainsFailsInARowCount == DOMAINS_FAILS) {
+            throw new ScraperFailException("Too many execution fails", e);
+        }
+
+    }
+
+    private void handleConnectionFail(ScraperConnectionException e) {
+        debugLog.error("Spider - Request failed {}", domain, e);
+        consoleLog.error("Request failed {} {}", domain, e.getMessage());
+        ++domainsFailsInARowCount;
+        if (domainsFailsInARowCount == DOMAINS_FAILS) {
+            throw new ScraperFailException("Too many connect fails", e);
         }
     }
 }
