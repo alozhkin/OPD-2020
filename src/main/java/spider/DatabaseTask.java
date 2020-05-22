@@ -7,6 +7,7 @@ import utils.Link;
 import utils.LinkFactory;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -16,11 +17,13 @@ public class DatabaseTask {
     private final Database database;
     private final Link domain;
     private final Collection<String> words;
+    private final Map<String, Integer> ids;
 
-    DatabaseTask(Database database, Link domain, Collection<String> words) {
+    DatabaseTask(Database database, Link domain, Collection<String> words, Map<String, Integer> ids) {
         this.database = database;
         this.domain = domain;
         this.words = words;
+        this.ids = ids;
     }
 
     boolean run() {
@@ -29,7 +32,7 @@ public class DatabaseTask {
             if (!words.isEmpty()) {
                 return database.putWords(
                         words.stream()
-                                .map(word -> Word.newInstance(LinkFactory.getDomainId(domain), word))
+                                .map(word -> Word.newInstance(ids.get(domain.getAbsoluteURL()), word))
                                 .collect(Collectors.toSet())
                 );
             } else {

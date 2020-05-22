@@ -11,10 +11,7 @@ import utils.CSVParser;
 import utils.Link;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static logger.LoggerUtils.consoleLog;
@@ -36,6 +33,7 @@ public class Spider {
     private int connectFailsInARowCount = 0;
     private Link domain;
     private OnSpiderChangesListener listener;
+    private Map<String, Integer> ids;
 
     public Spider(ContextFactory contextFactory, Database database) {
         this.contextFactory = contextFactory;
@@ -62,6 +60,7 @@ public class Spider {
             return;
         }
         try {
+            ids = csvParser.getDomainsIds();
             List<Link> domains = csvParser.getLinks();
             scrapeDomains(domains);
             database.exportDataToCSV(output);
@@ -95,7 +94,7 @@ public class Spider {
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 handleDomainFuture(future);
                 trackStatistic(scraper.getStatistic());
-                dbExec.submit(new DatabaseTask(database, domain, allWords)::run);
+                dbExec.submit(new DatabaseTask(database, domain, allWords, ids)::run);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
