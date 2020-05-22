@@ -4,6 +4,7 @@ import logger.LoggerUtils;
 import scraper.Scraper;
 import scraper.ScraperConnectionException;
 import splash.SplashNotRespondingException;
+import splash.SplashScriptExecutionException;
 import utils.Link;
 
 import java.net.ConnectException;
@@ -100,19 +101,15 @@ public class DomainTask {
 
     private void handleException(Exception e) {
         var exClass = e.getClass();
-        if (exClass.equals(SplashNotRespondingException.class)) {
-            throw (SplashNotRespondingException) e;
-        } else if (exClass.equals(ConnectException.class)) {
+        if (exClass.equals(ConnectException.class)) {
             throw new ScraperConnectionException(e);
-        } else if (exClass.equals(ScraperConnectionException.class)) {
-            throw (ScraperConnectionException) e;
         } else if (exClass.equals(HtmlLanguageException.class)) {
-            LoggerUtils.debugLog.warn("DomainTask - Wrong html language, " +
-                    "site is not taken into account {}", domain
-            );
+            LoggerUtils.debugLog.warn("DomainTask - Wrong html language, site is not taken into account {}", domain);
             LoggerUtils.consoleLog.warn("Wrong html language, site is not taken into account {}", domain);
-        } else {
-            LoggerUtils.debugLog.error("DomainTask - Failed", e);
+        } else if (e instanceof RuntimeException) {
+            throw (RuntimeException) e;
+        }  else {
+            LoggerUtils.debugLog.error("DomainTask - Unexpected exception", e);
         }
     }
 

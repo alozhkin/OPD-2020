@@ -7,6 +7,7 @@ import scraper.SplashScraper;
 import scraper.ScraperConnectionException;
 import splash.DefaultSplashRequestFactory;
 import splash.SplashNotRespondingException;
+import splash.SplashScriptExecutionException;
 import utils.CSVParser;
 import utils.Link;
 
@@ -147,8 +148,9 @@ public class Spider {
             consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
         } catch (ExecutionException e) {
             var exClass = e.getCause().getClass();
-            if (exClass.equals(ScraperConnectionException.class)) {
-                System.out.println();
+            if (exClass.equals(ScraperConnectionException.class)
+                    || exClass.equals(SplashScriptExecutionException.class)
+            ) {
                 debugLog.error("Spider - Request failed {}", domain, e);
                 consoleLog.error("Request failed {} {}", domain, e.getMessage());
                 ++connectFailsInARowCount;

@@ -7,10 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import spider.FailedPage;
 import spider.HtmlLanguageException;
 import spider.Page;
-import splash.DefaultSplashRequestContext;
-import splash.SplashNotRespondingException;
-import splash.SplashRequestFactory;
-import splash.SplashResponse;
+import splash.*;
 import utils.Html;
 import utils.Link;
 import utils.WrongFormedLinkException;
@@ -235,6 +232,10 @@ public class SplashScraper implements Scraper {
         }
 
         private void handle400ResponseBody(String responseBody) {
+            var splashResponse = gson.fromJson(responseBody, Splash400Response.class);
+            if (splashResponse.getType().equals("ScriptError")) {
+                throw new SplashScriptExecutionException(splashResponse.getInfo());
+            }
             LoggerUtils.debugLog.error("SplashScraper - Unexpected 400 HTTP {}", responseBody);
         }
 
