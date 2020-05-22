@@ -92,4 +92,28 @@ class DefaultWordFilterTest {
         new DefaultWordFilter().removeLinks(wordsForFiltration);
         assertEquals(expected, wordsForFiltration);
     }
+
+    @Test
+    void numberFilteringTest() {
+        Collection<String> wordsForFiltrationSet = new HashSet<>();
+
+        wordsForFiltrationSet.add("ГаллОграмма");
+        wordsForFiltrationSet.add("в");
+        wordsForFiltrationSet.add("Музее");
+        wordsForFiltrationSet.add("к");
+        wordsForFiltrationSet.add("11");
+        wordsForFiltrationSet.add("сентября");
+
+        Collection<String> expected = new HashSet<>();
+
+        expected.add("ГаллОграмма");
+        expected.add("в");
+        expected.add("Музее");
+        expected.add("к");
+        expected.add("сентября");
+
+        new DefaultWordFilter().removeNumbers(wordsForFiltrationSet);
+
+        assertEquals(expected, wordsForFiltrationSet);
+    }
 }

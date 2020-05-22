@@ -18,30 +18,31 @@ public class DefaultWordFilter implements WordFilter {
         removeLinks(words);
         Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
         deleteBlankLines(newSet);
+        removeNumbers(newSet);
         unnecessaryWordsFilter(newSet);
         return newSet;
     }
 
     // Фильтр ненужных слов
-    public void unnecessaryWordsFilter(Collection<String> setOfWords) {
-        setOfWords.removeAll(filteredWords);
+    public void unnecessaryWordsFilter(Collection<String> words) {
+        words.removeAll(filteredWords);
     }
 
     //Удаление пустого элемента
-    public void deleteBlankLines(Collection<String> setOfWords) {
-        setOfWords.removeIf(String::isEmpty);
+    public void deleteBlankLines(Collection<String> words) {
+        words.removeIf(String::isEmpty);
     }
 
-    public Collection<String> wordsToLowerCase(Collection<String> setOfWords) {
-        return setOfWords.stream().map(String::toLowerCase)
+    public Collection<String> wordsToLowerCase(Collection<String> words) {
+        return words.stream().map(String::toLowerCase)
                 .collect(Collectors.toSet());
     }
 
     //Фильтр знаков препинания
-    public Collection<String> punctuationMarkFilter(Collection<String> setOfWords) {
+    public Collection<String> punctuationMarkFilter(Collection<String> words) {
         Collection<String> newSet = new HashSet<>();
 
-        for (String setObj : setOfWords) {
+        for (String setObj : words) {
             newSet.add(removingPunctuation(setObj));
         }
         return newSet;
@@ -50,6 +51,11 @@ public class DefaultWordFilter implements WordFilter {
     //Метод удаления ссылок из коллекции слов
     public void removeLinks(Collection<String> words) {
         words.removeIf(x -> x.matches("^(www|http:|https:)+[^\\s\"]+[\\w]"));
+    }
+
+    //Метод удаления слов-чисел
+    public void removeNumbers(Collection<String> words) {
+        words.removeIf(x -> x.matches("^\\d+$"));
     }
 
     // Метод удаления знаков препинания из строки
