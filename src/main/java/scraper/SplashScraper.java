@@ -13,6 +13,7 @@ import splash.SplashRequestFactory;
 import splash.SplashResponse;
 import utils.Html;
 import utils.Link;
+import utils.WrongFormedLinkException;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.util.function.Consumer;
  * or {@link SocketException}.
  * So program schedules request retry specified number of times with some delay.
  * If splash will not answer, url will be added to failed pages with {@link SplashNotRespondingException}
+ * If splash redirects to page without valid url, will not scrape it
  */
 public class SplashScraper implements Scraper {
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
@@ -222,7 +224,8 @@ public class SplashScraper implements Scraper {
 
         private void handleResponseBody(String responseBody) {
             var splashResponse = gson.fromJson(responseBody, SplashResponse.class);
-            finalLink = new Link(splashResponse.getUrl());
+            var site = splashResponse.getUrl();
+            finalLink = new Link(site);
             if (!isSameSite()) return;
             logRedirect();
             if (!call.isCanceled()) {
@@ -273,6 +276,9 @@ public class SplashScraper implements Scraper {
             if (e.getClass().equals(HtmlLanguageException.class)) {
                 LoggerUtils.debugLog.info("SplashScraper - Wrong html language {}", initialLink.toString());
                 stat.responseRejected();
+            } if (e.getClass().equals(WrongFormedLinkException.class)) {
+                LoggerUtils.consoleLog.error("SplashScraper - " + e.getMessage());
+                LoggerUtils.debugLog.error("SplashScraper - " + e.getMessage(), e);
             } else {
                 LoggerUtils.debugLog.error("SplashScraper - Exception while handling response, site {}",
                         initialLink.toString(), e);

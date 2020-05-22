@@ -20,7 +20,7 @@ public class Link {
     /**
      * Creates Link.
      * <p>
-     * <ul><li>wrong url changes to empty link {@link Link#createEmptyLink()}
+     * <ul><li>wrong url causes exception
      * <li>removes trailing slash
      * <li>if scheme is absent, uses http
      * <li>support non-ASCII characters
@@ -28,17 +28,18 @@ public class Link {
      * <li>paths are decoded from <a href="https://en.wikipedia.org/wiki/Percent-encoding">percent encoding</a></ul>
      *
      * @param urlStr url (host is required)
+     * @throws WrongFormedLinkException if url is not valid
      */
     public Link(@NotNull String urlStr) {
-        if (urlStr.equals("")) {
-            httpUrl = null;
-        } else {
-            try {
-                httpUrl = HttpUrl.get(fix(urlStr));
-            } catch (Exception e) {
-                httpUrl = null;
-            }
+        try {
+            httpUrl = HttpUrl.get(fix(urlStr));
+        } catch (IllegalArgumentException e) {
+            throw new WrongFormedLinkException(urlStr, e);
         }
+    }
+
+    private Link() {
+        httpUrl = null;
     }
 
     private static String fix(String url) {
@@ -68,7 +69,7 @@ public class Link {
      * @return link without url
      */
     public static Link createEmptyLink() {
-        return new Link("");
+        return new Link();
     }
 
     /**
@@ -114,6 +115,7 @@ public class Link {
     public Set<String> getSubdomains() {
         var res = new HashSet<String>();
         var host = getHost();
+        if (host == null) return new HashSet<>();
         var hostSplit = host.split("\\.");
         var levelsNumber = hostSplit.length;
         // ignore top-level and second-level domain

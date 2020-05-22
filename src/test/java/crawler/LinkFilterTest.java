@@ -147,8 +147,8 @@ public class LinkFilterTest {
     void shouldConsiderLinksWithContentQueryDifferent() {
         var filtered = linkFilter.filter(
                 Set.of(
-                        new Link("https://www.alfa-tools.de/kontakt.php?content=datenschutz"),
-                        new Link("https://www.alfa-tools.de/kontakt.php?content=montage")
+                        new Link("https://www.alfa-tools.de/very_useful.php?content=datenschutz"),
+                        new Link("https://www.alfa-tools.de/very_useful.php?content=montage")
                 ),
                 new Link("alfa-tools.de")
         );
@@ -159,8 +159,8 @@ public class LinkFilterTest {
     void shouldConsiderLinksWithContentQueryDifferentSeveralParams() {
         var filtered = linkFilter.filter(
                 Set.of(
-                        new Link("https://www.alfa-tools.de/kontakt.php?value=true&content=datenschutz"),
-                        new Link("https://www.alfa-tools.de/kontakt.php?value=false&content=montage")
+                        new Link("https://www.alfa-tools.de/very_useful.php?value=true&content=datenschutz"),
+                        new Link("https://www.alfa-tools.de/very_useful.php?value=false&content=montage")
                 ),
                 new Link("alfa-tools.de")
         );

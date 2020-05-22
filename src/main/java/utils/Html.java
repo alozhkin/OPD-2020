@@ -37,9 +37,13 @@ public class Html {
         try {
             this.lang = findLang(html);
         } catch (Exception e) {
-            LoggerUtils.debugLog.error("HTML - Failed to parse lang");
+            LoggerUtils.debugLog.error("HTML - Failed to parse lang on page " + url);
             this.lang = "";
         }
+    }
+
+    public Html(String html) {
+        this(html, Link.createEmptyLink());
     }
 
     /**
@@ -49,10 +53,9 @@ public class Html {
         String html = Files.readString(path, StandardCharsets.ISO_8859_1);
         String charset = getCharset(html);
         if (charset == null) {
-            //todo link нужно изменить
-            return new Html(Files.readString(path, StandardCharsets.UTF_8), new Link(path.toString()));
+            return new Html(Files.readString(path, StandardCharsets.UTF_8));
         } else {
-            return new Html(Files.readString(path, Charset.forName(charset)), new Link(path.toString()));
+            return new Html(Files.readString(path, Charset.forName(charset)));
         }
     }
 

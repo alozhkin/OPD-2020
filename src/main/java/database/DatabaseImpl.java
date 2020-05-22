@@ -3,8 +3,10 @@ package database;
 import database.models.Website;
 import database.models.Word;
 import database.utils.DatabaseUtil;
+import logger.LoggerUtils;
 import utils.CSVParser;
 import utils.Link;
+import utils.WrongFormedLinkException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -342,7 +344,12 @@ class DatabaseImpl implements Database {
                     while (rset.next()) {
                         int companyId = rset.getInt(2);
                         String website = rset.getString(3);
-                        set.add(new Website(companyId, new Link(website)));
+                        try {
+                            set.add(new Website(companyId, new Link(website)));
+                        } catch (WrongFormedLinkException e) {
+                            LoggerUtils.consoleLog.error("DatabaseImpl - Not a site " + website);
+                            LoggerUtils.debugLog.error("DatabaseImpl - Not a site " + website, e);
+                        }
                     }
                     return set;
                 }

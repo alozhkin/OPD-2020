@@ -1,6 +1,7 @@
 package utils;
 
 import database.models.Website;
+import logger.LoggerUtils;
 
 import java.io.*;
 import java.util.*;
@@ -35,18 +36,27 @@ public class CSVParser {
     }
 
     public Collection<Website> getWebsites() {
-        return domainsIds
-                .entrySet()
-                .stream()
-                .map(entry -> new Website(entry.getValue(), new Link(entry.getKey())))
-                .collect(Collectors.toSet());
+        Set<Website> set = new HashSet<>();
+        for (Map.Entry<String, Integer> entry : domainsIds.entrySet()) {
+            try {
+                Website website = new Website(entry.getValue(), new Link(entry.getKey()));
+                set.add(website);
+            } catch (WrongFormedLinkException ignored) {}
+        }
+        return set;
     }
 
     private void convertLineToValues(String line) {
         var splitLine = line.split(SEPARATOR);
-        var link = new Link(splitLine[2].replaceAll(QUOTATION, ""));
-        links.add(link);
-        var id = Integer.valueOf(splitLine[0]);
-        domainsIds.put(link.getAbsoluteURL(), id);
+        var site = splitLine[2].replaceAll(QUOTATION, "");
+        try {
+            var link = new Link(site);
+            links.add(link);
+            var id = Integer.valueOf(splitLine[0]);
+            domainsIds.put(link.getAbsoluteURL(), id);
+        } catch (WrongFormedLinkException e) {
+            LoggerUtils.consoleLog.error("CSVParser - Not a site " + site);
+            LoggerUtils.debugLog.error("CSVParser - Not a site " + site, e);
+        }
     }
 }

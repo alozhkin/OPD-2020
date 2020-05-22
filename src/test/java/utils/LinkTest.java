@@ -9,15 +9,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LinkTest {
 
     @Test
-    void shouldNotThrowExceptionOnWrongURL() {
-        var url = "wrong url%$@&(.[] very wrong";
-        assertDoesNotThrow(() -> new Link(url));
-    }
-
-    @Test
-    void shouldConsiderWrongURLLikeEmptyString() {
+    void shouldThrowExceptionOnWrongURL() {
         var url = "wrong url [ ] & . oh so wrong";
-        assertEquals("", new Link(url).toString());
+        assertThrows(WrongFormedLinkException.class, () -> new Link(url));
     }
 
     @Test
