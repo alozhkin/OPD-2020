@@ -74,4 +74,22 @@ class DefaultWordFilterTest {
         Collection<String> newSet = new DefaultWordFilter().punctuationMarkFilter(wordSForFiltrationSet);
         assertEquals(newSet, expected);
     }
+
+    @Test
+    void linkFilteringTest() {
+        Collection<String> wordsForFiltration = new HashSet<>();
+        wordsForFiltration.add("нога");
+        wordsForFiltration.add("https://www.google.com");
+        wordsForFiltration.add("404");
+        wordsForFiltration.add("http://www.google.com");
+        wordsForFiltration.add("Зебры");
+        wordsForFiltration.add("www.google.com");
+
+        Collection<String> expected = new HashSet<>();
+        expected.add("нога");
+        expected.add("404");
+        expected.add("Зебры");
+        new DefaultWordFilter().removingLinks(wordsForFiltration);
+        assertEquals(expected, wordsForFiltration);
+    }
 }
