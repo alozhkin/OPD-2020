@@ -7,6 +7,8 @@
         </encoder>
     </appender>
 
+    <!-- Line feeds before and after the log are necessary to resolve the conflict
+    with the progress bar because of which they were displayed on one line -->
     <appender name="UILOG" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%n%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
