@@ -24,22 +24,22 @@ public class DefaultWordFilter implements WordFilter {
     }
 
     // Фильтр ненужных слов
-    public void unnecessaryWordsFilter(Collection<String> words) {
+    private void unnecessaryWordsFilter(Collection<String> words) {
         words.removeAll(filteredWords);
     }
 
     //Удаление пустого элемента
-    public void deleteBlankLines(Collection<String> words) {
+    private void deleteBlankLines(Collection<String> words) {
         words.removeIf(String::isEmpty);
     }
 
-    public Collection<String> wordsToLowerCase(Collection<String> words) {
+    private Collection<String> wordsToLowerCase(Collection<String> words) {
         return words.stream().map(String::toLowerCase)
                 .collect(Collectors.toSet());
     }
 
     //Фильтр знаков препинания
-    public Collection<String> punctuationMarkFilter(Collection<String> words) {
+    private Collection<String> punctuationMarkFilter(Collection<String> words) {
         Collection<String> newSet = new HashSet<>();
 
         for (String setObj : words) {
@@ -49,12 +49,12 @@ public class DefaultWordFilter implements WordFilter {
     }
 
     //Метод удаления ссылок из коллекции слов
-    public void removeLinks(Collection<String> words) {
+    private void removeLinks(Collection<String> words) {
         words.removeIf(x -> x.matches("^(www|http:|https:)+[^\\s\"]+[\\w]"));
     }
 
     //Метод удаления слов-чисел
-    public void removeNumbers(Collection<String> words) {
+    private void removeNumbers(Collection<String> words) {
         words.removeIf(x -> x.matches("^\\d+$"));
     }
 
