@@ -12,8 +12,7 @@ import org.kohsuke.args4j.Option;
 import spider.OnSpiderChangesListener;
 import utils.Link;
 
-import static logger.LoggerUtils.consoleLog;
-import static logger.LoggerUtils.debugLog;
+import static logger.LoggerUtils.*;
 
 public class ConsoleUI implements OnSpiderChangesListener {
     private static ProgressBar pb;
@@ -30,6 +29,7 @@ public class ConsoleUI implements OnSpiderChangesListener {
 
     private void start(String[] args) {
         CmdLineParser parser = new CmdLineParser(this);
+        consoleLog = getUILogger();
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
