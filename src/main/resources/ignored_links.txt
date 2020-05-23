@@ -123,12 +123,6 @@ _artikel
 articles
 wishlist
 cms
-downloads
-videos
-angebote
-sortiment
-gesamtverzeichnis
-kataloge
 newsletter
 konzerte
 produkte1
