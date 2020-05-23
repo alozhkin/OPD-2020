@@ -1,6 +1,7 @@
 package spider;
 
 import logger.LoggerUtils;
+import utils.Html;
 import utils.Link;
 
 import java.util.Collection;
@@ -35,13 +36,20 @@ public class PageTask {
         var html = page.getHtml();
         var htmlLink = html.getUrl();
         var initialLink = page.getInitialLink();
+        var frames = page.getFrames();
         if (!html.isLangRight()) {
             throw new HtmlLanguageException();
         }
         var links = context.crawl(html);
+        for (Html frame : frames) {
+            links.addAll(context.crawl(frame));
+        }
         var filteredLinks = context.filterLinks(links, htmlLink, initialLink);
         linkQueue.addAll(filteredLinks);
         var words = context.extract(html);
+        for (Html frame : frames) {
+            words.addAll(context.extract(frame));
+        }
         var filteredWords = context.filterWords(words);
         LoggerUtils.debugLog.info("PageTask - Completed {}", htmlLink.toString());
         resultWords.addAll(filteredWords);

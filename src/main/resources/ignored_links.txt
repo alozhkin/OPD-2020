@@ -123,3 +123,4 @@ _artikel
 articles
 wishlist
 cms
+gallery

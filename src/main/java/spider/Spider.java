@@ -198,8 +198,8 @@ public class Spider {
 
     private void handleSplashExecutionFail(SplashScriptExecutionException e) {
         if (!e.getInfo().getError().startsWith("network")) {
-            debugLog.error("Spider - Request failed {}", domain, e);
-            consoleLog.error("Request failed {} {}", domain, e.getMessage());
+            debugLog.error("Spider - Request failed {} {}", domain, e.getInfo(), e);
+            consoleLog.error("Request failed {} {} {}", domain, e.getClass().getSimpleName(), e.getInfo().getType());
         }
         ++domainsFailsInARowCount;
         if (domainsFailsInARowCount == DOMAINS_FAILS) {

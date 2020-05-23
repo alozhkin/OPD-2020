@@ -20,15 +20,17 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
             "local ok, reason = splash:go(args.url)\n" +
             "if not ok then\n" +
             "  if reason:sub(0,4) == 'http' then\n" +
-            "      splash:set_result_status_code(tonumber(reason:sub(5)))\n" +
+            "      splash:set_result_status_code(reason:sub(4))\n" +
             "  else\n" +
             "     error(reason)\n" +
             "  end\n" +
             "end\n" +
+            "local frames = splash:evaljs(\"let htmls=new Array(frames.length);for(let i=0;i<frames.length;i++)" +
+            "{const doc=frames[i].document;if(doc){htmls[i]=doc.documentElement.outerHTML}}htmls;\")\n" +
             "local html = splash:html()\n" +
             "local url = splash:url()\n" +
             "splash:runjs(\"window.close()\")\n" +
-            "return {html=html, url=url}";
+            "return {html=html, url=url, frames=frames}";
 
     /**
      * @param context credentials and variables
@@ -39,6 +41,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("url", context.getSiteUrl().toString());
         jsonObject.addProperty("images", 0);
+        jsonObject.addProperty("iframe", 1);
         jsonObject.addProperty("filters", "filter,easyprivacy,fanboy-annoyance");
         // in seconds, time for page to render
         jsonObject.addProperty("timeout", 20.0);
