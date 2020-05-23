@@ -123,3 +123,9 @@ _artikel
 articles
 wishlist
 cms
+videos
+angebote
+sortiment
+gesamtverzeichnis
+forum
+kataloge
