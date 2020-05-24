@@ -53,7 +53,6 @@ public class Spider {
         try {
             csvParser.parse(input);
         } catch (IOException e) {
-            System.out.println();
             consoleLog.error("Spider - Failed to scrape from CSV file: ", e);
             debugLog.error("Spider - Failed to scrape from CSV File: ", e);
             onFinished();
@@ -63,7 +62,10 @@ public class Spider {
             domainIds = csvParser.getDomainsIds();
             List<Link> domains = csvParser.getLinks();
             scrapeDomains(domains);
-            database.exportDataToCSV(output);
+            if (database.exportDataToCSV(output)) {
+                database.clearWebsites();
+                database.clearWords();
+            }
             onDataExported();
         } finally {
             onFinished();
@@ -100,12 +102,10 @@ public class Spider {
             Thread.currentThread().interrupt();
             LoggerUtils.debugLog.error("Spider - Interrupted", e);
         } catch (ScraperConnectionException e) {
-            System.out.println();
             LoggerUtils.debugLog.error("Spider - Stopped, too many connection fails", e);
             LoggerUtils.consoleLog.error("Spider stopped, too many connection fails");
         } catch (ExecutionException e) {
             if (e.getCause().getClass().equals(SplashNotRespondingException.class)) {
-                System.out.println();
                 LoggerUtils.debugLog.error("Spider - {}", e.getMessage(), e);
                 LoggerUtils.consoleLog.error(e.getMessage());
             } else {
@@ -129,7 +129,6 @@ public class Spider {
     private boolean checkDomainAlreadyWas() {
         var fixed = domain.fixWWW().getHost();
         if (scrapedDomains.contains(fixed)) {
-            System.out.println();
             LoggerUtils.debugLog.info("Spider - Skip domain because is it already scraped {}", domain);
             LoggerUtils.consoleLog.warn("Skip domain because is it already scraped {}", domain);
             return true;
@@ -144,13 +143,11 @@ public class Spider {
             connectFailsInARowCount = 0;
         } catch (TimeoutException e) {
             future.cancel(true);
-            System.out.println();
             LoggerUtils.debugLog.error("Spider - Stopped, waiting too long for scraping site {}", domain);
             LoggerUtils.consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
         } catch (ExecutionException e) {
             var exClass = e.getCause().getClass();
             if (exClass.equals(ScraperConnectionException.class)) {
-                System.out.println();
                 LoggerUtils.debugLog.error("Spider - Request failed {}", domain, e);
                 LoggerUtils.consoleLog.error("Request failed {} {}", domain, e.getMessage());
                 ++connectFailsInARowCount;
@@ -164,7 +161,6 @@ public class Spider {
     }
 
     private void trackStatistic(Statistic statistic) {
-        System.out.println();
         LoggerUtils.consoleLog.info("{} site {}", statistic.toString(), domain);
         LoggerUtils.debugLog.info("Spider - {} site {}", statistic.toString(), domain);
     }
