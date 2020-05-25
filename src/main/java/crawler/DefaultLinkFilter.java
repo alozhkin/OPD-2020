@@ -124,7 +124,7 @@ public class DefaultLinkFilter implements LinkFilter {
                 for (String lang : propertySplit) {
                     if (lang.equals(firstSegment)) return true;
                 }
-                return !ignoredLanguages.contains(firstSegment);
+                return !ignoredLanguages.contains(firstSegment.toLowerCase());
             }
         }
         return true;
@@ -133,11 +133,11 @@ public class DefaultLinkFilter implements LinkFilter {
     private boolean hasUsefulInfo(Link link) {
         var paths = link.getPath().split("/");
         for (String path : paths) {
-            if (!path.equals("") && ignoredLinks.contains(path)) return false;
+            if (!path.equals("") && ignoredLinks.contains(path.toLowerCase())) return false;
         }
         var subdomains = link.getSubdomains();
         for (String subdomain : subdomains) {
-            if (ignoredSubdomains.contains(subdomain)) return false;
+            if (ignoredSubdomains.contains(subdomain.toLowerCase())) return false;
         }
         return true;
     }
@@ -152,7 +152,7 @@ public class DefaultLinkFilter implements LinkFilter {
             if (lastSegmentSplit.length == 1) {
                 return true;
             } else {
-                return allowedFileExtensions.contains(lastSegmentSplit[lastSegmentSplit.length - 1]);
+                return allowedFileExtensions.contains(lastSegmentSplit[lastSegmentSplit.length - 1].toLowerCase());
             }
         } else {
             return true;

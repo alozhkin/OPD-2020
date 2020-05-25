@@ -39,7 +39,7 @@ stellenangebote
 kunden
 stammkunden
 kundendienst
-Certificate
+certificate
 certificates
 sitemap
 produkte
