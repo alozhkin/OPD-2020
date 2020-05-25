@@ -20,8 +20,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -335,7 +333,13 @@ public class SplashScraper implements Scraper {
                 scheduledToRetry.decrementAndGet();
                 throw new SplashNotRespondingException();
             } else {
-                retryExecutor.schedule(this::retry, delay, TimeUnit.MILLISECONDS);
+                synchronized (calls) {
+                    if (!call.isCanceled()) {
+                        var newCall = call.clone();
+                        calls.add(newCall);
+                        retryExecutor.schedule(() -> retry(newCall), delay, TimeUnit.MILLISECONDS);
+                    }
+                }
             }
         }
 
@@ -357,19 +361,14 @@ public class SplashScraper implements Scraper {
             return delay;
         }
 
-        private void retry() {
-            synchronized (calls) {
-                if (!call.isCanceled()) {
-                    var newCall = call.clone();
-                    calls.add(newCall);
-                    newCall.enqueue(new SplashCallback(context.getForNewRetry()));
-                    scheduledToRetry.decrementAndGet();
-                    stat.requestRetried();
-                }
+        private void retry(Call call) {
+            if (!call.isCanceled()) {
+                call.enqueue(new SplashCallback(context.getForNewRetry()));
+                scheduledToRetry.decrementAndGet();
+                stat.requestRetried();
             }
         }
     }
-
 
     /**
      * Little data class with information useful for calls
