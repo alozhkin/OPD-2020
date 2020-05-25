@@ -1,7 +1,6 @@
 package scraper;
 
 import com.google.gson.Gson;
-import logger.LoggerUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import spider.FailedPage;
@@ -21,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static logger.LoggerUtils.*;
 
 /**
  * Class that uses <a href="https://splash.readthedocs.io">Splash</a> - lightweight web browser with an HTTP API
@@ -72,19 +73,17 @@ public class SplashScraper implements Scraper {
                 cache.close();
             }
         } catch (IOException e) {
-            LoggerUtils.debugLog.error("SplashScraper - Cache closing rejected", e);
+            debugLog.error("SplashScraper - Cache closing rejected", e);
         }
     }
 
     @Override
     public void scrape(Link link, Consumer<Page> siteConsumer) {
-        LoggerUtils.debugLog.debug("SplashScraper - Site start {}", link);
         var request = renderReqFactory.getRequest(new DefaultSplashRequestContext.Builder().setSiteUrl(link).build());
         var call = httpClient.newCall(request);
         calls.add(call);
         call.enqueue(new SplashCallback(new CallContext(link, siteConsumer)));
         stat.requestSended();
-        LoggerUtils.debugLog.debug("SplashScraper - Site end {}", link);
     }
 
     /**
@@ -161,23 +160,49 @@ public class SplashScraper implements Scraper {
         private void handleFail(IOException e) {
             var cause = e.getCause();
             if (cause != null && cause.getClass().equals(EOFException.class)) {
-                LoggerUtils.debugLog.warn("SplashScraper - EOFException, request will be retried {}", initialLink);
-                handleSplashRestarting();
+                handleSplashRestarting((EOFException) cause);
+                return;
+            } else if (e.getClass().equals(SocketException.class)) {
+                handleSplashRestarting((SocketException) cause);
                 return;
             } else if (e.getMessage().equals("Canceled")) {
-                LoggerUtils.debugLog.debug("SplashScraper - Request canceled " + initialLink);
-            } else if (e.getClass().equals(SocketException.class)) {
-                LoggerUtils.debugLog.error("SplashScraper - Socket is closed, request will be retried {}", initialLink);
-                handleSplashRestarting();
-                return;
+                debugLog.debug("SplashScraper - Request canceled " + initialLink);
             } else if (e.getMessage().equals("executor rejected")) {
-                LoggerUtils.debugLog.error("SplashScraper - Executor rejected {}", initialLink);
+                debugLog.error("SplashScraper - Executor rejected {}", initialLink);
                 stat.requestFailed();
             } else {
-                LoggerUtils.debugLog.error("SplashScraper - Request failed {}", initialLink, e);
+                debugLog.error("SplashScraper - Request failed {}", initialLink, e);
                 stat.requestFailed();
             }
             failedPages.add(new FailedPage(e, initialLink));
+        }
+
+        private void handleSplashRestarting(Exception e) {
+            var delay = getDelay(context.getRetryCount());
+            if (delay == -1) {
+                throw new SplashNotRespondingException();
+            } else {
+                scheduleToRetry(delay, e);
+            }
+        }
+
+        private void scheduleToRetry(int delay, Exception e) {
+            logRetry(e);
+            synchronized (calls) {
+                if (!call.isCanceled()) {
+                    var newCall = call.clone();
+                    calls.add(newCall);
+                    retryExecutor.schedule(() -> retry(newCall), delay, TimeUnit.MILLISECONDS);
+                }
+            }
+        }
+
+        private void logRetry(Exception e) {
+            scheduledToRetry.incrementAndGet();
+            if (e != null) {
+                var simpleName = e.getClass().getSimpleName();
+                debugLog.error("SplashScraper - {}, request will be retried {}", simpleName, initialLink);
+            }
         }
 
         /**
@@ -192,7 +217,7 @@ public class SplashScraper implements Scraper {
          */
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) {
-            LoggerUtils.debugLog.debug("SplashScraper - Response is accepted {}", initialLink);
+            debugLog.debug("SplashScraper - Response is accepted {}", initialLink);
             this.call = call;
             try {
                 if (!call.isCanceled()) {
@@ -207,28 +232,31 @@ public class SplashScraper implements Scraper {
         private void handleResponse(Response response) throws IOException {
             int code = response.code();
             if (code == 200) {
-                stat.requestSucceeded();
-                var body = extractResponseBode(response);
-                handleSuccessfulResponseBody(body);
+                handleSuccessfulResponse(response);
             } else if (code == 503 || code == 502) {
-                if (!Objects.equals(response.header("Retry-After"), "-1")) {
-                    LoggerUtils.debugLog.warn("SplashScraper - HTTP {}, request will be retried {}", code, initialLink);
-                    handleSplashRestarting();
-                } else {
-                    LoggerUtils.debugLog.info("SplashScraper - HTTP {}, page {} was not scraped", code, initialLink);
-                }
+                handleServerProblem(response, code);
             } else if (code == 504) {
-                stat.requestTimeout();
-                LoggerUtils.debugLog.warn("SplashScraper - Timeout expired {}", initialLink);
+                handleTimeoutResponse();
             }  else if (code == 400) {
-                var body = extractResponseBode(response);
-                handle400ResponseBody(body);
-                stat.responseFailCode();
+                handle400Response(response);
             } else {
-                LoggerUtils.debugLog.info("SplashScraper - HTTP {}, page {} was not scraped", code, initialLink);
-                stat.responseFailCode();
+                handleUnexpectedResponse(code);
             }
             response.close();
+        }
+
+        public void handleSuccessfulResponse(Response response) throws IOException {
+            stat.requestSucceeded();
+            var body = extractResponseBode(response);
+            var splashResponse = gson.fromJson(body, SplashResponse.class);
+            finalLink = new Link(splashResponse.getUrl());
+            if (!isSameSite()) return;
+            logRedirect();
+            if (!call.isCanceled()) {
+                var frames = getFrames(splashResponse);
+                consumer.accept(new Page(new Html(splashResponse.getHtml(), finalLink), initialLink, frames));
+                stat.siteScraped();
+            }
         }
 
         private String extractResponseBode(Response response) throws IOException {
@@ -239,23 +267,15 @@ public class SplashScraper implements Scraper {
             return responseBody.string();
         }
 
-        private void handleSuccessfulResponseBody(String responseBody) {
-            var splashResponse = gson.fromJson(responseBody, SplashResponse.class);
-            var site = splashResponse.getUrl();
-            finalLink = new Link(site);
-            var frameCollection = splashResponse.getFrames();
+        private ArrayList<Html> getFrames(SplashResponse splashResponse) {
             var frames = new ArrayList<Html>();
+            var frameCollection = splashResponse.getFrames();
             if (frameCollection != null) {
                 frames.addAll(Arrays.stream(frameCollection)
                         .map(strFrame -> new Html(strFrame, finalLink))
                         .collect(Collectors.toList()));
             }
-            if (!isSameSite()) return;
-            logRedirect();
-            if (!call.isCanceled()) {
-                consumer.accept(new Page(new Html(splashResponse.getHtml(), finalLink), initialLink, frames));
-                stat.siteScraped();
-            }
+            return frames;
         }
 
         /**
@@ -268,9 +288,7 @@ public class SplashScraper implements Scraper {
             if (isDomainSuitable()) {
                 return true;
             } else {
-                LoggerUtils.debugLog.info(
-                        String.format("SplashScraper - Tried to redirect from %s to site %s", initialLink, finalLink)
-                );
+                debugLog.info("SplashScraper - Tried to redirect from {} to site {}", initialLink, finalLink);
                 stat.responseRejected();
                 return false;
             }
@@ -289,57 +307,64 @@ public class SplashScraper implements Scraper {
         private void logRedirect() {
             var isRedirected = !finalLink.getWithoutProtocol().equals(initialLink.getWithoutProtocol());
             if (isRedirected) {
-                LoggerUtils.debugLog.info(
-                        String.format("SplashScraper - Redirect from %s to %s", initialLink, finalLink)
-                );
+                debugLog.info("SplashScraper - Redirect from {} to {}", initialLink, finalLink);
             }
+        }
+
+        private void handleServerProblem(Response response, int code) {
+            if (!Objects.equals(response.header("Retry-After"), "-1")) {
+                handleSplashRestarting(null);
+            } else {
+                debugLog.info("SplashScraper - HTTP {}, page {} was not scraped", code, initialLink);
+            }
+        }
+
+        private void handleTimeoutResponse() {
+            debugLog.warn("SplashScraper - Timeout expired, page {} was not scraped", initialLink);
+            stat.requestTimeout();
+        }
+
+        private void handle400Response(Response response) throws IOException {
+            var body = extractResponseBode(response);
+            var splashResponse = gson.fromJson(body, Splash400Response.class);
+            if (splashResponse.getType().equals("ScriptError")) {
+                throw new SplashScriptExecutionException(splashResponse.getInfo());
+            }
+            debugLog.error("SplashScraper - Unexpected 400 HTTP {}", body);
+            stat.responseFailCode();
+        }
+
+        private void handleUnexpectedResponse(int code) {
+            debugLog.info("SplashScraper - HTTP {}, page {} was not scraped", code, initialLink);
+            stat.responseFailCode();
         }
 
         private void handleExceptionOnResponse(Exception e) {
             failedPages.add(new FailedPage(e, initialLink));
-            if (e.getClass().equals(HtmlLanguageException.class)) {
-                LoggerUtils.debugLog.info("SplashScraper - Wrong html language {}", initialLink.toString());
+            var exClass = e.getClass();
+            if (exClass.equals(HtmlLanguageException.class)) {
+                debugLog.warn("SplashScraper - Wrong html language {}", initialLink.toString());
                 stat.responseRejected();
-            } else if (e.getClass().equals(SplashScriptExecutionException.class)) {
-                if (((SplashScriptExecutionException) e).getInfo().getError().startsWith("network")) {
-                    LoggerUtils.debugLog.info("SplashScraper - Splash execution network exception {} {}",
-                            initialLink.toString(), ((SplashScriptExecutionException) e).getInfo().getError());
-                } else {
-                    LoggerUtils.debugLog.warn("SplashScraper - Splash execution exception {} {}",
-                            initialLink.toString(), ((SplashScriptExecutionException) e).getInfo().getError(), e);
-                }
-            } else if (e.getClass().equals(WrongFormedLinkException.class)) {
-                LoggerUtils.consoleLog.error("SplashScraper - {}", e.getMessage());
-                LoggerUtils.debugLog.error("SplashScraper - {}", e.getMessage(), e);
+                return;
+            } else if (exClass.equals(SplashScriptExecutionException.class)) {
+                handleSplashScriptException((SplashScriptExecutionException) e);
+            } else if (exClass.equals(WrongFormedLinkException.class)) {
+                debugLog.error("SplashScraper - {}", e.getMessage(), e);
+            } else if (exClass.equals(ScraperConnectionException.class)) {
+                debugLog.error("Spider - Request failed {} {}", domain, e.getClass().getSimpleName());
             } else {
-                LoggerUtils.debugLog.error("SplashScraper - Exception while handling response, site {}",
-                        initialLink.toString(), e);
-                stat.responseException();
+                debugLog.error("SplashScraper - Exception on response, site {}", initialLink, e);
             }
+            stat.responseException();
         }
 
-        private void handle400ResponseBody(String responseBody) {
-            var splashResponse = gson.fromJson(responseBody, Splash400Response.class);
-            if (splashResponse.getType().equals("ScriptError")) {
-                throw new SplashScriptExecutionException(splashResponse.getInfo());
-            }
-            LoggerUtils.debugLog.error("SplashScraper - Unexpected 400 HTTP {}", responseBody);
-        }
-
-        private void handleSplashRestarting() {
-            scheduledToRetry.incrementAndGet();
-            var delay = getDelay(context.getRetryCount());
-            if (delay == -1) {
-                scheduledToRetry.decrementAndGet();
-                throw new SplashNotRespondingException();
+        private void handleSplashScriptException(SplashScriptExecutionException splashEx) {
+            if (splashEx.getInfo().getError().startsWith("network")) {
+                debugLog.warn("SplashScraper - Splash execution network exception {} {}",
+                        initialLink.toString(), splashEx.getInfo());
             } else {
-                synchronized (calls) {
-                    if (!call.isCanceled()) {
-                        var newCall = call.clone();
-                        calls.add(newCall);
-                        retryExecutor.schedule(() -> retry(newCall), delay, TimeUnit.MILLISECONDS);
-                    }
-                }
+                debugLog.error("SplashScraper - Splash execution exception {} {}",
+                        initialLink.toString(), splashEx.getInfo());
             }
         }
 
