@@ -154,7 +154,9 @@ public class SplashScraper implements Scraper {
         @Override
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
             this.call = call;
-            handleFail(e);
+            if (!call.isCanceled()) {
+                handleFail(e);
+            }
             calls.remove(call);
         }
 
@@ -195,7 +197,9 @@ public class SplashScraper implements Scraper {
             LoggerUtils.debugLog.debug("SplashScraper - Response is accepted {}", initialLink);
             this.call = call;
             try {
-                handleResponse(response);
+                if (!call.isCanceled()) {
+                    handleResponse(response);
+                }
             } catch (Exception e) {
                 handleExceptionOnResponse(e);
             }
@@ -344,13 +348,11 @@ public class SplashScraper implements Scraper {
          * @return delay (in millis)
          */
         private int getDelay(int retryCount) {
-            var delay = 0;
+            var delay = -1;
             if (retryCount == 0) {
                 delay = SPLASH_RESTART_TIME;
             } else if (retryCount < SPLASH_IS_UNAVAILABLE_RETRIES) {
                 delay = SPLASH_RETRY_TIMEOUT;
-            } else {
-                delay = -1;
             }
             return delay;
         }
@@ -361,10 +363,10 @@ public class SplashScraper implements Scraper {
                     var newCall = call.clone();
                     calls.add(newCall);
                     newCall.enqueue(new SplashCallback(context.getForNewRetry()));
+                    scheduledToRetry.decrementAndGet();
+                    stat.requestRetried();
                 }
             }
-            scheduledToRetry.decrementAndGet();
-            stat.requestRetried();
         }
     }
 

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 // TODO documentation for class and all not inherit methods
 public class DefaultWordFilter implements WordFilter {
 
-    private final Collection<String> filteredWords = getFilterWords();
+    private static final Collection<String> filteredWords = getFilterWords();
 
     @Override
     public Collection<String> filter(Collection<String> words) {
@@ -70,16 +70,16 @@ public class DefaultWordFilter implements WordFilter {
         return sb.toString();
     }
 
-    private Collection<String> getFilterWords() {
+    private static Collection<String> getFilterWords() {
         List<String> filteredWords = new ArrayList<>();
         ConfigurationUtils.parseResourceToCollection(
-                "list_of_words_for_filtration/english_words.txt", filteredWords, getClass()
+                "list_of_words_for_filtration/english_words.txt", filteredWords, DefaultWordFilter.class
         );
         ConfigurationUtils.parseResourceToCollection(
-                "list_of_words_for_filtration/russian_words.txt", filteredWords, getClass()
+                "list_of_words_for_filtration/russian_words.txt", filteredWords, DefaultWordFilter.class
         );
         ConfigurationUtils.parseResourceToCollection(
-                "list_of_words_for_filtration/german_words.txt", filteredWords, getClass()
+                "list_of_words_for_filtration/german_words.txt", filteredWords, DefaultWordFilter.class
         );
         return filteredWords;
     }
