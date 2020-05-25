@@ -160,10 +160,10 @@ public class SplashScraper implements Scraper {
         private void handleFail(IOException e) {
             var cause = e.getCause();
             if (cause != null && cause.getClass().equals(EOFException.class)) {
-                handleSplashRestarting((EOFException) cause);
+                handleSplashRestarting(cause.getClass().getSimpleName());
                 return;
             } else if (e.getClass().equals(SocketException.class)) {
-                handleSplashRestarting((SocketException) cause);
+                handleSplashRestarting(e.getClass().getSimpleName());
                 return;
             } else if (e.getMessage().equals("Canceled")) {
                 debugLog.debug("SplashScraper - Request canceled " + initialLink);
@@ -177,17 +177,35 @@ public class SplashScraper implements Scraper {
             failedPages.add(new FailedPage(e, initialLink));
         }
 
-        private void handleSplashRestarting(Exception e) {
+        private void handleSplashRestarting(String reason) {
             var delay = getDelay(context.getRetryCount());
             if (delay == -1) {
                 throw new SplashNotRespondingException();
             } else {
-                scheduleToRetry(delay, e);
+                scheduleToRetry(delay, reason);
             }
         }
 
-        private void scheduleToRetry(int delay, Exception e) {
-            logRetry(e);
+        /**
+         * Gives delay for next retry.
+         * <p>
+         * Returns -1 if retry count is done
+         *
+         * @param retryCount number of retries
+         * @return delay (in millis)
+         */
+        private int getDelay(int retryCount) {
+            var delay = -1;
+            if (retryCount == 0) {
+                delay = SPLASH_RESTART_TIME;
+            } else if (retryCount < SPLASH_IS_UNAVAILABLE_RETRIES) {
+                delay = SPLASH_RETRY_TIMEOUT;
+            }
+            return delay;
+        }
+
+        private void scheduleToRetry(int delay, String reason) {
+            logRetry(reason);
             synchronized (calls) {
                 if (!call.isCanceled()) {
                     var newCall = call.clone();
@@ -197,11 +215,16 @@ public class SplashScraper implements Scraper {
             }
         }
 
-        private void logRetry(Exception e) {
+        private void logRetry(String reason) {
             scheduledToRetry.incrementAndGet();
-            if (e != null) {
-                var simpleName = e.getClass().getSimpleName();
-                debugLog.error("SplashScraper - {}, request will be retried {}", simpleName, initialLink);
+            debugLog.error("SplashScraper - {}, request will be retried {}", reason, initialLink);
+        }
+
+        private void retry(Call call) {
+            if (!call.isCanceled()) {
+                call.enqueue(new SplashCallback(context.getForNewRetry()));
+                scheduledToRetry.decrementAndGet();
+                stat.requestRetried();
             }
         }
 
@@ -313,7 +336,7 @@ public class SplashScraper implements Scraper {
 
         private void handleServerProblem(Response response, int code) {
             if (!Objects.equals(response.header("Retry-After"), "-1")) {
-                handleSplashRestarting(null);
+                handleSplashRestarting("Splash is unavailable");
             } else {
                 debugLog.info("SplashScraper - HTTP {}, page {} was not scraped", code, initialLink);
             }
@@ -365,32 +388,6 @@ public class SplashScraper implements Scraper {
             } else {
                 debugLog.error("SplashScraper - Splash execution exception {} {}",
                         initialLink.toString(), splashEx.getInfo());
-            }
-        }
-
-        /**
-         * Gives delay for next retry.
-         * <p>
-         * Returns -1 if retry count is done
-         *
-         * @param retryCount number of retries
-         * @return delay (in millis)
-         */
-        private int getDelay(int retryCount) {
-            var delay = -1;
-            if (retryCount == 0) {
-                delay = SPLASH_RESTART_TIME;
-            } else if (retryCount < SPLASH_IS_UNAVAILABLE_RETRIES) {
-                delay = SPLASH_RETRY_TIMEOUT;
-            }
-            return delay;
-        }
-
-        private void retry(Call call) {
-            if (!call.isCanceled()) {
-                call.enqueue(new SplashCallback(context.getForNewRetry()));
-                scheduledToRetry.decrementAndGet();
-                stat.requestRetried();
             }
         }
     }
