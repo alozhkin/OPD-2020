@@ -8,7 +8,7 @@ import spider.OnSpiderChangesListener;
 import spider.Spider;
 
 public class Main {
-    private static final String INPUT_PATH = "src/main/resources/websites_data_short.csv";
+    private static final String INPUT_PATH = "src/main/resources/websites_data_main.csv";
     private static final String OUTPUT_PATH = "export.csv";
 
     // prevents class instantiation

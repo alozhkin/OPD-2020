@@ -15,10 +15,7 @@ import utils.WrongFormedLinkException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -213,7 +210,9 @@ public class SplashScraper implements Scraper {
                 handleSuccessfulResponseBody(body);
             } else if (code == 503 || code == 502) {
                 LoggerUtils.debugLog.warn("SplashScraper - HTTP {}, request will be retried {}", code, initialLink);
-                handleSplashRestarting();
+                if (!Objects.equals(response.header("Retry-After"), "0")) {
+                    handleSplashRestarting();
+                }
             } else if (code == 504) {
                 stat.requestTimeout();
                 LoggerUtils.debugLog.warn("SplashScraper - Timeout expired {}", initialLink);

@@ -20,6 +20,10 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
             "local ok, reason = splash:go(args.url)\n" +
             "if not ok then\n" +
             "  if reason:sub(0,4) == 'http' then\n" +
+            "      local code = tonumber(reason:sub(5))\n" +
+            "      if code == 503 or code == 502 then\n" +
+            "           splash:set_result_header(\"Retry-After\", \"0\")\n" +
+            "      end\n" +
             "      splash:set_result_status_code(tonumber(reason:sub(5)))\n" +
             "  else\n" +
             "     error(reason)\n" +
