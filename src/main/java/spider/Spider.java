@@ -130,16 +130,12 @@ public class Spider {
         } catch (TimeoutException e) {
             handleScraperTimeout(future);
         } catch (ExecutionException e) {
-            var exClass = e.getCause().getClass();
-            if (exClass.equals(SplashScriptExecutionException.class)) {
-                handleSplashExecutionFail((SplashScriptExecutionException) e.getCause());
-            } else if (exClass.equals(ScraperConnectionException.class)) {
-                handleConnectionFail((ScraperConnectionException) e.getCause());
-            } else if (exClass.equals(HtmlLanguageException.class)) {
-                handleWrongLang();
-            } else if (exClass.equals(SplashNotRespondingException.class)) {
+            var cause = e.getCause().getClass();
+            if (cause.equals(SplashScriptExecutionException.class) || cause.equals(ScraperConnectionException.class)) {
+                checkNumberOfScraperFails();
+            } else if (cause.equals(SplashNotRespondingException.class)) {
                 throw (SplashNotRespondingException) e.getCause();
-            } else {
+            } else if (!cause.equals(HtmlLanguageException.class)) {
                 throw e;
             }
         }
@@ -151,28 +147,11 @@ public class Spider {
         consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
     }
 
-    private void handleSplashExecutionFail(SplashScriptExecutionException e) {
-        debugLog.error("Spider - Request failed {} {} {}", domain, e.getClass().getSimpleName(), e.getInfo());
-        consoleLog.error("Request failed {} {} {}", domain, e.getClass().getSimpleName(), e.getInfo().getType());
-        checkNumberOfScraperFails();
-    }
-
-    private void handleConnectionFail(ScraperConnectionException e) {
-        debugLog.error("Spider - Request failed {} {}", domain, e.getClass().getSimpleName());
-        consoleLog.error("Request failed {} {}", domain, e.getMessage());
-        checkNumberOfScraperFails();
-    }
-
     private void checkNumberOfScraperFails() {
         ++domainsFailsInARowCount;
         if (domainsFailsInARowCount == DOMAINS_FAILS) {
             throw new ScraperFailException(new TooManyFailsException());
         }
-    }
-
-    private void handleWrongLang() {
-        debugLog.warn("DomainTask - Wrong html language, site is not taken into account {}", domain);
-        consoleLog.warn("Wrong html language, site is not taken into account {}", domain);
     }
 
     private void trackStatistic(Statistic statistic) {
