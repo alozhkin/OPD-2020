@@ -165,7 +165,7 @@ public class SplashScraper implements Scraper {
                 handleSplashRestarting();
                 return;
             } else if (e.getMessage().equals("Canceled")) {
-//                LoggerUtils.debugLog.info("SplashScraper - Request canceled " + initialLink);
+                LoggerUtils.debugLog.info("SplashScraper - Request canceled " + initialLink);
             } else if (e.getClass().equals(SocketException.class)) {
                 LoggerUtils.debugLog.error("SplashScraper - Socket is closed, request will be retried {}", initialLink);
                 handleSplashRestarting();
@@ -300,7 +300,8 @@ public class SplashScraper implements Scraper {
                 if (((SplashScriptExecutionException) e).getInfo().getError().startsWith("network")) {
                     LoggerUtils.debugLog.info("SplashScraper - Splash execution network exception {}", initialLink.toString());
                 } else {
-                    LoggerUtils.debugLog.warn("SplashScraper - Splash execution exception {}", initialLink.toString(), e);
+                    LoggerUtils.debugLog.warn("SplashScraper - Splash execution exception {} {}",
+                            initialLink.toString(), ((SplashScriptExecutionException) e).getInfo().getType(), e);
                 }
             } else if (e.getClass().equals(WrongFormedLinkException.class)) {
                 LoggerUtils.consoleLog.error("SplashScraper - {}", e.getMessage());

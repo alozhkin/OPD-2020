@@ -26,7 +26,7 @@ import static logger.LoggerUtils.*;
  */
 public class Spider {
     // in seconds
-    private static final int DOMAIN_TIMEOUT = 30;
+    private static final int DOMAIN_TIMEOUT = 15;
     // after that number of fails in a row program stops
     private static final int DOMAINS_FAILS = 10;
 
