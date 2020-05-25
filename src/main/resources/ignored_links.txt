@@ -146,3 +146,13 @@ artikel
 buffet
 inventory
 email-handler
+leistungen
+marken-content
+wp-login
+comments
+category
+news-de
+news-liste
+search
+news-en
+albrecht-news
