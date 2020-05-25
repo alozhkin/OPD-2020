@@ -22,9 +22,9 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
             "  if reason:sub(0,4) == 'http' then\n" +
             "      local code = tonumber(reason:sub(5))\n" +
             "      if code == 503 or code == 502 then\n" +
-            "           splash:set_result_header(\"Retry-After\", \"0\")\n" +
+            "           splash:set_result_header(\"Retry-After\", \"-1\")\n" +
             "      end\n" +
-            "      splash:set_result_status_code(tonumber(reason:sub(5)))\n" +
+            "      splash:set_result_status_code(code)\n" +
             "  else\n" +
             "     error(reason)\n" +
             "  end\n" +

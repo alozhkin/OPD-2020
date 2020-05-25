@@ -209,9 +209,11 @@ public class SplashScraper implements Scraper {
                 var body = extractResponseBode(response);
                 handleSuccessfulResponseBody(body);
             } else if (code == 503 || code == 502) {
-                LoggerUtils.debugLog.warn("SplashScraper - HTTP {}, request will be retried {}", code, initialLink);
-                if (!Objects.equals(response.header("Retry-After"), "0")) {
+                if (!Objects.equals(response.header("Retry-After"), "-1")) {
+                    LoggerUtils.debugLog.warn("SplashScraper - HTTP {}, request will be retried {}", code, initialLink);
                     handleSplashRestarting();
+                } else {
+                    LoggerUtils.debugLog.info("SplashScraper - HTTP {}, page {} was not scraped", code, initialLink);
                 }
             } else if (code == 504) {
                 stat.requestTimeout();
