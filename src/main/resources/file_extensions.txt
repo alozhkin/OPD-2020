@@ -1,0 +1,10 @@
+html
+htm
+php
+php3
+phtml
+shtml
+jsp
+aspx
+cfm
+xhtml

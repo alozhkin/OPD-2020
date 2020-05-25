@@ -30,3 +30,13 @@ gradlew.bat
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# temp files
+*.tmp
+
+# database files
+*.db
+
+# log files
+*.log
+logs/

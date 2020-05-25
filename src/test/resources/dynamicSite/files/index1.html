@@ -1,0 +1,540 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test</title>
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.red-orange.min.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.brown-indigo.min.css" />
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+<script src="http://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="slick.min.js"></script>
+<link rel="stylesheet" href="slick.css" />
+<link rel="stylesheet" href="style.css" />
+<style>
+  p {
+    font-size: 20px;
+    letter-spacing: 0;
+    margin: 0 0 16px;
+}
+a {
+  text-decoration: none;
+  color: Black;
+}
+a:hover {
+    font-size: 15px;
+    color: black;
+   }
+A.l {
+ color: brown;
+ font-size: 15px;
+
+}
+.li{
+margin-left: 10%;
+margin-right: 10%;
+}
+</style>
+</head>
+<body background="../image/fon7.png">
+<button id="demo-menu-lower-left"
+        class="mdl-button mdl-js-button mdl-button--icon">
+  <i class="material-icons">more_vert</i>
+</button>
+<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
+    for="demo-menu-lower-left">
+  <li class="mdl-menu__item"><a href="../main.html">На главную</a></li>
+  <li class="mdl-menu__item"><a href="index4.html">О Климове</a></li>
+  <li class="mdl-menu__item"><a href="index2.html">Результаты</a></li>
+  <li class="mdl-menu__item"><a href="index3.html">Автор</a></li>
+</ul>
+
+<div class="wrapper">
+
+	<h1>Тест на профориентацию (тест Климова)</h1>
+	<div class="head-test">
+
+		<p>Если бы на свете существовали только две профессии, какую работу вы бы предпочли?<br>
+  &nbsp;<br>
+		<b>Какую работу вы предпочтёте?</b></p>
+	</div>
+	<div class="res-test" style="display:none">
+		<p><b>Ваш результат</b></p>
+	</div>
+	<div class="list-questions">
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="1" value="1" id="1a" ' onclick='schet ();'> <label for="1a">Ухаживать за животными</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="1" value="2" id="1b" ' onclick='schet ();'> <label for="1b">Обслуживать машины, приборы (следить, регулировать)</label>
+			</div>
+		</div>
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="2" value="1" id="2a" ' onclick='schet ();'> <label for="2a">Помогать больным </label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="2" value="2" id="2b" ' onclick='schet ();'> <label for="2b">Составлять таблицы, схемы, программы для вычислительных машин</label>
+			</div>
+		</div>
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="3" value="1" id="3a" ' onclick='schet ();'> <label for="3a">Следить за качеством книжных иллюстраций, плакатов, художественных открыток, грампластинок</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="3" value="2" id="3b" ' onclick='schet ();'> <label for="3b">Следить за состоянием, развитием растений</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="4" value="1" id="4a" ' onclick='schet ();'> <label for="4a">Обрабатывать материалы (дерево, ткань, металл, пластмассу и т.п.)</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="4" value="2" id="4b" ' onclick='schet ();'><label for="4b">Доводить Товары до потребителя, рекламировать, продавать</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="5" value="1" id="5a" ' onclick='schet ();'><label for="5a">Обсуждать научно-популярные книги, статьи</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="5" value="2" id="5b" ' onclick='schet ();'><label for="5b">Обсуждать художественные книги (или пьесы, концерты)</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="6" value="1" id="6a" ' onclick='schet ();'><label for="6a">Выращивать молодняк (животных какой-либо породы)</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="6" value="2" id="6b" ' onclick='schet ();'><label for="6b">Тренировать товарищей (или младших) в выполнении каких-либо действий (трудовых, учебных, спортивных)</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="7" value="1" id="7a" ' onclick='schet ();'><label for="7a">Копировать рисунки, изображения (или настраивать музыкальные инструменты)</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="7" value="2" id="7b" ' onclick='schet ();'><label for="7b">Управлять каким-либо грузовым (подъемным или транспортным) средством – подъемным краном, трактором, тепловозом и др.</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="8" value="1" id="8a" ' onclick='schet ();'><label for="8a">Сообщать, разъяснять людям нужные им сведения (в справочном бюро, на экскурсии и т.д.)</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="8" value="2" id="8b" ' onclick='schet ();'><label for="8b">Оформлять выставки, витрины (или участвовать в подготовке пьес, концертов)</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+                                                                     
+			<div class="answer">
+				<input type="radio" name="9" value="1" id="9a" ' onclick='schet ();'><label for="9a">Ремонтировать вещи, изделия (одежду, технику), жилище</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="9" value="2" id="9b" ' onclick='schet ();'><label for="9b">Искать и исправлять ошибки в текстах, таблицах, рисунках</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="10" value="1" id="10a" ' onclick='schet ();'><label for="10a">Лечить животных</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="10" value="2" id="10b" ' onclick='schet ();'><label for="10b">Выполнять вычисления, расчеты</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="11" value="1" id="11a" ' onclick='schet ();'><label for="11a">Выводить новые сорта растений  </label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="11" value="2" id="11b" ' onclick='schet ();'><label for="11b">Конструировать, проектировать новые виды промышленных изделий (машины, одежду, дома, продукты питания и т.п.)</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="12" value="1" id="12a" ' onclick='schet ();'><label for="12a">Разбирать споры, ссоры между людьми, убеждать, разъяснять, наказывать, поощрять</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="12" value="2" id="12b" ' onclick='schet ();'><label for="12b">Разбираться в чертежах, схемах, таблицах (проверять, уточнять, приводить в порядок)</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="13" value="1" id="13a" ' onclick='schet ();'><label for="13a">Наблюдать, изучать работу кружков художественной самодеятельности</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="13" value="2" id="13b" ' onclick='schet ();'><label for="13b">Наблюдать, изучать жизнь микробов</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="14" value="1" id="14a" ' onclick='schet ();'><label for="14a">Обслуживать, налаживать медицинские приборы, аппараты </label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="14" value="2" id="14b" ' onclick='schet ();'><label for="14b">Оказывать людям медицинскую помощь при ранениях, ушибах, ожогах и т.п.</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="15" value="1" id="15a" ' onclick='schet ();'><label for="15a">Художественно описывать, изображать события (наблюдаемые и представляемые)</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="15" value="2" id="15b" ' onclick='schet ();'><label for="15b">Составлять точные описания-отчеты о наблюдаемых явлениях, событиях, измеряемых объектах и др.</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="16" value="1" id="16a" ' onclick='schet ();'><label for="16a">Делать лабораторные анализы в больнице</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="16" value="2" id="16b" ' onclick='schet ();'><label for="16b">Принимать, осматривать больных, беседовать с ними, назначать лечение</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="17" value="1" id="17a" ' onclick='schet ();'><label for="17a">Красить или расписывать стены помещений, поверхность изделий</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="17" value="2" id="17b" ' onclick='schet ();'><label for="17b">Осуществлять монтаж или сборку машин, приборов</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="18" value="1" id="18a" ' onclick='schet ();'><label for="18a">Организовать культпоходы сверстников или младших в театры, музеи, экскурсии, туристические походы и т.п. </label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="18" value="2" id="18b" ' onclick='schet ();'><label for="18b">Играть на сцене, принимать участие в концертах</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="19" value="1" id="19a" ' onclick='schet ();'><label for="19a">Изготовлять по чертежам детали, изделия (машины, одежду), строить здания</label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="19" value="2" id="19b" ' onclick='schet ();'><label for="19b">Заниматься черчением, копировать чертежи, карты</label>
+			</div>
+		</div>
+
+		<div class="item-question">
+			<div class="answer">
+				<input type="radio" name="20" value="1" id="20a" ' onclick='schet ();'><label for="20a">Вести борьбу с болезнями растений, с вредителями леса, сада </label>
+			</div>
+
+			<div class="answer">
+				<input type="radio" name="20" value="2" id="20b" ' onclick='schet ();'><label for="20b">Работать на клавишных машинах (пишущей машинке, телетайпе, наборной машине и др.)</label>
+			</div>
+		</div>
+	</div>
+	<div class="result" style="display:none">
+		<p>
+			Человек-природа
+			<span id="div1"></span>
+			<span class="length">
+				<span class="spdiv">
+					<span id="length1"></span>
+				</span>
+			</span>
+		</p>
+		<p>Человек-техника
+			<span id="div2"></span>
+			<span class="length">
+				<span class="spdiv">
+					<span id="length2"></span>
+				</span>
+			</span>
+		</p>
+		<p>Человек-человек
+			<span id="div3"></span>
+			<span class="length">
+				<span class="spdiv">
+					<span id="length3"></span>
+				</span>
+			</span>
+		</p>
+		<p>Человек-знаковая система
+			<span id="div4"></span>
+			<span class="length">
+				<span class="spdiv">
+					<span id="length4"></span>
+				</span>
+			</span>
+		</p>
+		<p>Человек-художественный образ
+			<span id="div5"></span>
+			<span class="length">
+				<span class="spdiv">
+					<span id="length5"></span>
+				</span>
+			</span>
+		</p>
+
+		<div class="about-res">
+   <hr width="100%" align="left" color="brown" size ="15" noshade>
+			<p>I. <strong>«Человек-природа»</strong> — все профессии, связанные с растениеводством, животноводством и лесным хозяйством.</p>
+
+   <p>Предметом труда для представителей большинства профессий типа "человек природа" являются: </P>
+
+   <ul>
+   <li><p><em>Животные, условия их роста, жизни;</em></P></li>
+   <li><p><em>Растения, условия их произрастания.</em></P></li>
+   </ul>
+   <p>Для вас подходят профессии:</p>
+   <ul type="circle">
+   <li><p><em><strong>Агроном</strong> ( <a href="http://igsha.ru/structure/faculties/agronomy/" class="l"> Иркутский ГАУ</a>);<strong>Mикробиолог</strong> (<a href="http://biosoil.isu.ru/ru/about/departments/microbiology/index.html"  class="l">ИГУ</a>);<strong> Зоотехник</strong> ( <a href="http://igsha.ru/structure/faculties/biotechnology_and_veterinary/specialties_and_directions.php"  class="l">Иркутский ГАУ</a>)</em></P></li>
+   <li><p><em><strong>Bетеринар</strong> ( <a href="http://igsha.ru/structure/faculties/biotechnology_and_veterinary/"  class="l">Иркутский ГАУ</a>)</em></p></li>
+   </ul>
+   <p>Психологические требования профессий "человек-природа":</P>
+   <ul type="square">
+   <li><p><em>развитое воображение, наглядно-образное мышление, хорошая зрительная память, наблюдательность,
+   способность предвидеть и оценивать изменчивые природные факторы;</em></P></li>
+   <li><p><em>поскольку результаты деятельности выявляются по прошествии довольно длительного времени, специалист должен обладать терпением,
+   настойчивостью, должен быть готовым работать вне коллективов, иногда в трудных погодных условиях,в грязи и т.п.</em> </p></li>
+   </ul>
+   <p>&nbsp;<br></p>
+   <hr width="100%" align="left" color="brown" size ="15" noshade>
+
+			<p>II. <strong>«Человек-техника»</strong> — все технические профессии.</p>
+   <p>Если вам нравятся лабораторные работы по физике, химии, электротехнике, если вы делаете модели, разбираетесь в бытовой технике, если вы хотите создавать,
+   эксплуатировать или ремонтировать машины, механизмы, аппараты, станки, то вам необходимо ознакомьтесь с профессиями "человек-техника". </p>
+   <p>Специалистам в этой области приходится выполнять:</p>
+   <ul type="square">
+   <li><p><em>создание, монтаж, сборка технических устройств (специалисты проектируют, конструируют технические системы, устройства, разрабатывают
+   процессы их изготовления. Из отдельных узлов, деталей собирают машины, механизмы, приборы, регулируют и налаживают их); </em></P></li>
+   <li><p><em>эксплуатация технических устройств (специалисты работают на станках, управляют транспортом, автоматическими системами); </em></p></li>
+   <li><p><em>ремонт технических устройств (специалисты выявляют, распознают неисправности технических систем, приборов, механизмов, ремонтируют, регулируют, налаживают их). </em></P></li>
+   </ul>
+   <p>Для вас подходят:</p>
+   <ul type="circle">
+   <li><p><em><strong>Нефтегазовая промышленность</strong>(<a href="http://www.istu.edu/structure/57/1908/"  class="l">ИРНИТУ</a>);</em></P></li>
+   <li><p><em><strong>Профессии, связанные с физикой, информатикой, математикой, наукой;</strong></em></p></li>
+   <li><p><em><strong>Машинист</strong>(<a href="https://www.irgups.ru/edu/studencheskiy-delovoy-centr" class="l">ИрГУПС</a>);<strong>Mеханик</strong>(<a href="http://www.istu.edu/structure/57/1782/" class="l">ИрНИТУ</a>);<strong>Bодитель</strong> и т.д.</em></P></li>
+   </ul>
+   <p>Психологические требования профессий "человек-техника":</p>
+   <ul>
+   <li><p><em>Хорошая координация движений;</em></P></li>
+   <li><p><em>Точное зрительное, слуховое, вибрационное и кинестетическое восприятие; </em></p></li>
+   <li><p><em>Развитое техническое и творческое мышление и воображение; </em></P></li>
+   <li><p><em>Умение переключать и концентрировать внимание;</em></P></li>
+   <li><p><em>Наблюдательность.</em></P></li>
+   </ul>
+   <p>&nbsp;<br></p>
+   <hr width="100%" align="left" color="brown" size ="15" noshade>
+
+			<p>III. <strong>«Человек-человек»</strong> — все профессии, связанные с обслуживанием людей, с общением.</p>
+
+   <p>Психологические требования профессий "человек-человек":</p>
+   <ul>
+   <li><p><em>Стремление к общению, умение легко вступать в контакт с незнакомыми людьми; </em></P></li>
+   <li><p><em>Устойчивое хорошее самочувствие при работе с людьми; </em></p></li>
+   <li><p><em>Доброжелательность, отзывчивость; </em></P></li>
+   <li><p><em>Умение сдерживать эмоции;</em></P></li>
+   <li><p><em>Способность анализировать поведение окружающих и свое собственное, понимать намерения и настроение других людей, способность разбираться во
+   взаимоотношениях людей, умение улаживать разногласия между ними, организовывать их взаимодействие;</em></P></li>
+   <li><p><em>Способность мысленно ставить себя на место другого человека, умение слушать, учитывать мнение другого человека;</em></P></li>
+   <li><p><em>Способность владеть речью, мимикой, жестами; </em></P></li>
+   <li><p><em>Развитая речь, способность находить общий язык с разными людьми;</em></P></li>
+   <li><p><em>Умение убеждать людей;</em></P></li>
+   <li><p><em>Аккуратность, пунктуальность, собранность;</em></P></li>
+   </ul>
+   <p>Для вас подходят профессии:</p>
+   <ul  type="circle">
+   <li><p><em><strong>Воспитатель</strong>(<a href="http://pi.isu.ru/ru/about/depatments/socpedagog/" class="l">ИГУ</a>);<strong>Учитель</strong>(<a href="http://pi.isu.ru/ru/about/depatments/socpedagog/" class="l">ИГУ</a>);<strong>Cпортивный тренер</strong>(<a href="http://www.rgufk.ru/content/filial-v-gorode-irkutsk" class="l">Иркутский филиал РГУФКСМиТ</a>);</em></P></li>
+   <li><p><em><strong>Врач</strong>(<a href="" class="l">Иркутский государственный медицинский университет</a>);</em></p></li>
+   <li><p><em><strong>Юрист</strong>(<a href="http://lawinstitut.ru/ru/index.html" class="l">ИГУ</a> или<a href="http://www.istu.edu/structure/57/3685/" class="l"> ИрНИТУ</a>);<strong>Полицейский</strong>(<a href="https://вси.мвд.рф/" class="l">ВСИ МВД РФ</a>);</em></P></li>
+   </ul>
+   <p>&nbsp;<br></p>
+   <hr width="100%" align="left" color="brown" size ="15">
+
+			<p>IV. <strong>«Человек-знаковая система»</strong> — все профессии, связанные с обсчетами, цифровыми и буквенными знаками, в том числе и музыкальные специальности.</p>
+   <p>Если вы любите выполнять вычисления, чертежи, схемы, вести картотеки, систематизировать различные сведения, если вы хотите заниматься программированием, экономикой или статистикой и т. п.,
+   то знакомьтесь с профессиями типа "человек -знаковая система".Большинство профессий этого типа связано с переработкой информации.</p>
+   <p>Предметом труда для представителей большинства профессий типа "человек знаковая система" являются: </p>
+   <ul>
+   <li><p><em>Тексты на родном или иностранном языках; </em></P></li>
+   <li><p><em>Цифры, формулы, таблицы; </em></P></li>
+   <li><p><em>Чертежи, схемы, карты; </em></P></li>
+   <li><p><em>Звуковые сигналы; </em></p></li>
+   </ul>
+    <p>Для вас подходят профессии:</p>
+   <ul  type="circle">
+   <li><p><em><strong>Программист</strong>(<a href="http://www.istu.edu/structure/57/9518/1801/" class="l">ИрНИТУ</a>);<strong>Экономист</strong>(<a href="http://math.isu.ru/ru/chairs/economy" class="l">ИГУ</a> или <a href="http://www.istu.edu/structure/57/1951/" class="l">ИрНИТУ</a> ну или наконец <a href="http://www.epub.isea.ru/" class="l">БГУ</a>);</em></P></li>
+   <li><p><em><strong>Конструктор</strong>(<a href="http://www.istu.edu/structure/57/2692/" class="l">ИрНИТУ</a>);<strong> Инженер-технолог</strong>(<a href="http://www.istu.edu/structure/57/4823/" class="l">ИрНИТУ</a>);<strong> Геодезист</strong>(<a href="http://www.istu.edu/abiturientu/profili/gpgs" class="l">ИрНИТУ</a>);</em></P></li>
+   <li><p><em><strong>Звукооператор</strong>(<a href="" class="l">ИГУ</a> или <a href="" class="l">ИрНИТУ</a>);</em></p></li>
+   </ul>
+    <p>Психологические требования профессий "человек-знаковая система": </p>
+   <ul  type="square">
+   <li><p><em>Хорошая оперативная и механическая память;</em></P></li>
+   <li><p><em>Способность к длительной концентрации внимания на отвлеченном (знаковом) материале;</em></P></li>
+   <li><p><em>Хорошее распределение и переключение внимания;</em></P></li>
+   <li><p><em>Точность восприятия, умение видеть то, что стоит за условными знаками;</em></p></li>
+   <li><p><em>Логическое мышление;</em></P></li>
+   </ul>
+
+   <p>&nbsp;<br></p>
+   <hr width="100%" align="left" color="brown" size ="15" noshade>
+   <p>V. <strong>«Человек - художественный образ»</strong> — все творческие специальности.</p>
+   <p>Специалистам в этой области приходится выполнять следующие виды деятельности:</p>
+   <ul  type="square">
+   <li><p><em>Cоздание, проектирование художественных произведений </em></P></li>
+   <li><p><em>Воспроизведение, изготовление различных изделий по образцу</em></p></li>
+   <li><p><em>Размножение художественных произведений в массовом производстве </em></P></li>
+   </ul>
+    <p>Для вас подходят профессии:</p>
+   <ul  type="circle">
+   <li><p><em><strong>Художник</strong>(<a href="http://irkvgik.ru/index.php?start=60" class="l">Иркутский филиал ВГИК</a>);<strong> Архитектор</strong>(<a href="http://www.istu.edu/structure/57/1795/" class="l">ИрНИТУ</a>);<strong> Журналист</strong>(<a href="http://slovoold.isu.ru/application/" class="l">ИГУ</a> или <a href="http://www.journ.bsu.by/" class="l">БГУ</a>);</em></P></li>
+   <li><p><em><strong>Ювелир</strong>(<a href="http://www.istu.edu/structure/57/1901/" class="l">ИрНИТУ</a>);<strong>Реставратор</strong>;<strong> Актер</strong>;</em></p></li>
+   </ul>
+   <p>Психологические требования профессий "человек-художественный образ": </p>
+   <ul>
+   <li><p><em>Художественные способности; развитое зрительное восприятие; </em></P></li>
+   <li><p><em>Наблюдательность, зрительная память; наглядно-образное мышление; творческое воображение; </em></p></li>
+   <li><p><em>Знание психологических законов эмоционального воздействия на людей. </em></P></li>
+   </ul>
+   <p>&nbsp;<br></p>
+   <hr width="100%" align="left" color="brown" size ="15" noshade>
+   <a class="bot2" href="../main.html">Назад!</a>
+   <hr width="100%" align="left" color="brown" size ="15" noshade>
+   </div>
+	</div>
+
+
+</div>
+</body>
+
+<script>
+$('.list-questions').slick({
+	dots: false,
+	speed:900,
+	arrows: false,
+	slidesToShow: 1,
+	slidesToScroll: 1,
+	infinite: false,
+	draggable:false,
+});
+
+$('.item-question label').on('click', function(){
+	$('.list-questions').slick('slickNext');
+})
+
+
+$('.item-question input').on('change', function(){
+	if($(this).prop("checked")) {
+		$(this).parent().parent().find('input').removeClass('active');
+		$(this).addClass('active');
+	}
+	else {
+	alert ('false')
+		$(this).removeClass('active');
+	}
+})
+
+
+var answers = [];
+
+var human_world = ["11",  "32", "61", "101", "111", "132", "161", "201"]
+var human_tech = ["12", "41", "72", "91", "112", "141", "172", "191"]
+var human_human = ["21", "42", "62", "81", "121", "142", "162", "181"]
+var human_sistem = ["22", "51", "92", "102", "122", "151", "192", "202"]
+var human_obraz = ["31", "52", "71", "82", "131", "152", "171", "182"]
+
+
+var i = 1;
+  var popIntersect = function(array1, array2, name, ia) {
+      var result = [];
+      var a = array1.slice(0);
+      var b = array2.slice(0);
+      var aLast = a.length - 1;
+      var bLast = b.length - 1;
+      while (aLast >= 0 && bLast >= 0) {
+        if (a[aLast] > b[bLast]) {
+          a.pop();
+          aLast--;
+        } else if (a[aLast] < b[bLast]) {
+          b.pop();
+          bLast--;
+        } else /* they're equal */
+        {
+          result.push(a.pop());
+          b.pop();
+          aLast--;
+          bLast--;
+        }
+      }
+	  proc = result.length*100/array2.length;
+	  $('#div'+ia).text(proc);
+	  $('#length'+ia).css({'width':proc+'%', 'opacity' : proc/100 });
+
+
+      console.log(result);
+	  console.log(result.length);
+	  console.log(array2.length);
+	  i++
+  };
+ var showResult = function() {
+
+	$('.head-test').hide();
+	$('.res-test').show();
+	$('.result').show();
+	$('.list-questions').remove();
+	$('.head-test').hide();
+}
+
+
+$('.item-question:last-child .answer input').on('change', function(){
+
+	$('.answer').find('input').each(function(){
+		 var that = $(this);
+		 if(that.hasClass("active")){
+			answers.push(this.name + this.value);
+		 }
+	});
+	console.log(answers);
+
+	popIntersect(answers, human_world, "Человек-природа", i);
+	popIntersect(answers, human_tech, "Человек-техника", i);
+	popIntersect(answers, human_human, "Человек-человек", i);
+	popIntersect(answers, human_sistem, "Человек-знаковая система", i);
+	popIntersect(answers, human_obraz, "Человек-художественный образ", i);
+	showResult();
+
+})
+</script>
+</html>
