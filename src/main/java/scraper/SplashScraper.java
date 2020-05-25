@@ -53,7 +53,7 @@ public class SplashScraper implements Scraper {
     private final SplashRequestFactory renderReqFactory;
     // contains calls that are proceeded by http client or retry schedule executor
     private final Set<Call> calls = ConcurrentHashMap.newKeySet();
-    private final List<FailedPage> failedPages = new ArrayList<>();
+    private final ConcurrentLinkedQueue<FailedPage> failedPages = new ConcurrentLinkedQueue<>();
     private final AtomicInteger scheduledToRetry = new AtomicInteger(0);
     private final AtomicReference<String> domain = new AtomicReference<>();
 
@@ -115,7 +115,7 @@ public class SplashScraper implements Scraper {
 
     @Override
     public List<FailedPage> getFailedPages() {
-        return failedPages;
+        return new ArrayList<>(failedPages);
     }
 
     /**
@@ -165,7 +165,7 @@ public class SplashScraper implements Scraper {
                 handleSplashRestarting();
                 return;
             } else if (e.getMessage().equals("Canceled")) {
-                LoggerUtils.debugLog.info("SplashScraper - Request canceled " + initialLink);
+//                LoggerUtils.debugLog.info("SplashScraper - Request canceled " + initialLink);
             } else if (e.getClass().equals(SocketException.class)) {
                 LoggerUtils.debugLog.error("SplashScraper - Socket is closed, request will be retried {}", initialLink);
                 handleSplashRestarting();
