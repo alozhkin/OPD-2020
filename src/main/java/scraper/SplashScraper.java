@@ -376,7 +376,7 @@ public class SplashScraper implements Scraper {
                 debugLog.error("SplashScraper - {}", e.getMessage(), e);
             } else if (exClass.equals(ScraperConnectionException.class)) {
                 debugLog.error("Spider - Request failed {} {}", domain, e.getClass().getSimpleName());
-            } else if (!exClass.equals(SplashNotRespondingException.class)) {
+            } else if (!exClass.equals(SplashNotRespondingException.class) && !exClass.equals(SocketException.class)) {
                 debugLog.error("SplashScraper - Exception on response, site {}", initialLink, e);
             }
             stat.responseException();
