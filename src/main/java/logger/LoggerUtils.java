@@ -30,4 +30,8 @@ public class LoggerUtils {
     public static int getPagesScraped() {
         return pagesScraped.get();
     }
+
+    public static Logger getUILogger() {
+        return LoggerFactory.getLogger("UILOG");
+    }
 }
