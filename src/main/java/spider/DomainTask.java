@@ -3,8 +3,7 @@ package spider;
 import logger.LoggerUtils;
 import scraper.Scraper;
 import scraper.ScraperConnectionException;
-import splash.SplashNotRespondingException;
-import splash.SplashScriptExecutionException;
+import scraper.ScraperFailException;
 import utils.Link;
 
 import java.net.ConnectException;
@@ -66,6 +65,10 @@ public class DomainTask {
         }
     }
 
+    private void scrapeFirstLink(Link link) {
+        scraper.scrape(link, new PageTask(context, linkQueue, resultWords)::handlePage);
+    }
+
     // order is important
     private boolean areAllLinksScraped() {
         return scraper.scrapingPagesCount() != 0 || !linkQueue.isEmpty();
@@ -77,10 +80,6 @@ public class DomainTask {
         }
     }
 
-    private void scrapeFirstLink(Link link) {
-        scraper.scrape(link, new PageTask(context, linkQueue, resultWords)::handlePage);
-    }
-
     private void scrapeNextLink() throws InterruptedException {
         var link = linkQueue.poll(200, TimeUnit.MILLISECONDS);
         if (link != null) {
@@ -90,11 +89,11 @@ public class DomainTask {
     }
 
     private void checkIfScraperThrowException() {
-        var failedSites = scraper.getFailedPages();
-        if (!failedSites.isEmpty()) {
-            var failedSite = failedSites.get(0);
-            if (failedSite != null) {
-                handleException(failedSite.getException());
+        var failedPages = scraper.getFailedPages();
+        if (!failedPages.isEmpty()) {
+            var failedPage = failedPages.get(0);
+            if (failedPage != null) {
+                handleException(failedPage.getException());
             }
         }
     }
@@ -103,13 +102,10 @@ public class DomainTask {
         var exClass = e.getClass();
         if (exClass.equals(ConnectException.class)) {
             throw new ScraperConnectionException(e);
-        } else if (exClass.equals(HtmlLanguageException.class)) {
-            LoggerUtils.debugLog.warn("DomainTask - Wrong html language, site is not taken into account {}", domain);
-            LoggerUtils.consoleLog.warn("Wrong html language, site is not taken into account {}", domain);
         } else if (e instanceof RuntimeException) {
             throw (RuntimeException) e;
-        }  else {
-            LoggerUtils.debugLog.error("DomainTask - Unexpected exception", e);
+        } else {
+            throw new ScraperFailException(e);
         }
     }
 

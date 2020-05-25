@@ -1,10 +1,7 @@
 package spider;
 
 import database.Database;
-import scraper.ScraperFailException;
-import scraper.Statistic;
-import scraper.SplashScraper;
-import scraper.ScraperConnectionException;
+import scraper.*;
 import splash.DefaultSplashRequestFactory;
 import splash.SplashNotRespondingException;
 import splash.SplashScriptExecutionException;
@@ -16,7 +13,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import static logger.LoggerUtils.*;
-
 
 /**
  * Class carrying out the main work of the program: turn domains into words inside database
@@ -102,7 +98,7 @@ public class Spider {
         } catch (InterruptedException e) {
             handleInterrupt(e);
         } catch (ScraperFailException e) {
-            handleScraperFail();
+            handleScraperFail(e);
         } catch (SplashNotRespondingException e) {
             handleSplashNotResponding(e);
         } catch (Exception e) {
@@ -139,6 +135,8 @@ public class Spider {
                 handleSplashExecutionFail((SplashScriptExecutionException) e.getCause());
             } else if (exClass.equals(ScraperConnectionException.class)) {
                 handleConnectionFail((ScraperConnectionException) e.getCause());
+            } else if (exClass.equals(HtmlLanguageException.class)) {
+                handleWrongLang();
             } else if (exClass.equals(SplashNotRespondingException.class)) {
                 throw (SplashNotRespondingException) e.getCause();
             } else {
@@ -156,20 +154,25 @@ public class Spider {
     private void handleSplashExecutionFail(SplashScriptExecutionException e) {
         debugLog.error("Spider - Request failed {} {} {}", domain, e.getClass().getSimpleName(), e.getInfo());
         consoleLog.error("Request failed {} {} {}", domain, e.getClass().getSimpleName(), e.getInfo().getType());
-        handleScraperFail(e);
+        checkNumberOfScraperFails();
     }
 
     private void handleConnectionFail(ScraperConnectionException e) {
         debugLog.error("Spider - Request failed {} {}", domain, e.getClass().getSimpleName());
         consoleLog.error("Request failed {} {}", domain, e.getMessage());
-        handleScraperFail(e);
+        checkNumberOfScraperFails();
     }
 
-    private void handleScraperFail(Exception e) {
+    private void checkNumberOfScraperFails() {
         ++domainsFailsInARowCount;
         if (domainsFailsInARowCount == DOMAINS_FAILS) {
-            throw new ScraperFailException("Too many connect fails", e);
+            throw new ScraperFailException(new TooManyFailsException());
         }
+    }
+
+    private void handleWrongLang() {
+        debugLog.warn("DomainTask - Wrong html language, site is not taken into account {}", domain);
+        consoleLog.warn("Wrong html language, site is not taken into account {}", domain);
     }
 
     private void trackStatistic(Statistic statistic) {
@@ -184,6 +187,41 @@ public class Spider {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private void handleInterrupt(InterruptedException e) {
+        Thread.currentThread().interrupt();
+        debugLog.error("Spider - Interrupted", e);
+    }
+
+    private void handleScraperFail(Exception e) {
+        var causeClass = e.getCause().getClass();
+        if (causeClass.equals(TooManyFailsException.class)) {
+            debugLog.error("Spider - Stopped, {}", e.getMessage());
+            consoleLog.error("Spider stopped, {}", e.getMessage());
+        } else {
+            debugLog.error("Spider - Stopped, unexpected error", e);
+            consoleLog.error("Spider stopped, unexpected error {}", causeClass.getSimpleName());
+        }
+    }
+
+    private void handleSplashNotResponding(SplashNotRespondingException e) {
+        debugLog.error("Spider - {}", e.getMessage(), e);
+        consoleLog.error(e.getMessage());
+    }
+
+    private void handleFinish(ScheduledExecutorService domainExec, ScheduledExecutorService dbExec) {
+        closeResources(domainExec, dbExec);
+        debugLog.info("Spider - {} sites were scraped", scrapedDomains.size());
+        consoleLog.info("Spider - {} sites were scraped", scrapedDomains.size());
+        debugLog.info("Spider - Completed");
+    }
+
+    private void closeResources(ScheduledExecutorService domainExec, ScheduledExecutorService dbExec) {
+        shutdownExecutorService(dbExec);
+        shutdownExecutorService(domainExec);
+        SplashScraper.shutdown();
+        debugLog.info("Spider - Resources were closed");
     }
 
     private void onDomainsParsed(Collection<Link> domains) {
@@ -208,34 +246,5 @@ public class Spider {
         if (listener != null) {
             listener.onFinished();
         }
-    }
-
-    private void handleInterrupt(InterruptedException e) {
-        Thread.currentThread().interrupt();
-        debugLog.error("Spider - Interrupted", e);
-    }
-
-    private void handleScraperFail() {
-        debugLog.error("Spider - Stopped, too many fails");
-        consoleLog.error("Spider stopped, too many fails");
-    }
-
-    private void handleSplashNotResponding(SplashNotRespondingException e) {
-        debugLog.error("Spider - {}", e.getMessage(), e);
-        consoleLog.error(e.getMessage());
-    }
-
-    private void handleFinish(ScheduledExecutorService domainExec, ScheduledExecutorService dbExec) {
-        closeResources(domainExec, dbExec);
-        debugLog.info("Spider - {} sites were scraped", scrapedDomains.size());
-        consoleLog.info("Spider - {} sites were scraped", scrapedDomains.size());
-        debugLog.info("Spider - Completed");
-    }
-
-    private void closeResources(ScheduledExecutorService domainExec, ScheduledExecutorService dbExec) {
-        shutdownExecutorService(dbExec);
-        shutdownExecutorService(domainExec);
-        SplashScraper.shutdown();
-        debugLog.info("Spider - Resources were closed");
     }
 }
