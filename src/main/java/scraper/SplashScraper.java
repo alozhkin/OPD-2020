@@ -298,7 +298,8 @@ public class SplashScraper implements Scraper {
                 stat.responseRejected();
             } else if (e.getClass().equals(SplashScriptExecutionException.class)) {
                 if (((SplashScriptExecutionException) e).getInfo().getError().startsWith("network")) {
-                    LoggerUtils.debugLog.info("SplashScraper - Splash execution network exception {}", initialLink.toString());
+                    LoggerUtils.debugLog.info("SplashScraper - Splash execution network exception {} {}",
+                            initialLink.toString(), ((SplashScriptExecutionException) e).getInfo().getType());
                 } else {
                     LoggerUtils.debugLog.warn("SplashScraper - Splash execution exception {} {}",
                             initialLink.toString(), ((SplashScriptExecutionException) e).getInfo().getType(), e);
