@@ -20,7 +20,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
             "local ok, reason = splash:go(args.url)\n" +
             "if not ok then\n" +
             "  if reason:sub(0,4) == 'http' then\n" +
-            "      splash:set_result_status_code(reason:sub(4))\n" +
+            "      splash:set_result_status_code(tonumber(reason:sub(5)))\n" +
             "  else\n" +
             "     error(reason)\n" +
             "  end\n" +

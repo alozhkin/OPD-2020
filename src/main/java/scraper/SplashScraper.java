@@ -222,6 +222,7 @@ public class SplashScraper implements Scraper {
                 handle400ResponseBody(body);
                 stat.responseFailCode();
             } else {
+                LoggerUtils.debugLog.info("SplashScraper - HTTP {}, page {} was not scraped", code, initialLink);
                 stat.responseFailCode();
             }
             response.close();
