@@ -168,7 +168,7 @@ public class SplashScraper implements Scraper {
                 handleSplashRestarting();
                 return;
             } else if (e.getMessage().equals("Canceled")) {
-                LoggerUtils.debugLog.warn("SplashScraper - Request canceled " + initialLink);
+                LoggerUtils.debugLog.info("SplashScraper - Request canceled " + initialLink);
             } else if (e.getClass().equals(SocketException.class)) {
                 LoggerUtils.debugLog.error("SplashScraper - Socket is closed, request will be retried {}", initialLink);
                 handleSplashRestarting();
