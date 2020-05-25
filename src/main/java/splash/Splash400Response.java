@@ -3,6 +3,9 @@ package splash;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Class that matches Splash 400 json response
+ */
 public class Splash400Response {
 
     @SerializedName("error")

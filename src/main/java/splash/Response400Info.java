@@ -3,6 +3,9 @@ package splash;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Class that matches Splash 400 json response info field
+ */
 public class Response400Info {
 
     @SerializedName("source")

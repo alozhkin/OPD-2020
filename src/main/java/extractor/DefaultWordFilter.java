@@ -8,11 +8,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// TODO documentation for class and all not inherit methods
+/**
+ * Class responsible for word filtration
+ */
 public class DefaultWordFilter implements WordFilter {
 
     private static final Collection<String> filteredWords = getFilterWords();
 
+    /**
+     * Method responsible for filtration. Filters words in list_of_words_for_filtration, digits, punctuation marks,
+     * transorms all words to lower case.
+     * @param words words to be filtered
+     * @return filtered words
+     */
     @Override
     public Collection<String> filter(Collection<String> words) {
         removeLinks(words);

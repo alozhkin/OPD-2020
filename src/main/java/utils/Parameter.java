@@ -3,7 +3,7 @@ package utils;
 import java.util.Objects;
 
 /**
- * Class that matches key-value query parameters with"
+ * Class that matches key-value query parameters with "="
  */
 public class Parameter {
     private final String name;
