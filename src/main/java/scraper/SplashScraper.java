@@ -350,7 +350,8 @@ public class SplashScraper implements Scraper {
         private void handle400Response(Response response) throws IOException {
             var body = extractResponseBode(response);
             var splashResponse = gson.fromJson(body, Splash400Response.class);
-            if (splashResponse.getType().equals("ScriptError")) {
+            var type = splashResponse.getType();
+            if (type != null && type.equals("ScriptError")) {
                 throw new SplashScriptExecutionException(splashResponse.getInfo());
             }
             debugLog.error("SplashScraper - Unexpected 400 HTTP {}", body);
