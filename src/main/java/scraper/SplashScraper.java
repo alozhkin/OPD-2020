@@ -296,7 +296,7 @@ public class SplashScraper implements Scraper {
             if (e.getClass().equals(HtmlLanguageException.class)) {
                 LoggerUtils.debugLog.info("SplashScraper - Wrong html language {}", initialLink.toString());
                 stat.responseRejected();
-            } if (e.getClass().equals(SplashScriptExecutionException.class)) {
+            } else if (e.getClass().equals(SplashScriptExecutionException.class)) {
                 if (((SplashScriptExecutionException) e).getInfo().getError().startsWith("network")) {
                     LoggerUtils.debugLog.info("SplashScraper - Splash execution network exception {}", initialLink.toString());
                 } else {
