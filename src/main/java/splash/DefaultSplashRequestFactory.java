@@ -28,6 +28,12 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
             "local frames = splash:evaljs(\"let htmls=new Array(frames.length);for(let i=0;i<frames.length;i++)" +
             "{const doc=frames[i].document;if(doc){htmls[i]=doc.documentElement.outerHTML}}htmls;\")\n" +
             "local html = splash:html()\n" +
+            "local lowHtml = string.lower(html)\n" +
+            "local tag = \"<meta http%-equiv=\\\"refresh\\\"\"\n" +
+            "if lowHtml:find(tag) then\n" +
+            "  splash:wait(2)\n" +
+            "  html = splash:html()\n" +
+            "end\n" +
             "local url = splash:url()\n" +
             "splash:runjs(\"window.close()\")\n" +
             "return {html=html, url=url, frames=frames}";
