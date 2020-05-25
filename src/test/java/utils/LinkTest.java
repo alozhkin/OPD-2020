@@ -15,12 +15,6 @@ public class LinkTest {
     }
 
     @Test
-    void shouldAcceptEmptyString() {
-        var url = "";
-        assertEquals("", new Link(url).toString());
-    }
-
-    @Test
     void shouldRemoveTrailingSlash() {
         var expected = "http://test.com";
         var slashUrl = "http://test.com/";
