@@ -66,16 +66,9 @@ public class DefaultWordFilter implements WordFilter {
         words.removeIf(x -> x.matches("^\\d+$"));
     }
 
-    // Метод удаления знаков препинания из строки
+    // Метод удаления знаков препинания из начала и конца строки
     private String removingPunctuation(String s) {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < s.length(); i++) {
-            if (Character.isLetterOrDigit(s.charAt(i)))
-                sb.append(s.charAt(i));
-        }
-
-        return sb.toString();
+        return s.replaceAll("^\\p{Punct}*|\\p{Punct}*$", " ").trim();
     }
 
     private static Collection<String> getFilterWords() {
