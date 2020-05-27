@@ -123,7 +123,7 @@ public class Spider {
         return false;
     }
 
-    private void handleDomainFuture(Future<?> future) throws InterruptedException, ExecutionException {
+    private void handleDomainFuture(Future<?> future) throws InterruptedException {
         try {
             future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
             domainsFailsInARowCount = 0;
@@ -135,8 +135,11 @@ public class Spider {
                 checkNumberOfScraperFails();
             } else if (cause.equals(SplashNotRespondingException.class)) {
                 throw (SplashNotRespondingException) e.getCause();
-            } else if (!cause.equals(HtmlLanguageException.class)) {
-                throw e;
+            } else if (cause.equals(ScraperFailException.class)) {
+                throw (ScraperFailException) e.getCause();
+            }
+            if (!cause.equals(HtmlLanguageException.class)) {
+                debugLog.error("Spider - Site {} failed", domain, e);
             }
         }
     }
