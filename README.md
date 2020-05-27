@@ -36,6 +36,15 @@ sudo docker-compose up
 4. Run program
 ### Another systems may have problems with 8050 Splash port access.
 
+## Program launch
+There are three ways to run a program:
+1. Run "main" method in main.Main. The default values will be used as the input and output paths. The program will start without a progress bar. 
+2. Run "main" method in ui.ConsoleUI. As program arguments, you must pass the path to the input file with sites, and optionally you can pass the path to the output file using option ```-o OUTPUT_FILE_PATH``` and the path to the database using option ```-db DATABASE_FILE_PATH```. The program will start with the progress bar.
+3. Build Jar file via running "jar" in build.gradle. After that run 
+```
+java -jar words_extractor.jar "INPUT_FILE_PATH" 
+```
+just like in ConsoleUI, you can use the options ```-o OUTPUT_FILE_PATH``` and ```-db DATABASE_FILE_PATH```
 ## How does it work?
 First of all, we use Splash to render html and run js code. What can it do?
 
