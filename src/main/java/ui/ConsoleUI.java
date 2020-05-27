@@ -4,7 +4,10 @@ import java.util.Collection;
 import java.util.Objects;
 
 import main.Main;
+import me.tongfei.progressbar.DelegatingProgressBarConsumer;
 import me.tongfei.progressbar.ProgressBar;
+import me.tongfei.progressbar.ProgressBarBuilder;
+import me.tongfei.progressbar.ProgressBarStyle;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -29,7 +32,6 @@ public class ConsoleUI implements OnSpiderChangesListener {
 
     private void start(String[] args) {
         CmdLineParser parser = new CmdLineParser(this);
-        consoleLog = getUILogger();
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
@@ -42,7 +44,12 @@ public class ConsoleUI implements OnSpiderChangesListener {
 
     @Override
     public void onDomainsParsed(Collection<Link> domains) {
-        pb = new ProgressBar("Words_Extractor", domains.size() + 1);
+        pb = new ProgressBarBuilder()
+                .setTaskName("words_extractor")
+                .setInitialMax(domains.size() + 1)
+                .setConsumer(new DelegatingProgressBarConsumer(getUILogger()::info))
+                .setStyle(ProgressBarStyle.UNICODE_BLOCK)
+                .build();
     }
 
     @Override

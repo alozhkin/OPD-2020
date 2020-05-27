@@ -92,7 +92,7 @@ public class Spider {
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 handleDomainFuture(future);
-                trackStatistic(scraper.getStatistic());
+//                trackStatistic(scraper.getStatistic());
                 dbExec.submit(new DatabaseTask(database, domain, allWords, domainIds)::run);
             }
         } catch (InterruptedException e) {

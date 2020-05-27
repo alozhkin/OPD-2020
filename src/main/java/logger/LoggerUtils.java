@@ -32,6 +32,6 @@ public class LoggerUtils {
     }
 
     public static Logger getUILogger() {
-        return LoggerFactory.getLogger("UILOG");
+        return consoleLog;
     }
 }
