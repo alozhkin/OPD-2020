@@ -75,9 +75,10 @@ public class Link {
     /**
      * Removes <i>"www."</i>, even when protocol specified
      *
-     * @return link without <i>"www."</i>
+     * @return link without <i>"www."</i> or <i>"www."</i> if link equals <i>"www."</i>
      */
     public Link fixWWW() {
+        if (getHost().equals("www.")) return this;
         var fixed = getWithoutProtocol();
         if (fixed.startsWith("www.")) {
             fixed = fixed.substring(4);
