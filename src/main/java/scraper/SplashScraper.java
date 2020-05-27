@@ -217,7 +217,7 @@ public class SplashScraper implements Scraper {
 
         private void logRetry(String reason) {
             scheduledToRetry.incrementAndGet();
-            debugLog.error("SplashScraper - {}, request will be retried {}", reason, initialLink);
+            debugLog.warn("SplashScraper - {}, request will be retried {}", reason, initialLink);
         }
 
         private void retry(Call call) {
