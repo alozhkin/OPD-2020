@@ -30,7 +30,7 @@ public class DatabaseTest {
 
     @BeforeEach
     public void initDb() {
-        database = Database.newInstance();
+        database = Database.newInstance("websites.db");
     }
 
     @Test
