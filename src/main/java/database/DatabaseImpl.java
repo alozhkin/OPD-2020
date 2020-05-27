@@ -31,10 +31,9 @@ class DatabaseImpl implements Database {
 
         Use IDatabase.newInstance() to create database object
    */
-
-    DatabaseImpl() {
+    DatabaseImpl(String databasePath) {
         try {
-            url = System.getProperty("database.url");
+            url = System.getProperty("database.url") + databasePath;
             initDatabase();
         } catch (ClassNotFoundException e) {
             consoleLog.error("DatabaseImpl - Failed to initialize database: {}", e.toString());
