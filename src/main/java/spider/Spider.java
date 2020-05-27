@@ -140,6 +140,7 @@ public class Spider {
             }
             if (!cause.equals(HtmlLanguageException.class)) {
                 debugLog.error("Spider - Site {} processing failed due to {}", domain, cause.getSimpleName());
+                consoleLog.error("Spider - Site {} processing failed due to {}", domain, cause.getSimpleName());
             }
         }
     }
