@@ -92,7 +92,7 @@ public class Spider {
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 handleDomainFuture(future);
-                trackStatistic(scraper.getStatistic());
+//                trackStatistic(scraper.getStatistic());
                 dbExec.submit(new DatabaseTask(database, domain, allWords, domainIds)::run);
             }
         } catch (InterruptedException e) {
@@ -123,7 +123,7 @@ public class Spider {
         return false;
     }
 
-    private void handleDomainFuture(Future<?> future) throws InterruptedException, ExecutionException {
+    private void handleDomainFuture(Future<?> future) throws InterruptedException {
         try {
             future.get(DOMAIN_TIMEOUT, TimeUnit.SECONDS);
             domainsFailsInARowCount = 0;
@@ -135,16 +135,19 @@ public class Spider {
                 checkNumberOfScraperFails();
             } else if (cause.equals(SplashNotRespondingException.class)) {
                 throw (SplashNotRespondingException) e.getCause();
-            } else if (!cause.equals(HtmlLanguageException.class)) {
-                throw e;
+            } else if (cause.equals(ScraperFailException.class)) {
+                throw (ScraperFailException) e.getCause();
+            }
+            if (!cause.equals(HtmlLanguageException.class)) {
+                debugLog.error("Spider - Site {} processing failed due to {}", domain, cause.getSimpleName());
             }
         }
     }
 
     private void handleScraperTimeout(Future<?> future) {
         future.cancel(true);
-        debugLog.error("Spider - Stopped, waiting too long for scraping site {}", domain);
-        consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
+        debugLog.warn("Spider - Stopped, waiting too long for scraping site {}", domain);
+        consoleLog.warn("Spider stopped, waiting too long for scraping site {}", domain);
     }
 
     private void checkNumberOfScraperFails() {

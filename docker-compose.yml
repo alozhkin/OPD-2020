@@ -1,0 +1,70 @@
+version: '2'
+
+services:
+    opd: 
+        build:
+            context: .
+        depends_on:
+            - haproxy
+        volumes:
+            - ./docker/results:/usr/local/etc/results
+            - ./docker/input:/usr/local/etc/input
+            - ./docker/logs:/logs
+        links:
+            - haproxy
+
+    haproxy:
+        image: haproxy:1.7
+        ports:
+            # splash
+            - "8050:8050"
+        links:
+            - splash0
+            - splash1
+            - splash2
+
+        volumes:
+            - ./docker/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+            - ./docker/filters:/etc/splash/filters:ro
+        logging:
+            driver: "none"
+
+    splash0:
+        image: scrapinghub/splash:3.4.1
+        command: --max-timeout 20 --slots 20 --maxrss 628 --verbosity 0 --browser-engines=webkit --disable-private-mode
+        expose:
+            - 8050
+        mem_limit: 816m
+        memswap_limit: 1012m
+        restart: always
+        logging:
+            driver: "none"
+        volumes:
+            - ./docker/filters:/etc/splash/filters:ro
+
+    splash1:
+        image: scrapinghub/splash:3.4.1
+        command: --max-timeout 20 --slots 20 --maxrss 628 --verbosity 0 --browser-engines=webkit --disable-private-mode
+        expose:
+            - 8050
+        mem_limit: 816m
+        memswap_limit: 1012m
+        restart: always
+        logging:
+            driver: "none"
+        volumes:
+            - ./docker/filters:/etc/splash/filters:ro
+
+    splash2:
+        image: scrapinghub/splash:3.4.1
+        command: --max-timeout 20 --slots 20 --maxrss 628 --verbosity 0 --browser-engines=webkit --disable-private-mode
+        expose:
+            - 8050
+        mem_limit: 816m
+        memswap_limit: 1012m
+        restart: always
+        logging:
+            driver: "none"
+        volumes:
+            - ./docker/filters:/etc/splash/filters:ro
+

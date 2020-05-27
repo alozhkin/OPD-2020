@@ -14,10 +14,19 @@ public class DefaultSplashRequestContext {
 
     public static class Builder {
         private static final Link localhost = new Link("localhost:8050");
+        private static final Link haproxy = new Link("haproxy:8050");
+        private static Boolean insideContainer;
         private Link siteUrl;
-        private Link splashUrl = localhost;
+        private Link splashUrl;
         private String username = "user";
         private String password = "userpass";
+
+        public Builder() {
+            if (insideContainer == null) {
+                insideContainer = System.getProperty("inside.container").equals("true");
+            }
+            splashUrl = insideContainer ? haproxy : localhost;
+        }
 
         public Builder setSiteUrl(Link siteUrl) {
             this.siteUrl = siteUrl;
