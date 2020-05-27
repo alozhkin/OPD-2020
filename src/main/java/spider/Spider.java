@@ -139,15 +139,15 @@ public class Spider {
                 throw (ScraperFailException) e.getCause();
             }
             if (!cause.equals(HtmlLanguageException.class)) {
-                debugLog.error("Spider - Site {} failed", domain, e);
+                debugLog.error("Spider - Site {} processing failed due to {}", domain, cause.getSimpleName());
             }
         }
     }
 
     private void handleScraperTimeout(Future<?> future) {
         future.cancel(true);
-        debugLog.error("Spider - Stopped, waiting too long for scraping site {}", domain);
-        consoleLog.error("Spider stopped, waiting too long for scraping site {}", domain);
+        debugLog.warn("Spider - Stopped, waiting too long for scraping site {}", domain);
+        consoleLog.warn("Spider stopped, waiting too long for scraping site {}", domain);
     }
 
     private void checkNumberOfScraperFails() {
