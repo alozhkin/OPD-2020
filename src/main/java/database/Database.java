@@ -11,10 +11,11 @@ public interface Database {
     /**
      * Creates a database instance
      *
+     * @param databasePath target path in which the database should be located
      * @return database instance
      */
-    static Database newInstance() {
-        return new DatabaseImpl();
+    static Database newInstance(String databasePath) {
+        return new DatabaseImpl(databasePath);
     }
 
     static Database createDummy() {

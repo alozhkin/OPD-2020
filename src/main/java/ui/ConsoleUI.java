@@ -20,11 +20,14 @@ import static logger.LoggerUtils.*;
 public class ConsoleUI implements OnSpiderChangesListener {
     private static ProgressBar pb;
     private static final String OUTPUT_PATH = "output.csv";
+    private static final String DATABASE_PATH = "websites.db";
 
     @Argument(required = true)
     private String input;
     @Option(name = "-o")
     private String output;
+    @Option(name = "-db")
+    private String databasePath;
 
     public static void main(String[] args) {
         new ConsoleUI().start(args);
@@ -39,7 +42,8 @@ public class ConsoleUI implements OnSpiderChangesListener {
             consoleLog.error("ConsoleUI - Failed in Cmd line parser: ", e);
             return;
         }
-        Main.start(input, Objects.requireNonNullElse(output, OUTPUT_PATH), this);
+        Main.start(input, Objects.requireNonNullElse(output, OUTPUT_PATH),
+                Objects.requireNonNullElse(databasePath, DATABASE_PATH), this);
     }
 
     @Override
