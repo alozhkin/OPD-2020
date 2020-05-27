@@ -86,13 +86,13 @@ public class Spider {
             for (Link d : domains) {
                 domain = d;
                 onDomainScraped();
-                if (checkDomainAlreadyWas()) continue;
+                if (checkDomainAlreadyWas() && checkDomainIsSuitable()) continue;
                 var context = contextFactory.createContext();
                 var scraper = new SplashScraper(requestFactory);
                 Set<String> allWords = ConcurrentHashMap.newKeySet();
                 var future = domainExec.submit(() -> new DomainTask(domain, context, scraper, allWords).scrapeDomain());
                 handleDomainFuture(future);
-//                trackStatistic(scraper.getStatistic());
+                trackStatistic(scraper.getStatistic());
                 dbExec.submit(new DatabaseTask(database, domain, allWords, domainIds)::run);
             }
         } catch (InterruptedException e) {
@@ -121,6 +121,14 @@ public class Spider {
         }
         scrapedDomains.add(fixed);
         return false;
+    }
+
+    // for no apparent reason Splash completely crashes at this website
+    // issue (https://github.com/scrapinghub/splash/issues/985)
+    // with similar stacktrace did not receive a response
+    private boolean checkDomainIsSuitable() {
+        String host = domain.fixWWW().getHost();
+        return !host.equals("m-eppich.de") && !host.equals("seat.de");
     }
 
     private void handleDomainFuture(Future<?> future) throws InterruptedException {
@@ -159,7 +167,6 @@ public class Spider {
     }
 
     private void trackStatistic(Statistic statistic) {
-        consoleLog.info("{}, site {}", statistic.toString(), domain);
         debugLog.info("Spider - {}, site {}", statistic.toString(), domain);
     }
 
