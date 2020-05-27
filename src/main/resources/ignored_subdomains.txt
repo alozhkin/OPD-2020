@@ -1,3 +1,7 @@
 ordershop
 shop
 wzshop
+jobs
+job
+m
+blog
