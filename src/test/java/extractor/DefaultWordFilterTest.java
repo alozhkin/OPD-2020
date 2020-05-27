@@ -74,11 +74,11 @@ class DefaultWordFilterTest {
     @Test
     void punctuationMarkFilterTest() {
         Collection<String> wordSForFiltrationSet = new HashSet<>();
-        wordSForFiltrationSet.add("нога,");
-        wordSForFiltrationSet.add("зе.бры:");
+        wordSForFiltrationSet.add("но-га...;.//,");
+        wordSForFiltrationSet.add("///зе-бр-ы:...");
         Collection<String> expected = new HashSet<>();
-        expected.add("нога");
-        expected.add("зебры");
+        expected.add("но-га");
+        expected.add("зе-бр-ы");
         Collection<String> newSet = new DefaultWordFilter().filter(wordSForFiltrationSet);
         assertEquals(expected, newSet);
     }
