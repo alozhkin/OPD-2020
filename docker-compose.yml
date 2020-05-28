@@ -28,6 +28,10 @@ services:
             - ./docker/filters:/etc/splash/filters:ro
         logging:
             driver: "none"
+        depends_on:
+            - splash0
+            - splash1
+            - splash2
 
     splash0:
         image: scrapinghub/splash:3.4.1
