@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,12 +18,10 @@ public class DefaultExtractorWithDefaultWordFilterTest {
 
     @Test
     void extractWithWordFilterTest() {
-        Set<String> expected = Set.of("простенький", "be1.ru", "html", "теста", "проверим", "вытащит", "отфильтрует",
-                "список", "повторяющихся", "проверки", "совпадений", "слов", "ыыыыы", "непотребство", "вставить", "англ",
-                "слова", "прикольно", "примеру", "gamburger", "немецком", "versuchs", "lehranstalt",
-                "brauerei", "berlin", "vlb", "e.v");
+        Set<String> expected = Set.of("juliana", "kommt", "paris", "diesem", "sommer", "universitätsstadt",
+                "süden", "morgens", "klasse", "german", "noch", "kommen", "beste", "freundin");
         Collection<String> set = new DefaultExtractor().extract(h);
         Collection<String> setWithFiltration = new DefaultWordFilter().filter(set);
-        assertEquals(setWithFiltration, expected);
+        assertEquals(new TreeSet<>(expected), new TreeSet<>(setWithFiltration));
     }
 }

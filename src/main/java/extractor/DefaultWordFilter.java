@@ -4,7 +4,6 @@ import config.ConfigurationUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,59 +15,14 @@ public class DefaultWordFilter implements WordFilter {
     private static final Collection<String> filteredWords = getFilterWords();
 
     /**
-     * Method responsible for filtration. Filters words in list_of_words_for_filtration, digits, punctuation marks,
+     * Method responsible for filtration.
      * transorms all words to lower case.
      * @param words words to be filtered
      * @return filtered words
      */
     @Override
     public Collection<String> filter(Collection<String> words) {
-        removeLinks(words);
-        Collection<String> newSet = wordsToLowerCase(punctuationMarkFilter(words));
-        deleteBlankLines(newSet);
-        removeNumbers(newSet);
-        unnecessaryWordsFilter(newSet);
-        return newSet;
-    }
-
-    // Фильтр ненужных слов
-    private void unnecessaryWordsFilter(Collection<String> words) {
-        words.removeAll(filteredWords);
-    }
-
-    //Удаление пустого элемента
-    private void deleteBlankLines(Collection<String> words) {
-        words.removeIf(String::isEmpty);
-    }
-
-    private Collection<String> wordsToLowerCase(Collection<String> words) {
-        return words.stream().map(String::toLowerCase)
-                .collect(Collectors.toSet());
-    }
-
-    //Фильтр знаков препинания
-    private Collection<String> punctuationMarkFilter(Collection<String> words) {
-        Collection<String> newSet = new HashSet<>();
-
-        for (String setObj : words) {
-            newSet.add(removingPunctuation(setObj));
-        }
-        return newSet;
-    }
-
-    //Метод удаления ссылок из коллекции слов
-    private void removeLinks(Collection<String> words) {
-        words.removeIf(x -> x.matches("^(www|http:|https:)+[^\\s\"]+[\\w]"));
-    }
-
-    //Метод удаления слов-чисел
-    private void removeNumbers(Collection<String> words) {
-        words.removeIf(x -> x.matches("^\\d+$"));
-    }
-
-    // Метод удаления знаков препинания из начала и конца строки
-    private String removingPunctuation(String s) {
-        return s.replaceAll("^\\p{Punct}*|\\p{Punct}*$", " ").trim();
+        return words.stream().map(this::transform).filter(this::check).collect(Collectors.toSet());
     }
 
     private static Collection<String> getFilterWords() {
@@ -83,5 +37,13 @@ public class DefaultWordFilter implements WordFilter {
                 "list_of_words_for_filtration/german_words.txt", filteredWords, DefaultWordFilter.class
         );
         return filteredWords;
+    }
+
+    private String transform(String str) {
+        return str.replaceAll("^[^a-zA-ZäöüÄÖÜß]*|[^a-zA-ZäöüÄÖÜß]*$", "").toLowerCase();
+    }
+
+    private boolean check(String str) {
+        return str.matches("[a-zA-ZäöüÄÖÜß\\-]+") && !filteredWords.contains(str);
     }
 }
