@@ -19,7 +19,7 @@ import static logger.LoggerUtils.*;
 
 public class ConsoleUI implements OnSpiderChangesListener {
     private static ProgressBar pb;
-    private static final String OUTPUT_PATH = "output.csv";
+    private static final String OUTPUT_PATH = "";
     private static final String DATABASE_PATH = "websites.db";
 
     @Argument(required = true)
