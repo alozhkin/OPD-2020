@@ -5,9 +5,11 @@ import java.util.*;
 public class Word {
 
     private static int factoryId = 0;
+    private static int foctoryDatabaseId = 0;
     private final int id;
     private final int websiteId;
     private final String word;
+    private int databaseId = -1;
 
     public static Word newInstance(int websiteId, String word) {
         return new Word(++factoryId, websiteId, word);
@@ -20,6 +22,13 @@ public class Word {
     }
 
     public int getId() { return id; }
+
+    public int getDatabaseId() {
+        if (databaseId == -1) {
+            databaseId = ++foctoryDatabaseId;
+        }
+        return databaseId;
+    }
 
     public int getWebsiteId() {
         return websiteId;

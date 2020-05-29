@@ -9,7 +9,7 @@ import spider.Spider;
 
 public class Main {
     private static final String INPUT_PATH = "websites_data.csv";
-    private static final String OUTPUT_PATH = "export.csv";
+    private static final String OUTPUT_PATH = "";
     private static final String DATABASE_PATH = "websites.db";
 
     // prevents class instantiation
