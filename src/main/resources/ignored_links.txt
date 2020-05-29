@@ -227,6 +227,7 @@ retail
 rezept
 rezepte
 rundreisen
+sale
 search
 service
 service-downloads
