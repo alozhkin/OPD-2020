@@ -272,6 +272,16 @@ public class SplashScraper implements Scraper {
             stat.requestSucceeded();
             var body = extractResponseBode(response);
             var splashResponse = gson.fromJson(body, SplashResponse.class);
+            var splashUrl = splashResponse.getUrl();
+            if (splashUrl.equals("")) {
+                var info = new Response400Info();
+                if (splashResponse.getHtml().contains("Network error #301")) {
+                    info.setError("network301");
+                } else {
+                    info.setError("unknown error, url is missing");
+                }
+                throw new SplashScriptExecutionException(info);
+            }
             finalLink = new Link(splashResponse.getUrl());
             if (!isSameSite()) return;
             logRedirect();
@@ -385,7 +395,7 @@ public class SplashScraper implements Scraper {
         private void handleSplashScriptException(SplashScriptExecutionException splashEx) {
             var error = splashEx.getInfo().getError();
             if (error.startsWith("network")) {
-                if (error.startsWith("network3")) {
+                if (error.equals("network3")) {
                     debugLog.warn("SplashScraper - No address associated with host name {}",
                             initialLink.toString());
                 } else {
