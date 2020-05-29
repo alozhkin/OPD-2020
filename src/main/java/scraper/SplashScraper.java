@@ -383,9 +383,15 @@ public class SplashScraper implements Scraper {
         }
 
         private void handleSplashScriptException(SplashScriptExecutionException splashEx) {
-            if (splashEx.getInfo().getError().startsWith("network")) {
-                debugLog.warn("SplashScraper - Splash execution network exception {} {}",
-                        initialLink.toString(), splashEx.getInfo());
+            var error = splashEx.getInfo().getError();
+            if (error.startsWith("network")) {
+                if (error.startsWith("network3")) {
+                    debugLog.warn("SplashScraper - No address associated with host name {}",
+                            initialLink.toString());
+                } else {
+                    debugLog.warn("SplashScraper - Splash execution network exception {} {}",
+                            initialLink.toString(), splashEx.getInfo());
+                }
             } else {
                 debugLog.error("SplashScraper - Splash execution exception {} {}",
                         initialLink.toString(), splashEx.getInfo());
