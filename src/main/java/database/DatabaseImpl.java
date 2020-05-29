@@ -13,10 +13,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static logger.LoggerUtils.consoleLog;
 import static logger.LoggerUtils.debugLog;
@@ -131,17 +129,36 @@ class DatabaseImpl implements Database {
 
     @Override
     public boolean exportDataToCSV(String filepath) {
-        File file = new File(filepath);
+        File file = new File(filepath + "words.csv");
+        File pivotTable = new File(filepath + "words_websites.csv");
         file.delete();
+        pivotTable.delete();
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            String header = "\"id\";\"website_id\";\"word\"";
-            writer.append(header);
-            List<Word> list = getWordsData();
-            for (Word w : list) {
-                writer.append(String.format("\n%d;%d;\"%s\"", w.getId(), w.getWebsiteId(), w.getWord()));
+        try (BufferedWriter wordsWriter = new BufferedWriter(new FileWriter(file, true))) {
+            try (BufferedWriter pivotWriter = new BufferedWriter(new FileWriter(pivotTable, true))) {
+                String wordsHeader = "\"id\";\"word\"";
+                wordsWriter.append(wordsHeader);
+                String pivotHeader = "\"word_id\";\"website_id\"";
+                pivotWriter.append(pivotHeader);
+                List<Word> wordsList = getWordsData();
+                Map<Integer, String> words = wordsList.stream()
+                        .sorted(Comparator.comparing(Word::getWord))
+                        .collect(Collectors.toMap(Word::getDatabaseId, Word::getWord));
+                Map<Integer, Integer> wordsPivot = wordsList.stream()
+                        .sorted(Comparator.comparing(Word::getWord))
+                        .collect(Collectors.toMap(Word::getDatabaseId, Word::getWebsiteId));
+                for (Map.Entry<Integer, String> entry : words.entrySet()) {
+                    Integer key = entry.getKey();
+                    String value = entry.getValue();
+                    wordsWriter.append(String.format("\n%d;\"%s\"", key, value));
+                }
+                for (Map.Entry<Integer, Integer> entry : wordsPivot.entrySet()) {
+                    Integer key = entry.getKey();
+                    Integer value = entry.getValue();
+                    pivotWriter.append(String.format("\n%d;\"%d\"", key, value));
+                }
+                return true;
             }
-            return true;
         } catch (Exception e) {
             consoleLog.error("DatabaseImpl - Failed to export data from database: {}", e.toString());
             debugLog.error("DatabaseImpl - Failed to export data from database:", e);
