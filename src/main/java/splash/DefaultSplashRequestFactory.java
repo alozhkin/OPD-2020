@@ -36,7 +36,7 @@ public class DefaultSplashRequestFactory implements SplashRequestFactory {
             "        elseif reason == \"network3\" and url_without_protocol:sub(0, 4) ~= \"www.\" then\n" +
             "            goToPage(splash, \"http://www.\" .. url_without_protocol)\n" +
             // network301 https://github.com/scrapinghub/splash/issues/896
-            "        else reason ~= \"network301\"\n" +
+            "        elseif reason ~= \"network301\" then\n" +
             "            error(reason)\n" +
             "        end\n" +
             "    end\n" +
