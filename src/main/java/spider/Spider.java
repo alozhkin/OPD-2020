@@ -146,7 +146,7 @@ public class Spider {
             } else if (cause.equals(ScraperFailException.class)) {
                 throw (ScraperFailException) e.getCause();
             }
-            if (!cause.equals(HtmlLanguageException.class)) {
+            if (isScraperError(e.getCause())) {
                 debugLog.error("Spider - Site {} processing failed due to {}", domain, cause.getSimpleName());
                 consoleLog.error("Spider - Site {} processing failed due to {}", domain, cause.getSimpleName());
             }
@@ -168,6 +168,14 @@ public class Spider {
 
     private void trackStatistic(Statistic statistic) {
         debugLog.info("Spider - {}, site {}", statistic.toString(), domain);
+    }
+
+    private boolean isScraperError(Throwable cause) {
+        if (cause.getClass().equals(HtmlLanguageException.class)) return false;
+        if (cause.getClass().equals(SplashScriptExecutionException.class)) {
+            return !((SplashScriptExecutionException) cause).getInfo().getError().startsWith("network");
+        }
+        return true;
     }
 
     private void shutdownExecutorService(ExecutorService executorService) {
