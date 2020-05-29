@@ -393,8 +393,13 @@ public class SplashScraper implements Scraper {
                             initialLink.toString(), splashEx.getInfo());
                 }
             } else {
-                debugLog.error("SplashScraper - Splash execution exception {} {}",
-                        initialLink.toString(), splashEx.getInfo());
+                if (error.equals("webkit102")) {
+                    debugLog.warn("SplashScraper - Splash does not support pdf {} {}",
+                            initialLink.toString(), splashEx.getInfo());
+                } else {
+                    debugLog.error("SplashScraper - Splash execution exception {} {}",
+                            initialLink.toString(), splashEx.getInfo());
+                }
             }
         }
     }

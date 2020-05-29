@@ -173,7 +173,9 @@ public class Spider {
     private boolean isScraperError(Throwable cause) {
         if (cause.getClass().equals(HtmlLanguageException.class)) return false;
         if (cause.getClass().equals(SplashScriptExecutionException.class)) {
-            return !((SplashScriptExecutionException) cause).getInfo().getError().startsWith("network");
+            String error = ((SplashScriptExecutionException) cause).getInfo().getError();
+            // webkit102 is thrown when pdf is loading
+            return !(error.startsWith("network") || error.equals("webkit102"));
         }
         return true;
     }
