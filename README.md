@@ -20,11 +20,11 @@ sudo apt install docker-compose
 ```
 cd YOUR_PATH_TO_PROJECT
 ```
-3. Run gradle build
+3. Run gradle build (if you change code you must rebuild)
 ```
 ./gradlew build
 ```
-4. Run docker-compose build (If you have problems at startup try [this](https://github.com/docker/compose/issues/2180#issuecomment-147769429))
+4. Run docker-compose build (If you have problems at startup try [this](https://github.com/docker/compose/issues/2180#issuecomment-147769429)) (if you don't change code, you don't need to rebuild)
 ```
 docker-compose build
 ```
